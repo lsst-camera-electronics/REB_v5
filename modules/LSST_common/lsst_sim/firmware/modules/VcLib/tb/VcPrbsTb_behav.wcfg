@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="VcPrbsTb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="VcPrbsTb" />
+            <top_module name="glbl" />
+            <top_module name="stdrtlpkg" />
+            <top_module name="vcpkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="14" />
+   <wvobject fp_name="divider1689" type="divider">
+      <obj_property name="label">Errors</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/updatedResults" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">updatedResults</obj_property>
+      <obj_property name="ObjectShortName">updatedResults</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/errMissedPacket" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">errMissedPacket</obj_property>
+      <obj_property name="ObjectShortName">errMissedPacket</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/errLength" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">errLength</obj_property>
+      <obj_property name="ObjectShortName">errLength</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/errEofe" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">errEofe</obj_property>
+      <obj_property name="ObjectShortName">errEofe</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/errWordCnt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">errWordCnt[31:0]</obj_property>
+      <obj_property name="ObjectShortName">errWordCnt[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/errbitCnt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">errbitCnt[31:0]</obj_property>
+      <obj_property name="ObjectShortName">errbitCnt[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider1722" type="divider">
+      <obj_property name="label">Results</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/results" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">results</obj_property>
+      <obj_property name="ObjectShortName">results</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <wvobject fp_name="/VcPrbsTb/results.valid" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.valid</obj_property>
+         <obj_property name="ObjectShortName">results.valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.sof" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.sof</obj_property>
+         <obj_property name="ObjectShortName">results.sof</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.eof" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.eof</obj_property>
+         <obj_property name="ObjectShortName">results.eof</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.eofe" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.eofe</obj_property>
+         <obj_property name="ObjectShortName">results.eofe</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.data" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">.data</obj_property>
+         <obj_property name="ObjectShortName">results.data</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/results.data[0]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[0][15:0]</obj_property>
+            <obj_property name="ObjectShortName">results.data[0][15:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/results.data[1]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[1][15:0]</obj_property>
+            <obj_property name="ObjectShortName">results.data[1][15:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/results.data[2]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[2][15:0]</obj_property>
+            <obj_property name="ObjectShortName">results.data[2][15:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/results.data[3]" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">[3][15:0]</obj_property>
+            <obj_property name="ObjectShortName">results.data[3][15:0]</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.locBuffAFull" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.locBuffAFull</obj_property>
+         <obj_property name="ObjectShortName">results.locBuffAFull</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/results.locBuffFull" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">.locBuffFull</obj_property>
+         <obj_property name="ObjectShortName">results.locBuffFull</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group160" type="group">
+      <obj_property name="label">VcPrbsTx</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">r</obj_property>
+         <obj_property name="ObjectShortName">r</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.eventCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.eventCnt</obj_property>
+            <obj_property name="ObjectShortName">r.eventCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.randomData" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.randomData</obj_property>
+            <obj_property name="ObjectShortName">r.randomData</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.dataCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.dataCnt</obj_property>
+            <obj_property name="ObjectShortName">r.dataCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.usBuff16In</obj_property>
+            <obj_property name="ObjectShortName">r.usBuff16In</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In.valid" type="logic" db_ref_id="1">
+               <obj_property name="ElementShortName">.valid</obj_property>
+               <obj_property name="ObjectShortName">r.usBuff16In.valid</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In.sof" type="logic" db_ref_id="1">
+               <obj_property name="ElementShortName">.sof</obj_property>
+               <obj_property name="ObjectShortName">r.usBuff16In.sof</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In.eof" type="logic" db_ref_id="1">
+               <obj_property name="ElementShortName">.eof</obj_property>
+               <obj_property name="ObjectShortName">r.usBuff16In.eof</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In.eofe" type="logic" db_ref_id="1">
+               <obj_property name="ElementShortName">.eofe</obj_property>
+               <obj_property name="ObjectShortName">r.usBuff16In.eofe</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.usBuff16In.data" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">.data</obj_property>
+               <obj_property name="ObjectShortName">r.usBuff16In.data</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/r.state" type="other" db_ref_id="1">
+            <obj_property name="ElementShortName">.state</obj_property>
+            <obj_property name="ObjectShortName">r.state</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/usBuff16In" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">usBuff16In</obj_property>
+         <obj_property name="ObjectShortName">usBuff16In</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsTx_Inst/usBuff16Out" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">usBuff16Out</obj_property>
+         <obj_property name="ObjectShortName">usBuff16Out</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group161" type="group">
+      <obj_property name="label">VcPrbsRx</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">r</obj_property>
+         <obj_property name="ObjectShortName">r</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.eof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eof</obj_property>
+            <obj_property name="ObjectShortName">r.eof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.eofe" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eofe</obj_property>
+            <obj_property name="ObjectShortName">r.eofe</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.errLength" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.errLength</obj_property>
+            <obj_property name="ObjectShortName">r.errLength</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.updatedResults" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.updatedResults</obj_property>
+            <obj_property name="ObjectShortName">r.updatedResults</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.errMissedPacket" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.errMissedPacket</obj_property>
+            <obj_property name="ObjectShortName">r.errMissedPacket</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.errorBits" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.errorBits</obj_property>
+            <obj_property name="ObjectShortName">r.errorBits</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.bitPntr" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.bitPntr</obj_property>
+            <obj_property name="ObjectShortName">r.bitPntr</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.errWordCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.errWordCnt</obj_property>
+            <obj_property name="ObjectShortName">r.errWordCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.errbitCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.errbitCnt</obj_property>
+            <obj_property name="ObjectShortName">r.errbitCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.eventCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.eventCnt</obj_property>
+            <obj_property name="ObjectShortName">r.eventCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.randomData" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.randomData</obj_property>
+            <obj_property name="ObjectShortName">r.randomData</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.dataCnt" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.dataCnt</obj_property>
+            <obj_property name="ObjectShortName">r.dataCnt</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.stopTime" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.stopTime</obj_property>
+            <obj_property name="ObjectShortName">r.stopTime</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.startTime" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.startTime</obj_property>
+            <obj_property name="ObjectShortName">r.startTime</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.packetRate" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.packetRate</obj_property>
+            <obj_property name="ObjectShortName">r.packetRate</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.dsBuff16In" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.dsBuff16In</obj_property>
+            <obj_property name="ObjectShortName">r.dsBuff16In</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.usBuff32In" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.usBuff32In</obj_property>
+            <obj_property name="ObjectShortName">r.usBuff32In</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/r.state" type="other" db_ref_id="1">
+            <obj_property name="ElementShortName">.state</obj_property>
+            <obj_property name="ObjectShortName">r.state</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16In" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">dsBuff16In</obj_property>
+         <obj_property name="ObjectShortName">dsBuff16In</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">dsBuff16Out</obj_property>
+         <obj_property name="ObjectShortName">dsBuff16Out</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out.valid" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.valid</obj_property>
+            <obj_property name="ObjectShortName">dsBuff16Out.valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out.sof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.sof</obj_property>
+            <obj_property name="ObjectShortName">dsBuff16Out.sof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out.eof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eof</obj_property>
+            <obj_property name="ObjectShortName">dsBuff16Out.eof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out.eofe" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eofe</obj_property>
+            <obj_property name="ObjectShortName">dsBuff16Out.eofe</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/dsBuff16Out.data" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.data</obj_property>
+            <obj_property name="ObjectShortName">dsBuff16Out.data</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">usBuff32In</obj_property>
+         <obj_property name="ObjectShortName">usBuff32In</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In.valid" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.valid</obj_property>
+            <obj_property name="ObjectShortName">usBuff32In.valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In.sof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.sof</obj_property>
+            <obj_property name="ObjectShortName">usBuff32In.sof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In.eof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eof</obj_property>
+            <obj_property name="ObjectShortName">usBuff32In.eof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In.eofe" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eofe</obj_property>
+            <obj_property name="ObjectShortName">usBuff32In.eofe</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32In.data" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.data</obj_property>
+            <obj_property name="ObjectShortName">usBuff32In.data</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/VcPrbsRx_Inst/usBuff32Out" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">usBuff32Out</obj_property>
+         <obj_property name="ObjectShortName">usBuff32Out</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/VcPrbsTb/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="group107" type="group">
+      <obj_property name="label">VcMapping</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/VcPrbsTb/vcTxIn_locBuffAFullPrbsRx" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">vcTxIn_locBuffAFullPrbsRx</obj_property>
+         <obj_property name="ObjectShortName">vcTxIn_locBuffAFullPrbsRx</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcTxIn_locBuffFullPrbsRx" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">vcTxIn_locBuffFullPrbsRx</obj_property>
+         <obj_property name="ObjectShortName">vcTxIn_locBuffFullPrbsRx</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/errWordCnt" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">errWordCnt[31:0]</obj_property>
+         <obj_property name="ObjectShortName">errWordCnt[31:0]</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vcTxInPrbsTx</obj_property>
+         <obj_property name="ObjectShortName">vcTxInPrbsTx</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.valid" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.valid</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.valid</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.sof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.sof</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.sof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.eof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eof</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.eof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.eofe" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eofe</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.eofe</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.data" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.data</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.data</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.data[0]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[0][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcTxInPrbsTx.data[0][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.data[1]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[1][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcTxInPrbsTx.data[1][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.data[2]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[2][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcTxInPrbsTx.data[2][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.data[3]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[3][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcTxInPrbsTx.data[3][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.locBuffAFull" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.locBuffAFull</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.locBuffAFull</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcTxInPrbsTx.locBuffFull" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.locBuffFull</obj_property>
+            <obj_property name="ObjectShortName">vcTxInPrbsTx.locBuffFull</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcTxOutPrbsTx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vcTxOutPrbsTx</obj_property>
+         <obj_property name="ObjectShortName">vcTxOutPrbsTx</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcRxOutPrbsTx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vcRxOutPrbsTx</obj_property>
+         <obj_property name="ObjectShortName">vcRxOutPrbsTx</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcRxOutPrbsRx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vcRxOutPrbsRx</obj_property>
+         <obj_property name="ObjectShortName">vcRxOutPrbsRx</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">vcRxCommonOutPrbsRx</obj_property>
+         <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx</obj_property>
+         <obj_property name="Radix">HEXRADIX</obj_property>
+         <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.sof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.sof</obj_property>
+            <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.sof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.eof" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eof</obj_property>
+            <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.eof</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.eofe" type="logic" db_ref_id="1">
+            <obj_property name="ElementShortName">.eofe</obj_property>
+            <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.eofe</obj_property>
+         </wvobject>
+         <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.data" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">.data</obj_property>
+            <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.data</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.data[0]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[0][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.data[0][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.data[1]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[1][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.data[1][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.data[2]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[2][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.data[2][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+            <wvobject fp_name="/VcPrbsTb/vcRxCommonOutPrbsRx.data[3]" type="array" db_ref_id="1">
+               <obj_property name="ElementShortName">[3][15:0]</obj_property>
+               <obj_property name="ObjectShortName">vcRxCommonOutPrbsRx.data[3][15:0]</obj_property>
+               <obj_property name="Radix">HEXRADIX</obj_property>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/VcPrbsTb/vcTxIn_locBuffAFullPrbsRx" type="logic" db_ref_id="1">
+         <obj_property name="ElementShortName">vcTxIn_locBuffAFullPrbsRx</obj_property>
+         <obj_property name="ObjectShortName">vcTxIn_locBuffAFullPrbsRx</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

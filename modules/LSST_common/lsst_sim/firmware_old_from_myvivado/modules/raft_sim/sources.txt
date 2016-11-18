@@ -1,0 +1,4 @@
+vhdl work rtl/RcmSimPackage.vhd
+vhdl work rtl/RaftDataSimRegs.vhd
+vhdl work rtl/RaftDataSim.vhd
+vhdl work rtl/RcmExampleRegs.vhd

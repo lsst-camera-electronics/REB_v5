@@ -1,0 +1,141 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx map options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : ngdbuild_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for map
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options For Virtex4:
+#   -bp               Map slice logic into unused block RAMs.
+#   -c <packfactor>   Pack unrelated logic into clbs.  <packfactor> indicates
+#                       what % of CLB resource to target.  Range: 0 <= 
+#                       <packfactor> <= 100 (default is 100).
+#   -cm area|speed|balanced
+#                     Cover mode.  Default is "area".  Synthesis based designs 
+#                       are not likely to see improvement by changing the 
+#                       default.
+#   -detail           Print a more verbose map report. 
+#   -equivalent_register_removal on|off
+#                     Remove redundant registers during global optimization
+#                       (default is on).
+#   -f <cmdfile>      Read command line arguments from file <cmdfile>.
+#   -global_opt off|speed
+#                     Perform global optimization before mapping
+#                       (default is off).
+#   -ignore_keep_hierarchy
+#                     Ignore any KEEP_HIERARCHY properties attached to blocks
+#   -intstyle ise|xflow|silent
+#                     Reduce the screen output.
+#   -ir [off|place|all]
+#                     Do not use RLOC constraints to generate RPMs.
+#                     Default is "off". Use RLOCs to group logic together
+#                     within a CLB, but not to control the relative placement
+#                     of CLBs with respect to each other.
+#   -ise <iseProjectFile>
+#                     Use supplied ISE project file.
+#   -l                Disable logic replication.
+#   -logic_opt off|on Perform physical synthesis combinatorial logic
+#                       optimizations during timing driven packing
+#                       (default is off).
+#   -ntd              Perform non-timing driven placement when used with -timing.
+#   -o                Specify the output file name.
+#   -ol std|high      Effort level.
+#   -p <partname>     Map to part <partname>.
+#   -power off|on     Power optimizations.
+#   -activityfile <activityfile.vcd|.saif> 
+#                     Switching activity data file to guide power optimizations
+#   -pr off|i|o|b     Pack internal flops/latches into input IOBs (i),
+#                       output IOBs (o), both types of IOBs, or internal
+#                       fabric such as slices, BRAMs, or DSP blocks (off).
+#                       Default is off.
+#   -register_duplication [off|on]
+#                     Duplicate registers/luts during timing-driven packing 
+#                     in order to improve timing(default is off).
+#   -retiming off|on  Run register retiming during global optimization
+#                       (default is off).
+#   -smartguide <guidefile>
+#                     Enables SmartGuide using guidefile.ncd as the guide file.
+#                       guidefile.ncd must be a placed and routed ncd.
+#   -t <costtable>    Timing-driven cost table entry.  Range:  1 <= <costtable> 
+#                       <= 100 (default is 1).
+#   -timing           Perform a timing-driven packing.
+#   -u                Do not remove unnecessary/disabled logic.
+#   -x                Enable Performance Evaluation Mode. In this mode, the 
+#                     tools will ignore any timing constraints specified in
+#                     a constraints file and auto-generate timing constraints 
+#                     to drive tool performance.
+#   -xe c|n           Extra effort level for timing-driven packing.  'c' means
+#                       continue to improve timing even if timing constraints
+#                       cannot be met.  'n' means try additional algorithms to 
+#                       meet timing.
+
+
+#   -bp               Map slice logic into unused block RAMs.
+#   -c <packfactor>   Pack unrelated logic into clbs.  <packfactor> indicates
+#                       what % of CLB resource to target.  Range: 0 <= 
+#                       <packfactor> <= 100 (default is 100).
+#   -cm area|speed|balanced
+#                     Cover mode.  Default is "area".  Synthesis based designs 
+#                       are not likely to see improvement by changing the 
+#                       default.
+#   -detail           Print a more verbose map report. 
+#   -f <cmdfile>      Read command line arguments from file <cmdfile>.
+#   -ignore_keep_hierarchy
+#                     Ignore any KEEP_HIERARCHY properties attached to blocks
+#   -intstyle ise|xflow|silent
+#                     Reduce the screen output.
+#   -ir [off|place|all]
+#                     Do not use RLOC constraints to generate RPMs. 
+#                     Default is "off". Use RLOCs to group logic together 
+#                     within a CLB, but not to control the relative placement 
+#                     of CLBs with respect to each other.
+#   -ise <iseProjectFile>
+#                     Use supplied ISE project file.
+#   -l                Disable logic replication.
+#   -logic_opt off|on Perform physical synthesis combinatorial logic
+#                       optimizations during timing driven packing
+#                       (default is off).
+#   -ntd              Perform non-timing driven placement when used with -timing.
+#   -o                Specify the output file name.
+#   -ol std|high      Effort level.
+#   -p <partname>     Map to part <partname>.
+#   -power off|on     Power optimizations.
+#   -activityfile <activityfile.vcd|.saif> 
+#                     Switching activity data file to guide power optimizations
+#   -pr off|i|o|b     Pack internal flops/latches into input IOBs (i),
+#                       output IOBs (o), both types of IOBs (b), or internal
+#                       fabric such as slices, BRAMs, or DSP blocks (off).
+#                       Default is off.
+#   -register_duplication [off|on]
+#                     Duplicate registers/luts during timing-driven packing 
+#                     in order to improve timing.
+#   -smartguide <guidefile>
+#                     Enables SmartGuide using guidefile.ncd as the guide file.
+#                       guidefile.ncd must be a placed and routed ncd.
+#   -t <costtable>    Timing-driven cost table entry.  Range:  1 <= <costtable> 
+#                       <= 100 (default is 1).
+#   -timing           Perform a timing-driven packing.
+#   -u                Do not remove unnecessary/disabled logic.
+#   -x                Enable Performance Evaluation Mode. In this mode, the 
+#                     tools will ignore any timing constraints specified in 
+#                     a constraints file and auto-generate timing constraints 
+#                     to drive tool performance.
+#   -xe c|n           Extra effort level for timing-driven packing.  'c' means
+#                       continue to improve timing even if timing constraints
+#                       cannot be met.  'n' means try additional algorithms to 
+#                       meet timing.
+-c 100
+-cm speed
+#-global_opt speed
+-intstyle ise
+-pr b
+-t 3

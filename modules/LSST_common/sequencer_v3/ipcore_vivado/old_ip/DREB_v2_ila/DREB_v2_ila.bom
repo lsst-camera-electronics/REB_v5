@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<BillOfMaterials Version="1" Minor="2">
+	<IPInstance name="DREB_v2_ila">
+		<FileSets>
+			<FileSet generator="xmdf_to_bom">
+				<File name="DREB_v2_ila.asy" type="asy" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.cdc" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.constraints/DREB_v2_ila.ucf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.constraints/DREB_v2_ila.xdc" type="xdc" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.ncf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.ngc" type="ngc" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.vhd" type="vhdl" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.vho" type="vho" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila.xco" type="xco" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="DREB_v2_ila_xmdf.tcl" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+			</FileSet>
+		</FileSets>
+	</IPInstance>
+</BillOfMaterials>
+

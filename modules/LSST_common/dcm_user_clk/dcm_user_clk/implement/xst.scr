@@ -1,0 +1,9 @@
+run
+-ifmt MIXED
+-top dcm_user_clk_exdes
+-p xc7k160t-ffg676-1
+-ifn xst.prj
+-ofn dcm_user_clk_exdes
+-keep_hierarchy soft 
+-equivalent_register_removal no 
+-max_fanout 65535

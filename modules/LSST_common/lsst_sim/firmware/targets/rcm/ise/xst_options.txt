@@ -1,0 +1,7 @@
+run
+-ofn rcm
+-top rcm
+-p XC5VFX30T-1-FF665 
+-ifn $SOURCE_FILE
+-opt_mode Speed
+-opt_level 2

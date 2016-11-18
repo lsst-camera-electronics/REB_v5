@@ -1,0 +1,21 @@
+Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2015.2 (lin64) Build 1266856 Fri Jun 26 16:35:25 MDT 2015
+| Date         : Thu Jan 28 16:09:31 2016
+| Host         : lsst-daq01 running 64-bit Red Hat Enterprise Linux Server release 6.7 (Santiago)
+| Command      : upgrade_ip
+| Device       : xc7k160tffg676-1
+--------------------------------------------------------------------------------------------------
+
+Upgrade Log for IP 'dual_port_ram_16_4'
+
+1. Summary
+----------
+
+SUCCESS in the upgrade of dual_port_ram_16_4 from xilinx.com:ip:dist_mem_gen:7.2 to xilinx.com:ip:dist_mem_gen:8.0 (Rev. 8)
+
+2. Upgrade messages
+-------------------
+
+WARNING: upgrade cannot rename parameter component_name to Component_Name : a parameter called Component_Name already exists in dist_mem_gen_v8_0
+

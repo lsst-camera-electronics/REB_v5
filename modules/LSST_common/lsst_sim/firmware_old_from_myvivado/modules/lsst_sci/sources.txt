@@ -1,0 +1,6 @@
+vhdl work rtl/LsstSciPackage.vhd
+vhdl work rtl/LsstSciCore.vhd
+vhdl work rtl/LsstSciDataEncoder.vhd
+vhdl work rtl/LsstSciStatusBlock.vhd
+vhdl work rtl/LsstSci.vhd
+

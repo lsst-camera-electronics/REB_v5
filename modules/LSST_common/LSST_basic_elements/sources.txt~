@@ -1,0 +1,9 @@
+vhdl work rtl/ff_ce.vhd
+vhdl work rtl/ff_ce_pres.vhd
+vhdl work rtl/generic_counter_comparator_ce_init.vhd
+vhdl work rtl/generic_counter_comparator_ce_init_1.vhd
+vhdl work rtl/generic_mux_bus_4_1_clk.vhd
+vhdl work rtl/generic_reg_ce_init.vhd
+vhdl work rtl/generic_reg_ce_init_1.vhd
+vhdl work rtl/generic_single_port_ram.vhd
+

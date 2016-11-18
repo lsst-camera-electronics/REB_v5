@@ -1,0 +1,8 @@
+vhdl work rtl/onewire_iface.vhd
+vhdl work rtl/clk_div.vhd
+vhdl work rtl/onewire_master.vhd
+vhdl work rtl/shreg.vhd
+vhdl work rtl/jcounter.vhd
+vhdl work rtl/bitreg.vhd
+vhdl work rtl/bytereg.vhd
+vhdl work rtl/crcreg.vhd

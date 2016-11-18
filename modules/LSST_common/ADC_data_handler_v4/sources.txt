@@ -1,0 +1,5 @@
+vhdl work rtl/ADC_data_handler_package.vhd
+vhdl work rtl/ADC_data_handler_v4.vhd
+vhdl work rtl/ADC_data_handler_fsm_v4.vhd
+vhdl work rtl/readadcs_v3.vhd
+
