@@ -1,2 +1,0 @@
-vhdl work rtl/Base_Register_Set_package.vhd
-vhdl work rtl/base_reg_set_top.vhd

@@ -1,6 +1,0 @@
-vhdl work rtl/SPI_read_write_ads8634.vhd
-vhdl work rtl/ads8634_and_mux_top.vhd
-vhdl work rtl/ads8634_and_mux_top_package.vhd
-vhdl work rtl/ads8634_controller_fsm.vhd
-
-

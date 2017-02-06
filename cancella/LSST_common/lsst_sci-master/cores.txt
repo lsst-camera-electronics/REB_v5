@@ -1,2 +1,0 @@
-coregen/PgpClkCore.xci
-coregen/k7_status_block_mem.xci

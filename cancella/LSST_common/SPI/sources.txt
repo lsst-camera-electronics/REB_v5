@@ -1,3 +1,0 @@
-vhdl work rtl/ad53xx_DAC_top.vhd
-vhdl work rtl/ad56xx_DAC_top.vhd
-vhdl work rtl/SPI_write.vhd
