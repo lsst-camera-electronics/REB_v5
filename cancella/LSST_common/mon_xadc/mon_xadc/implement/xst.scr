@@ -1,0 +1,9 @@
+run
+-ifmt MIXED
+-top mon_xadc_exdes
+-p xc7k160t-ffg676-1
+-ifn xst.prj
+-ofn mon_xadc_exdes
+-keep_hierarchy soft 
+-equivalent_register_removal no 
+-max_fanout 65535

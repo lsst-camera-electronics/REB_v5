@@ -1,0 +1,3 @@
+vhdl work Version.vhd
+vhdl work hdl/sciab.vhd
+vhdl work hdl/reb_sim.vhd

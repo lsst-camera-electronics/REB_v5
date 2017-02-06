@@ -1,0 +1,4 @@
+vhdl work multi_read_2/adt7420_temp_multiread_2_top.vhd
+vhdl work multi_read_2/adt7420_temp_multiread_2_fsm.vhd
+vhdl work multi_read_4/adt7420_temp_multiread_4_top.vhd
+vhdl work multi_read_4/adt7420_temp_multiread4_fsm.vhd

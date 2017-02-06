@@ -45,6 +45,10 @@ entity REB_v5_top is
     PgpTx_P : out std_logic;
     PgpTx_M : out std_logic;
 
+    ------ Aux 100MHz Clk ------
+    --aux_100mhz_clk_p : in std_logic;
+    aux_100mhz_clk_in : in std_logic;
+
     ------ CCD 1 ------
     -- CCD ADC
     adc_data_t_ccd_1 : in  std_logic_vector(7 downto 0);
@@ -85,7 +89,6 @@ entity REB_v5_top is
     din_C_BIAS_ccd_1  : out std_logic;
     sync_C_BIAS_ccd_1 : out std_logic;
     sclk_C_BIAS_ccd_1 : out std_logic;
-
 
     ------ CCD 2 ------
     -- CCD ADC
@@ -169,7 +172,6 @@ entity REB_v5_top is
     sync_C_BIAS_ccd_3 : out std_logic;
     sclk_C_BIAS_ccd_3 : out std_logic;
 
-
     -- V & I sensors  
     LTC2945_SCL : inout std_logic;
     LTC2945_SDA : inout std_logic;
@@ -177,7 +179,7 @@ entity REB_v5_top is
     LTC2945n15_SCL : inout std_logic;
     LTC2945n15_SDA : inout std_logic;
 
-    --          ------ Temperature ------
+    ------- Temperature ------
     -- DREB PCB temperature
     sda_temp0 : inout std_logic;
     scl_temp0 : inout std_logic;
@@ -222,6 +224,24 @@ entity REB_v5_top is
 -- bacbias sw
     backbias_clamp : out std_logic;
     backbias_ssbe  : out std_logic;
+
+    ------ Jitter Cleaner ------
+    jc_refclk_out_p : out std_logic;
+    jc_refclk_out_n : out std_logic;
+    jc_refclk_in_p  : in  std_logic;
+    jc_refclk_in_n  : in  std_logic;
+
+    jc_miso : in  std_logic;
+    jc_mosi : out std_logic;
+    jc_sclk : out std_logic;
+    jc_cs   : out std_logic;
+
+    jc_los0  : in  std_logic;
+    jc_lol   : in  std_logic;
+    --jc_oe    : out std_logic;
+    jc_reset : out std_logic;
+
+
 
     ------ MISC ------
 -- Resistors
@@ -455,7 +475,7 @@ architecture Behavioral of REB_v5_top is
 -- CCD temperature
           ccd_temp_busy            : in  std_logic;
           ccd_temp                 : in  std_logic_vector(23 downto 0);
-          ccd_temp_start           : out std_logic; 
+          ccd_temp_start           : out std_logic;
           ccd_temp_start_reset     : out std_logic;
 -- REB 1wire serial number
           reb_onewire_reset        : out std_logic;
@@ -467,6 +487,9 @@ architecture Behavioral of REB_v5_top is
           back_bias_sw_rb          : in  std_logic;
           back_bias_cl_rb          : in  std_logic;
           en_back_bias_sw          : out std_logic;
+-- Jitter Cleaner
+          jc_status_bus            : in  std_logic_vector(5 downto 0);
+          jc_start_config          : out std_logic;
 -- multiboot
           start_multiboot          : out std_logic;
 -- XADC
@@ -801,6 +824,21 @@ architecture Behavioral of REB_v5_top is
       sn_data     : out   std_logic_vector(47 downto 0));  -- parallel out
   end component;
 
+  component si5342_jitter_cleaner_top
+    port (
+      clk          : in  std_logic;
+      reset        : in  std_logic;
+      start_config : in  std_logic;
+      jc_config    : in  std_logic_vector(1 downto 0);
+      config_busy  : out std_logic;
+      jc_clk_ready : out std_logic;
+      jc_clk_in_en : out std_logic;
+      miso         : in  std_logic;
+      mosi         : out std_logic;
+      chip_select  : out std_logic;
+      sclk         : out std_logic);
+  end component;
+
   component clk_2MHz_generator is
     port (
       clk             : in  std_logic;
@@ -899,10 +937,14 @@ architecture Behavioral of REB_v5_top is
 
 
 -- Clocks
-  signal pgpRefClk   : std_logic;
-  signal usrClk      : std_logic;
-  signal clk_100_Mhz : std_logic;
-  signal clk_50_Mhz  : std_logic;
+  signal pgpRefClk         : std_logic;
+  signal usrClk            : std_logic;
+  signal clk_100_Mhz_local : std_logic;
+  signal clk_100_Mhz       : std_logic;
+  signal clk_50_Mhz        : std_logic;
+
+  signal aux_100mhz_clk : std_logic;
+
 
 -- Reset
   signal n_rst      : std_logic;
@@ -1146,6 +1188,19 @@ architecture Behavioral of REB_v5_top is
   signal reb_sn_dev_error  : std_logic;
   signal reb_sn            : std_logic_vector(47 downto 0);
   signal reb_sn_timeout    : std_logic;
+
+-- Jitter Cleaner
+  signal jc_start_config  : std_logic;
+  signal jc_config_busy   : std_logic;
+  signal jc_config_done   : std_logic;
+  signal jc_clk_ready     : std_logic;
+  signal jc_clk_in_en     : std_logic;
+  signal not_jc_clk_ready : std_logic;
+  signal jc_status_bus    : std_logic_vector(5 downto 0);
+
+  signal jc_refclk_out : std_logic;
+  signal jc_refclk_in  : std_logic;
+
 
 --dc_dc converter sync
   signal dcdc_clk_en_out : std_logic;
@@ -1570,8 +1625,13 @@ begin
       back_bias_sw_rb   => back_bias_sw_int,
       back_bias_cl_rb   => back_bias_clamp_int,
       en_back_bias_sw   => en_back_bias_sw,
+
+-- Jitter Cleaner
+      jc_status_bus   => jc_status_bus,
+      jc_start_config => jc_start_config,
+
 -- multiboot
-      start_multiboot   => start_multiboot,
+      start_multiboot => start_multiboot,
 
 -- XADC
       xadc_drdy_out            => xadc_drdy_out,
@@ -2014,16 +2074,107 @@ begin
       clk_in  => clk_100_Mhz,
       led_out => test_led_int(3));
 
+  --dcm_user_clk_0 : dcm_user_clk
+  --  port map
+  --  (                                   -- Clock in ports
+  --    CLK_IN1  => usrClk,
+  --    -- Clock out ports
+  --    CLK_OUT1 => clk_100_Mhz,
+  --    CLK_OUT2 => clk_50_Mhz,
+  --    -- Status and control signals
+  --    LOCKED   => dcm_locked);
+
   dcm_user_clk_0 : dcm_user_clk
     port map
     (                                   -- Clock in ports
       CLK_IN1  => usrClk,
       -- Clock out ports
-      CLK_OUT1 => clk_100_Mhz,
+      CLK_OUT1 => clk_100_Mhz_local,
       CLK_OUT2 => clk_50_Mhz,
       -- Status and control signals
       LOCKED   => dcm_locked);
 
+-------- Jitter cleaner
+
+  jc_ref_clk_out : ODDR
+    generic map(
+      DDR_CLK_EDGE => "OPPOSITE_EDGE",  -- "OPPOSITE_EDGE" or "SAME_EDGE"
+      INIT         => '1',  -- Initial value for Q port ('1' or '0')
+      SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
+      ) port map (
+        Q  => jc_refclk_out,            -- 1-bit DDR output
+        --C  => clk_100_Mhz_local,        -- 1-bit clock input
+        C  => aux_100mhz_clk,           -- 1-bit clock input
+        CE => jc_clk_in_en,             -- 1-bit clock enable input
+        D1 => '1',                      -- 1-bit data input (positive edge)
+        D2 => '0',                      -- 1-bit data input (negative edge)
+        R  => '0',                      -- 1-bit reset input
+        S  => '0'                       -- 1-bit set input
+        );
+
+
+  jitter_cleaner : si5342_jitter_cleaner_top
+    port map (
+      clk          => clk_100_Mhz,
+      reset        => sync_res,
+      start_config => jc_start_config,
+      jc_config    => regDataWr_masked(1 downto 0),
+      config_busy  => jc_config_busy,
+      jc_clk_ready => jc_config_done,
+      jc_clk_in_en => jc_clk_in_en,
+      miso         => jc_miso,
+      mosi         => jc_mosi,
+      chip_select  => jc_cs,
+      sclk         => jc_sclk);
+
+  jc_reset <= '1';                      -- NO reset
+  --jc_oe    <= '0';                      -- Outputs Enabled
+
+  jc_clk_ready     <= jc_config_done and jc_lol and jc_los0;
+  not_jc_clk_ready <= not jc_clk_ready;
+
+  jc_status_bus <= '0' & '0' & jc_clk_ready & jc_config_done & jc_lol & jc_los0;
+
+
+
+  BUFGCTRL_mux_100Mhz_clk : BUFGCTRL
+    generic map (
+      INIT_OUT     => 0,     -- Initial value of BUFGCTRL output ($VALUES;)
+      PRESELECT_I0 => true,  -- BUFGCTRL output uses I0 input ($VALUES;)
+      PRESELECT_I1 => false  -- BUFGCTRL output uses I1 input ($VALUES;)
+      )
+    port map (
+      O       => clk_100_Mhz,           -- 1-bit output: Clock output
+      CE0     => '1',                   -- CE not used 
+      CE1     => '1',                   -- CE not used 
+      I0      => clk_100_Mhz_local,     -- local clock generated form OSC 
+      I1      => jc_refclk_in,          -- clock from Jitter Cleaner
+      IGNORE0 => '0',  -- 1-bit input: Clock ignore input for I0
+      IGNORE1 => '0',  -- set to 1 to let the mux switch also when clk is not present 
+      S0      => not_jc_clk_ready,      -- 1-bit input: Clock select for I0
+      S1      => jc_clk_ready           -- 1-bit input: Clock select for I1
+      );
+
+-- jiter test
+
+
+
+  --jitter_test_clk_out : ODDR
+  --generic map(
+  --  DDR_CLK_EDGE => "OPPOSITE_EDGE",  -- "OPPOSITE_EDGE" or "SAME_EDGE"
+  --  INIT         => '1',  -- Initial value for Q port ('1' or '0')
+  --  SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
+  --  ) port map (
+  --    Q  => ASPIC_r_up_ccd_1,            -- 1-bit DDR output
+  --    C  => clk_100_Mhz,        -- 1-bit clock input
+  --    CE => '1',                      -- 1-bit clock enable input
+  --    D1 => '1',                      -- 1-bit data input (positive edge)
+  --    D2 => '0',                      -- 1-bit data input (negative edge)
+  --    R  => '0',                      -- 1-bit reset input
+  --    S  => '0'                       -- 1-bit set input
+  --    );
+
+  
 
   monitor_xadc : mon_xadc
     port map (
@@ -2169,6 +2320,38 @@ begin
   U_reset_gate_ccd_3 : OBUFDS port map (I  => reset_gate_ccd_3,
                                         O  => reset_gate_ccd_3_p,
                                         OB => reset_gate_ccd_3_n);
+
+
+-- Jitter Cleaner
+  U_jc_refclk_out_buf : OBUFDS
+    generic map (
+      IOSTANDARD => "DEFAULT",          -- Specify the output I/O standard
+      SLEW       => "FAST")             -- Specify the output slew rate
+
+    port map (I  => jc_refclk_out,
+              O  => jc_refclk_out_p,
+              OB => jc_refclk_out_n);
+
+  jc_clock_in_buf : IBUFDS
+    generic map (
+      DIFF_TERM    => true,             -- Differential Termination
+      IBUF_LOW_PWR => false,  -- Low power (TRUE) vs. performance (FALSE) setting for referenced I/O standards
+      IOSTANDARD   => "DEFAULT")
+    port map (
+      O  => jc_refclk_in,               -- Buffer output
+      I  => jc_refclk_in_p,  -- Diff_p buffer input (connect directly to top-level port)
+      IB => jc_refclk_in_n  -- Diff_n buffer input (connect directly to top-level port)
+      );
+
+
+  IBUFG_inst : IBUFG
+    generic map (
+      IBUF_LOW_PWR => true,  -- Low power (TRUE) vs. performance (FALSE) setting for referenced I/O standards
+      IOSTANDARD   => "DEFAULT")
+    port map (
+      O => aux_100mhz_clk,              -- Clock buffer output
+      I => aux_100mhz_clk_in  -- Clock buffer input (connect directly to top-level port)
+      );
 
 ------ MISC ------                                  
 -- leds

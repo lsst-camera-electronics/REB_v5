@@ -1,0 +1,82 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx bitgen options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : bitgen_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for bitgen
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options:
+#  -d            = Don't Run DRC (Design Rules Checker)
+#  -j            = Don't create bit file
+#  -b            = Create rawbits file
+#  -w            = Overwrite existing output file
+#  -l            = Create logic allocation file
+#  -m            = Create mask file
+#  -t            = Tie down unused interconnect
+#  -n            = Save tied ncd as _<file>.ncd
+#  -u            = Use critical nets as last resort during tiedown
+#  -a            = Attempt "full" tiedown, allowing use of user signals
+#  -f <cmdfile>  = Read command line arguments from file <cmdfile>
+#  -r <bitfile>  = Create a partial bit file using <bitfile> as reference
+#  -bd <memfile> = Update BlockRAM contents with data from file <memfile>
+# -g <opt:val>  = Set option to value, options are (1st is default):
+#  Compress
+#  Readback
+#  CRC             Enable, Disable
+#  DebugBitstream  No, Yes
+#  ConfigRate      4, 5, 7, 8, 9, 10, 13, 15, 20, 26, 30, 34, 41, 45, 51, 55, 60
+#  StartupClk      Cclk, UserClk, JtagClk
+#  CclkPin         Pullup, Pullnone
+#  DonePin         Pullup, Pullnone
+#  HswapenPin      Pullup, Pulldown, Pullnone
+#  M0Pin           Pullup, Pulldown, Pullnone
+#  M1Pin           Pullup, Pulldown, Pullnone
+#  M2Pin           Pullup, Pulldown, Pullnone
+#  PowerdownPin    Pullup, Pullnone
+#  ProgPin         Pullup, Pullnone
+#  InitPin         Pullup, Pullnone
+#  CsPin           Pullup, Pulldown, Pullnone
+#  DinPin          Pullup, Pulldown, Pullnone
+#  BusyPin         Pullup, Pulldown, Pullnone
+#  RdWrPin         Pullup, Pulldown, Pullnone
+#  TckPin          Pullup, Pulldown, Pullnone
+#  TdiPin          Pullup, Pulldown, Pullnone
+#  TdoPin          Pullup, Pulldown, Pullnone
+#  TmsPin          Pullup, Pulldown, Pullnone
+#  UnusedPin       Pulldown, Pullup, Pullnone
+#  GWE_cycle       6, 1, 2, 3, 4, 5, Done, Keep
+#  GTS_cycle       5, 1, 2, 3, 4, 6, Done, Keep
+#  LCK_cycle       NoWait, 0, 1, 2, 3, 4, 5, 6
+#  Match_cycle     Auto, NoWait, 0, 1, 2, 3, 4, 5, 6
+#  DONE_cycle      4, 1, 2, 3, 5, 6
+#  Persist         No, Yes
+#  DriveDone       No, Yes
+#  DonePipe        No, Yes
+#  Security        None, Level1, Level2
+#  UserID          0xFFFFFFFF, <hex string>
+#  ActivateGclk    No, Yes
+#  ActiveReconfig  No, Yes
+#  PartialMask0    <string>
+#  PartialMask1    <string>
+#  PartialMask2    <string>
+#  PartialGclk
+#  PartialLeft
+#  PartialRight
+#  Encrypt         No, Yes
+#  Key0            pick, <string>
+#  StartCBC        pick, <string>
+#  KeyFile         <string>
+#  DCIUpdateMode   AsRequired, Continuous, Quiet
+#  IEEE1532        No, Yes
+#  Binary          No, Yes
+-intstyle silent
+-w

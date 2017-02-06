@@ -1,0 +1,143 @@
+#----------------------------------------------------------------------------
+#-- Title         : RCM SDS
+#-- Project       : LSST
+#------------------------------------------------------------------------------
+#-- File          : rcm_sds.ucf
+#-- Author        : Gregg Thayer <jgt@slac.stanford.edu>
+#-- Created       : 2011/02/21
+#------------------------------------------------------------------------------
+#-- Description:
+#-- Constraints file for RCM SDS
+#------------------------------------------------------------------------------
+#-- Modification history:
+#-- 2011/03/21: created.
+#------------------------------------------------------------------------------
+CONFIG PART = xc5vlx30t-ff665-1;
+
+# Clocks and Resets
+NET "PgpRefClk_P"    LOC = "T4" | TNM_NET = PgpRefClkp;
+NET "PgpRefClk_M"    LOC = "T3" | TNM_NET = PgpRefClkm;
+
+NET "Clk_200_P" LOC = "E20" | TNM_NET = Clk_200p;
+NET "Clk_200_M" LOC = "E21" | TNM_NET = Clk_200m;
+NET "Clk_150_P" LOC = "F20" | TNM_NET = Clk_150p;
+NET "Clk_150_M" LOC = "G21" | TNM_NET = Clk_150m;
+
+TIMESPEC TS_PgpRefClk_P = PERIOD "PgpRefClkp"  6.4 ns HIGH 50%;
+TIMESPEC TS_PgpRefClk_M = PERIOD "PgpRefClkm"  6.4 ns HIGH 50%;
+
+NET "U_LsstSci/pgpClk2x" TNM_NET = "pgpClk2x";
+TIMESPEC TS_pgpClk2x = PERIOD pgpClk2x 314 Mhz HIGH 50%;
+
+TIMESPEC TS_Clk_200_M = PERIOD "Clk_200m" 5 ns HIGH 50%;
+TIMESPEC TS_Clk_200_P = PERIOD "Clk_200p" 5 ns HIGH 50%;
+TIMESPEC TS_Clk_150_M = PERIOD "Clk_150m" 6.67 ns HIGH 50%;
+TIMESPEC TS_Clk_150_P = PERIOD "Clk_150p" 6.67 ns HIGH 50%;
+
+NET "Pwron_Rst_L"       LOC = "AC18" | IOSTANDARD = "LVCMOS25";
+
+# PGP signals
+NET "PgpRx_M"        LOC = "T1";
+NET "PgpRx_P"        LOC = "R1";
+NET "PgpTx_M"        LOC = "R2";
+NET "PgpTx_P"        LOC = "P2";
+
+#INST "U_LsstSci/U_PGPCore/Gtp16FixedLatCore_1/UGtpDual" LOC = GTP_DUAL_X0Y1;
+#INST "U_LsstSci/U_PGPCore/UGtpDual" LOC = GTP_DUAL_X0Y1;
+
+# Voltage Converter Monitor Flags
+NET "Vout_ok_F"        LOC = "U6" | IOSTANDARD = "LVCMOS33";
+NET "Vin_ok_F"         LOC = "Y6" | IOSTANDARD = "LVCMOS33";
+NET "V3_3v_ok_F"       LOC = "G6" | IOSTANDARD = "LVCMOS33";
+NET "V2_5v_ok_F"       LOC = "Y4" | IOSTANDARD = "LVCMOS33";
+NET "V1_8v_ok_F"       LOC = "G5" | IOSTANDARD = "LVCMOS33";
+NET "V1_5v_ok_F"       LOC = "W5" | IOSTANDARD = "LVCMOS33";
+NET "V1_0v_ok_F"       LOC = "G4" | IOSTANDARD = "LVCMOS33";
+NET "Mgt_Avcc_ok_F"    LOC = "V6" | IOSTANDARD = "LVCMOS33";
+NET "Mgt_Avtt_ok_F"    LOC = "J5" | IOSTANDARD = "LVCMOS33";
+NET "Mgt_Avccpll_ok_F" LOC = "U7" | IOSTANDARD = "LVCMOS33";
+
+# Test Points and LEDs
+NET "Test_7" LOC = "R22" | IOSTANDARD = "LVCMOS33";
+NET "Test_6" LOC = "R23" | IOSTANDARD = "LVCMOS33";
+NET "Test_5" LOC = "P23" | IOSTANDARD = "LVCMOS33";
+NET "Test_4" LOC = "P24" | IOSTANDARD = "LVCMOS33";
+NET "Test_3" LOC = "R25" | IOSTANDARD = "LVCMOS33";
+NET "Test_2" LOC = "P25" | IOSTANDARD = "LVCMOS33";
+NET "Test_1" LOC = "R26" | IOSTANDARD = "LVCMOS33";
+NET "Test_0" LOC = "P26" | IOSTANDARD = "LVCMOS33";
+
+NET "TestLed_2" LOC = "T24" | IOSTANDARD = "LVCMOS33";
+NET "TestLed_1" LOC = "U25" | IOSTANDARD = "LVCMOS33";
+
+NET "SW_Addr0"            LOC = "C13"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr1"            LOC = "C14"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr2"            LOC = "B14"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr3"            LOC = "A13"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr4"            LOC = "A14"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr5"            LOC = "A15"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr6"            LOC = "B15"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "SW_Addr7"            LOC = "C16"   | PULLUP | IOSTANDARD = "LVCMOS25";
+
+NET "R_Addr0"            LOC = "B19"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr1"            LOC = "C18"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr2"            LOC = "A20"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr3"            LOC = "B20"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr4"            LOC = "C19"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr5"            LOC = "D19"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr6"            LOC = "D21"   | PULLUP | IOSTANDARD = "LVCMOS25";
+NET "R_Addr7"            LOC = "D20"   | PULLUP | IOSTANDARD = "LVCMOS25";
+
+
+#NET "Temp_IO"           LOC = "AB6"    | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(14)"        LOC = "AD14"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(15)"        LOC = "AD13"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(17)"        LOC = "AE13"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(16)"        LOC = "AF13"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(13)"        LOC = "AF14"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(10)"        LOC = "AF15"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(11)"        LOC = "AE15"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(12)"        LOC = "AD15"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(9)"         LOC = "AE16"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(7)"         LOC = "AF17"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(8)"         LOC = "AE17"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(6)"         LOC = "AD18"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(5)"         LOC = "AE18"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(4)"         LOC = "AF18"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(1)"         LOC = "AF19"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcClkEn"          LOC = "AD20"   | IOSTANDARD = "LVCMOS33";
+#NET "SysClk"            LOC = "AD19"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(3)"         LOC = "AE20"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(2)"      	 LOC = "AE21"   | IOSTANDARD = "LVCMOS33";
+#NET "AdcDat(0)"   	 LOC = "AF22"   | IOSTANDARD = "LVCMOS33";
+#NET "tbaP"               LOC = "U24"    | IOSTANDARD = "LVCMOS33";
+#NET "tbaM"               LOC = "V24"    | IOSTANDARD = "LVCMOS33";
+#NET "sclk"               LOC = "AB7"    | IOSTANDARD = "LVCMOS33";
+#NET "sc(1)"              LOC = "AD5"    | IOSTANDARD = "LVCMOS33";
+#NET "sc(0)"              LOC = "AE6"    | IOSTANDARD = "LVCMOS33";
+#NET "s(2)"               LOC = "AF3"    | IOSTANDARD = "LVCMOS33";
+#NET "s(1)"               LOC = "AD4"    | IOSTANDARD = "LVCMOS33";
+#NET "s(0)"               LOC = "AE5"    | IOSTANDARD = "LVCMOS33";
+#NET "rg"                 LOC = "AF4"    | IOSTANDARD = "LVCMOS33";
+#NET "rcmSdo"             LOC = "AD8"    | IOSTANDARD = "LVCMOS33";
+#NET "rcmSdi"             LOC = "AF9"    | IOSTANDARD = "LVCMOS33";
+#NET "p(3)"               LOC = "AF5"    | IOSTANDARD = "LVCMOS33";
+#NET "p(2)"               LOC = "AD6"    | IOSTANDARD = "LVCMOS33";
+#NET "p(1)"               LOC = "AE7"    | IOSTANDARD = "LVCMOS33";
+#NET "p(0)"               LOC = "AF7"    | IOSTANDARD = "LVCMOS33";
+#NET "cnvst"              LOC = "AE10"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(7)"             LOC = "AF10"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(6)"             LOC = "AC8"    | IOSTANDARD = "LVCMOS33";
+#NET "adr(5)"             LOC = "AE11"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(4)"             LOC = "AF12"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(3)"             LOC = "AD9"    | IOSTANDARD = "LVCMOS33";
+#NET "adr(2)"             LOC = "AD11"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(1)"             LOC = "AE12"   | IOSTANDARD = "LVCMOS33";
+#NET "adr(0)"             LOC = "AC9"    | IOSTANDARD = "LVCMOS33";
+#NET "ac(3)"              LOC = "AC6"    | IOSTANDARD = "LVCMOS33";
+#NET "ac(2)"              LOC = "AE8"    | IOSTANDARD = "LVCMOS33";
+#NET "ac(1)"              LOC = "AF8"    | IOSTANDARD = "LVCMOS33";
+#NET "ac(0)"              LOC = "AC7"    | IOSTANDARD = "LVCMOS33";
+
+#NET "U_raftDataSim/U_Cscope_icon/iDRCK_LOCAL" TNM_NET = U_raftDataSim/U_Cscope_icon/iDRCK_LOCAL;
+#TIMESPEC TS_U_Cscope_icon_iDRCK_LOCAL = PERIOD "U_raftDataSim/U_Cscope_icon/iDRCK_LOCAL" 6.7 ns HIGH 50%;

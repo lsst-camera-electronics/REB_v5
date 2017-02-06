@@ -1,0 +1,2 @@
+vhdl work rtl/dual_ad53xx_DAC_top.vhd
+vhdl work rtl/demux_1_2_clk_def_1.vhd

@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<BillOfMaterials Version="1" Minor="2">
+	<IPInstance name="dual_port_ram_24_4">
+		<FileSets>
+			<FileSet generator="xmdf_to_bom">
+				<File name="dual_port_ram_24_4/dist_mem_gen_v7_2_readme.txt" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/doc/dist_mem_gen_v7_2_vinfo.html" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/doc/pg063-dist-mem-gen.pdf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/example_design/dual_port_ram_24_4_exdes.ucf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/example_design/dual_port_ram_24_4_exdes.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/example_design/dual_port_ram_24_4_exdes.xdc" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/example_design/dual_port_ram_24_4_prod_exdes.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/implement.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/implement.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/implement_synplify.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/implement_synplify.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/planAhead_ise.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/planAhead_ise.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/planAhead_ise.tcl" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/xst.prj" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/implement/xst.scr" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_agen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_checker.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_dgen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_pkg.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_rng.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_stim_gen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/dual_port_ram_24_4_tb_synth.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/functional/simulate_mti.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/functional/simulate_mti.do" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/functional/simulate_mti.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/timing/simulate_mti.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/timing/simulate_mti.do" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4/simulation/timing/simulate_mti.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.asy" type="asy" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.ngc" type="ngc" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.sym" type="asy" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.vhd" type="vhdl" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.vho" type="vho" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4.xco" type="xco" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_24_4_xmdf.tcl" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+			</FileSet>
+		</FileSets>
+	</IPInstance>
+</BillOfMaterials>
+

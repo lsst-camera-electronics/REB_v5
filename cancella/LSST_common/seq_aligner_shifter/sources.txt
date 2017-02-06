@@ -1,0 +1,2 @@
+vhdl work rtl/sequencer_aligner_shifter_top.vhd
+

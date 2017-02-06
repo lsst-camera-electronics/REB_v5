@@ -1,0 +1,2 @@
+vhdl work rtl/REB_v5_commands_package.vhd
+vhdl work rtl/REB_v5_cmd_interpreter.vhd

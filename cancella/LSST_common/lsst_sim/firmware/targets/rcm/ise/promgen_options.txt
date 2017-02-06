@@ -1,0 +1,105 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx promgen options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : promgen_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for promgen
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options:
+# -b           Disable bit swapping. Only valid for hex format (-p hex).
+#
+# -l           Disable length count for daisychain.
+#
+# -w           Overwrite existing output file(s).
+#
+# -s <size>    PROM size in K bytes (must be power of 2), multiple sizes imply
+#              splitting the bitstream(s) into multiple PROMs.
+#
+# -x <xilinx_prom>
+#              Specific Xilinx PROM, multiple PROMs imply splitting the
+#              bitstream(s) into multiple PROMs.
+#
+# -p <format>  PROM format (mcs, exo, hex, tek, bin, ieee1532, or ufp)
+#
+# -t <templatefile[.pft]>
+#              Specify a template file for the User Format PROM (ufp).
+#              If not specified the file $XILINX/data/default.pft is used.
+# 
+# -o <file>    Output PROM file name (default matches first .bit file),
+#              multiple names may be specified when splitting PROMs.
+#
+# -u <hexaddr> <file[.bit]> {<file[.bit]>}
+#              Load .bit file(s) up from address.  Multiple .bit files are
+#              daisychained to form a single PROM load.
+#
+# -ver <version> <hexaddr> <file[.bit]> {<file[.bit]>}
+#              Load .bit file(s) up from address.  Multiple .bit files are
+#              daisychained to form a single PROM load. The daisychain will be
+#              assigned to the specified version within the PROM. Only valid
+#              for Xilinx Multi-Bank PROMs. 
+#
+# -i <version>
+#              Select the initial version for a Xilinx Multi-Bank PROM.
+#
+# -z [<version>]
+#              Enable compression for a Xilinx Multi-Bank PROM. All versions
+#              will be compressed if a specific version is not specified.
+#
+# -d <hexaddr> <file[.bit]> {<file[.bit]>}
+#              Load .bit file(s) down from address.  Multiple .bit files are
+#              daisychained to form a single PROM load.
+#
+# -n <file[.bit]> {<file[.bit]>}
+#              Load .bit file(s) up or down starting from the next address
+#              following previous load.  Multiple .bit files are daisychained
+#              to form a single PROM load.  Must follow a -u, -d, or -n option.
+#
+# -r <promfile>
+#              Load the PROM file.  The -r and the -u, -d and -n options are 
+#              mutually exclusive.
+#
+# -c [<hexbyte>]
+#              Calculate a 32 bit checksum for each PROM file. The PROM will
+#              be pre-filled with the value 0xff unless <hexbyte> (a 2 digit
+#              hexadecimal value) is specified.
+#
+# -f <cmdfile>
+#              Read command line arguments from file <cmdfile>.
+# -data_width <8|16|32>
+#              Change bit/byte ordering in device bitstream depending on the
+#              device architecture. This option is not valid for all
+#              architectures, check device data-sheet.
+#
+# -bd <file[.elf]> [start <hexaddr>]
+#              Load .elf or .mem data file up from starting address if specified.
+#              If start address is not specified, the file will be loaded up from
+#              end of previous data file.
+#
+# -bm <file[.bmm]>
+#              Load .bmm file to describe formatting of data files.
+#
+# -spi
+#              Disables bit swapping for compatibility with SPI flash devices.
+#
+# -bpi_dc <serial|parallel>
+#              Selects serial or parallel daisy-chain output from first FPGA
+#              connected in either BPI or SelectMAP modes. Serial daisy-chain is
+#              only supported for certain families, check device data-sheet.
+#
+# -data_file <up|down> <hexaddr> <file> {<file>}
+#              Specify the starting address, direction and data filenames to add
+#              into the PROM file. No further formatting will be done on these
+#              file, they will be added as-is.
+-w
+-p mcs
+-c FF
+-data_width 16

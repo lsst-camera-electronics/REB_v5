@@ -1,0 +1,79 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx place and route options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : par_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for par
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options:
+#   -ol = Overall effort level. high is maximum effort.
+#         Default: std (standard)
+#   -pl = Placer effort level. high is maximum effort. Overrides
+#         any placer effort level implied by "-ol" option.
+#         Default: std (standard)
+#   -rl = Router effort level. high is maximum effort. Overrides
+#         any router effort level implied by "-ol" option.
+#         Default: std (standard)
+#   -xe = Extra effort level. c (Continue on Impossible) is maximum effort.
+#         Default: none
+#   -t =  Placer cost table entry. Start at this entry.
+#         Default: 1.
+#   -p =  Don't run the placer. (Keep current placement)
+#   -k =  Re-entrant route. Keep the current placement. Continue the routing
+#         using the existing routing as a starting point.
+#   -r =  Don't run the router.
+#   -w =  Overwrite. Allows overwrite of an existing file (including input
+#         file). If specified output is a directory, allows files in
+#         directory to be overwritten.
+#   -f =  Read par command line arguments and switches from file.
+#   -smartguide = Enables SmartGuide using guidefile.ncd as the guide file. 
+#   -n =  P&R Iterations at this level. Use "-n 0" to run until a
+#         successful result is generated. The result must be fully
+#         routed and meet timing constraints. The output file must
+#         have a ".dir" extension for -n option != 1.
+#         Default: 1.
+#   -s =  Save "n" best results for this run. Best is defined by the
+#         design score which is a combination of unroutes, net delay,
+#         and failed timing values.
+#         Default: Save all results.
+#   -m =  Multi task par run. File <node list file> ",
+#         contains a list of node names on which to run the jobs.
+#         (This option is available for supported SOLARIS and LINUX operating
+#          systems only).
+#   -x =  Ignore user timing constraints in physical constraints file and 
+#         generate timing constraints automatically for all internal clocks to 
+#         increase performance. Note: the level of performance achieved will 
+#         be dictated by the effort level (-ol std|med|high) chosen.
+#   -ub = Use bonded IOs. Allow bonded IO sites to be used for internal
+#         logic. This includes IOs which do not require the pad as well
+#         as allowing the router to route through the IO site.
+#   -nopad = Turns off generation of the pad report.
+#         Default: Pad Report Generated
+#   -power = Power Aware Par.  Optimizes the capacitance of non-timing-driven
+#            design signals.
+#         Default: off
+#   -activityfile <activityfile.vcd|saif> = Switching activity data file to 
+#            guide power optimization.  This option is only valid if the 
+#            "-power on" option has been used. 
+#   -intstyle = Indicate contextual information when invoking Xilinx applications 
+#         within a flow or project environment.
+#         The mode "xflow" indicates that the program is being run as part of a 
+#         batch flow. The mode "silent" indicates that no output will be 
+#         displayed to the screen. The mode "ise" indicates that the program is being
+#         run as part of an integrated design environment. 
+#         Default: Program is run as a standalone application.
+#   -ise = Use supplied ISE project repository file.
+#   -ntd = Ignore Timing constraints in physical constraints file and do NOT
+#         generate timing constraints automatically.
+#-t 3
+-intstyle ise
+-ol high

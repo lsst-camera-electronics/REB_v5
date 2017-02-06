@@ -1,0 +1,48 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx trace options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : trce_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for trce
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options:
+#-o <report[.twr]>  ... report output file (default design.twr)
+#-xml <report[.twx]> ... XML report output file (default design.twx)
+#-e [<limit>]       ... produce detailed error report for timing constraints,
+#                       optionally limited to the specified number of items
+#-v [<limit>]       ... produce verbose timing report for timing constraints
+#                       optionally limited to the specified number of items
+#-l [<limit>]       ... produce timing report for timing constraints
+#                       optionally limited to the specified number of items
+#-n [<limit>]       ... report paths per endpoint (default is per constraint)
+#                       optionally limited to the specified number of endpoints
+#-s <speed>         ... run analysis with the specified speed grade
+#-a                 ... perform advanced design analysis in the absence
+#                       of a constraint file
+#-u [<limit>]       ... report paths which are not covered by the constraints
+#                       within the PCF file limited to the specified number of
+#                       items.
+#-f <filename>      ... use the <filename> as command input
+#-skew              ... this option is obsolete, clock skew is always analyzed
+#-stamp <stampfile> ... optionally generate STAMP model and data files
+#-tsi <tsifile[.tsi]> ... produce timing specification interaction report
+#-nodatasheet       ... do not create the datasheet section of the report
+#-timegroups        ... create the table of timegroups section of the report
+#-fastpaths         ... report fastest paths/verbose hold paths
+#-run <macro[.xtm]> ... run the Timing Analyzer macro file. When the -run
+#                       switch is used, the only other legal switches are
+#                       -intstyle and -ise
+#-intstyle <style>  ... use the specified style: ise, xflow, or silent
+#-ise <projectfile> ... use supplied ISE project file
+-intstyle ise
+-l 30
+-v 30

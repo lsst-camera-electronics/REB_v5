@@ -1,0 +1,83 @@
+##---------------------------------------------------------------------------
+## Title         : Xilinx ngdbuild options file
+## Project       : LCLS CXI Detector
+##---------------------------------------------------------------------------
+## File          : ngdbuild_options.txt
+## Author        : Ryan Herbst, rherbst@slac.stanford.edu
+## Created       : 11/09/2009
+##---------------------------------------------------------------------------
+## Description:
+## Options file for ngdbuild
+##---------------------------------------------------------------------------
+## Copyright (c) 2007 by Ryan Herbst. All rights reserved.
+##---------------------------------------------------------------------------
+## Modification history:
+## 11/09/2009: created.
+##---------------------------------------------------------------------------
+# Possible Options:
+#     -p  partname     Use specified part type to implement the design
+#     -sd source_dir   Add "source_dir" to the list of directories
+#                      to search when resolving netlist file references
+#     -l library       Add "library" to the list of source libraries
+#                      passed to the netlisters
+#     -ur rules_file   User rules file for netlist launcher
+#     -dd output_dir   Directory to place intermediate .ngo files
+#     -nt value        NGO file generation
+#                      Options:       "timestamp", "on", "off"
+#                      -nt timestamp: Regenerate NGO only when source
+#                                     netlist is newer than existing
+#                                     NGO file (default)
+#                      -nt on:        Always regenerate NGO file from
+#                                     source design netlists
+#                      -nt off:       Do not regenerate NGO files
+#                                     which already exist. Build NGD
+#                                     file from existing NGO files
+#     -uc ucf_file     Use specified "User Constraint File".
+#                      The file <design_name>.ucf is used by default
+#                      if it is found in the local directory.
+#     -r               Ignore location constraints
+#     -aul             Allow unmatched LOC constraints
+#     -aut             Allow unmatched timing group constraints
+#     -a               Infer pad components from ports in top-level EDIF
+#                      netlist (if any)
+#     -i               Ignore usage of default ucf file, if present
+#     -u               Allow unexpanded blocks in output NGD design.
+#                      During partial design assembly flow, it gets used
+#                      along with -modular assemble switch to consider
+#                      unexpanded blocks as unimplemented modules.
+#     -insert_keep_hierarchy
+#                      Preserve hierarchical boundaries for timing simulation
+#                      at module boundaries for designs represented by multiple
+#                      input netlists.
+#     -modular initial|module|assemble
+#                      Modular design flows:
+#                      The specific flags are:
+#     -modular initial
+#                      Modular design in initial budgeting mode
+#     -modular module -active <active_module_name>
+#                      Modular design in active mode
+#     -active <active_module_name>
+#                      Specifies the name of active module.
+#     -modular assemble -pimpath pimpath> -use_pim <pim_module_name>
+#                      Modular design in assembly mode.
+#     -pimpath <pimpath>
+#                      Specifies PIM directory name.
+#     -use_pim <pim_module_name>
+#                      Specifies an instantiated module in a top level design.
+#                      -use_pim can be used multiple times to specify multiple 
+#                      instantiated modules.
+#                      if -use_pim is missing, all subdirectories located in 
+#                      <pimpath> directory, which contain a .ngo or .ngc file 
+#                      with the same subdirectory name, will be considered as 
+#                      valid instantiated modules.
+#     -bm bmm_file     Use specified ".bmm file".
+#     -intstyle ise|xflow|silent
+#                      Indicate contextual information when invoking Xilinx 
+#                      applications within a flow or project environment.
+#     -quiet           Only report Warning and Error messages.
+#     -verbose         Reports all messages
+#     -ise <ise_project_file>
+#
+-nt on
+-intstyle ise
+-quiet

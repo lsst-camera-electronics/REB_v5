@@ -1,0 +1,64 @@
+Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2015.2 (lin64) Build 1266856 Fri Jun 26 16:35:25 MDT 2015
+| Date         : Tue Nov  3 18:08:15 2015
+| Host         : lpnws5166 running 64-bit Scientific Linux release 6.7 (Carbon)
+| Command      : upgrade_ip
+| Device       : xc7k160tffg676-1
+------------------------------------------------------------------------------------
+
+Upgrade Log for IP 'seq_param_fifo_v3'
+
+1. Summary
+----------
+
+SUCCESS in the upgrade of seq_param_fifo_v3 from xilinx.com:ip:fifo_generator:9.3 to xilinx.com:ip:fifo_generator:12.0 (Rev. 4)
+
+2. Upgrade messages
+-------------------
+
+Renamed parameter AXI_Address_Width to ADDRESS_WIDTH
+WARNING: upgrade cannot rename parameter Interface_Type to INTERFACE_TYPE : a parameter called INTERFACE_TYPE already exists in fifo_generator_v12_0
+Added parameter DATA_WIDTH with value 64
+Added parameter PROTOCOL with value AXI4
+Set parameter ID_WIDTH to value 0
+Set parameter ADDRESS_WIDTH to value 32
+Removed parameter AXI_Data_Width
+Removed parameter AXI_Type
+Added parameter READ_WRITE_MODE with value READ_WRITE
+Removed parameter Enable_Read_Channel
+Removed parameter Enable_Write_Channel
+WARNING: upgrade cannot rename parameter TID_Width to TID_WIDTH : a parameter called TID_WIDTH already exists in fifo_generator_v12_0
+WARNING: upgrade cannot rename parameter TKEEP_Width to TKEEP_WIDTH : a parameter called TKEEP_WIDTH already exists in fifo_generator_v12_0
+WARNING: upgrade cannot rename parameter TDEST_Width to TDEST_WIDTH : a parameter called TDEST_WIDTH already exists in fifo_generator_v12_0
+WARNING: upgrade cannot rename parameter TSTRB_Width to TSTRB_WIDTH : a parameter called TSTRB_WIDTH already exists in fifo_generator_v12_0
+Renamed parameter Enable_TSTROBE to HAS_TSTRB
+Renamed parameter Enable_TKEEP to HAS_TKEEP
+Added parameter TDATA_NUM_BYTES with value 0
+Set parameter TSTRB_WIDTH to value 0
+Set parameter TKEEP_WIDTH to value 0
+Set parameter TID_WIDTH to value 0
+Set parameter TDEST_WIDTH to value 0
+Removed parameter TDATA_Width
+Removed parameter Enable_TDATA
+Added parameter HAS_ACLKEN with value false
+Removed parameter Use_Clock_Enable
+Removed parameter Enable_TID
+Removed parameter Enable_TDEST
+WARNING: upgrade cannot rename parameter TUSER_Width to TUSER_WIDTH : a parameter called TUSER_WIDTH already exists in fifo_generator_v12_0
+Set parameter TUSER_WIDTH to value 4
+Removed parameter Enable_TUSER
+Set parameter AWUSER_Width to value 0
+Removed parameter Enable_AWUSER
+Set parameter WUSER_Width to value 0
+Removed parameter Enable_WUSER
+Set parameter BUSER_Width to value 0
+Removed parameter Enable_BUSER
+Set parameter ARUSER_Width to value 0
+Removed parameter Enable_ARUSER
+Set parameter RUSER_Width to value 0
+Removed parameter Enable_RUSER
+Added parameter asymmetric_port_width with value false
+Added parameter ecc_pipeline_reg with value false
+Added parameter dynamic_power_saving with value false
+

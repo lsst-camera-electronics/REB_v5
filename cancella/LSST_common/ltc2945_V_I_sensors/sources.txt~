@@ -1,0 +1,7 @@
+vhdl work rtl/ltc2945_add_package.vhd
+vhdl work rtl/ltc2945_multi_read_top.vhd
+vhdl work rtl/ltc2945_multi_read_fsm.vhd
+vhdl work i2c_core/i2c_top.vhd
+vhdl work i2c_core/i2c_master.vhd
+vhdl work i2c_core/i2c_handler_fsm.vhd
+vhdl work i2c_core/mux_bus_2_8_bit_clk.vhd

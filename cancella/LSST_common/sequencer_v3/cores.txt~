@@ -1,0 +1,11 @@
+ipcore_vivado/ip/dual_port_ram_ip/dual_port_ram_ip.xci
+ipcore_vivado/ip/dual_port_ram_4_4/dual_port_ram_4_4.xci
+ipcore_vivado/ip/dual_port_ram_24_4/dual_port_ram_24_4.xci
+ipcore_vivado/ip/dual_port_ram_10_4/dual_port_ram_10_4.xci
+ipcore_vivado/ip/dual_port_ram_16_4/dual_port_ram_16_4.xci
+ipcore_vivado/ip/seq_param_fifo_v3/seq_param_fifo_v3.xci
+ipcore_vivado/ip/dual_port_ram_8_16/dual_port_ram_8_16.xci
+ipcore_vivado/ip/dual_port_ram_8_32/dual_port_ram_8_32.xci
+
+dcm_user_clk/dcm_user_clk.xci
+mon_xadc/mon_xadc.xci

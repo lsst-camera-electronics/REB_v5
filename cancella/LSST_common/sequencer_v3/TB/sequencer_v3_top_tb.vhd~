@@ -1,0 +1,492 @@
+-------------------------------------------------------------------------------
+-- Title      : Testbench for design "sequencer_v3_top"
+-- Project    : pippo
+-------------------------------------------------------------------------------
+-- File       : sequencer_v3_top_tb.vhd
+-- Author     :   <srusso@lpnws5166.in2p3.fr>
+-- Company    : 
+-- Created    : 2014-08-06
+-- Last update: 2014-08-06
+-- Platform   : 
+-- Standard   : VHDL'87
+-------------------------------------------------------------------------------
+-- Description: 
+-------------------------------------------------------------------------------
+-- Copyright (c) 2014 
+-------------------------------------------------------------------------------
+-- Revisions  :
+-- Date        Version  Author  Description
+-- 2014-08-06  1.0      srusso  Created
+-------------------------------------------------------------------------------
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+-------------------------------------------------------------------------------
+
+entity sequencer_v3_top_tb is
+
+end sequencer_v3_top_tb;
+
+-------------------------------------------------------------------------------
+
+architecture testbench of sequencer_v3_top_tb is
+
+  component sequencer_v3_top
+    port (
+      reset                    : in  std_logic;
+      clk                      : in  std_logic;
+      start_sequence           : in  std_logic;
+      program_mem_we           : in  std_logic;
+      program_mem_w_add        : in  std_logic_vector(9 downto 0);
+      program_mem_data_in      : in  std_logic_vector(31 downto 0);
+      prog_mem_redbk           : out std_logic_vector(31 downto 0);
+      program_mem_init_en      : in  std_logic;
+      program_mem_init_add     : in  std_logic_vector(9 downto 0);
+      program_mem_init_add_rbk : out std_logic_vector(9 downto 0);
+      time_mem_w_en            : in  std_logic;
+      time_mem_in              : in  std_logic_vector(15 downto 0);
+      time_mem_w_add           : in  std_logic_vector(7 downto 0);
+      time_mem_readbk          : out std_logic_vector(15 downto 0);
+      out_mem_w_en             : in  std_logic;
+      out_mem_in               : in  std_logic_vector(31 downto 0);
+      out_mem_w_add            : in  std_logic_vector(7 downto 0);
+      out_mem_readbk           : out std_logic_vector(31 downto 0);
+      stop_sequence            : in  std_logic;
+      step_sequence            : in  std_logic;
+      sequencer_busy           : out std_logic;
+      sequencer_out            : out std_logic_vector(31 downto 0);
+      end_sequence             : out std_logic);
+  end component;
+
+  signal reset                : std_logic                     := '1';
+  signal clk                  : std_logic                     := '0';
+  signal start_sequence       : std_logic                     := '0';
+  signal program_mem_we       : std_logic                     := '0';
+  signal program_mem_w_add    : std_logic_vector(9 downto 0)  := (others => '0');
+  signal program_mem_data_in  : std_logic_vector(31 downto 0) := (others => '0');
+  signal program_mem_init_en  : std_logic                     := '0';
+  signal program_mem_init_add : std_logic_vector(9 downto 0)  := (others => '0');
+  signal time_mem_w_en        : std_logic                     := '0';
+  signal time_mem_in          : std_logic_vector(15 downto 0) := (others => '0');
+  signal time_mem_w_add       : std_logic_vector(7 downto 0)  := (others => '0');
+  signal out_mem_w_en         : std_logic                     := '0';
+  signal out_mem_in           : std_logic_vector(31 downto 0) := (others => '0');
+  signal out_mem_w_add        : std_logic_vector(7 downto 0)  := (others => '0');
+  signal stop_sequence        : std_logic                     := '0';
+  signal step_sequence        : std_logic                     := '0';
+
+  --Outputs
+  signal prog_mem_redbk           : std_logic_vector(31 downto 0);
+  signal program_mem_init_add_rbk : std_logic_vector(9 downto 0);
+  signal time_mem_readbk          : std_logic_vector(15 downto 0);
+  signal out_mem_readbk           : std_logic_vector(31 downto 0);
+  signal sequencer_out            : std_logic_vector(31 downto 0);
+  signal end_sequence             : std_logic;
+  signal sequencer_busy           : std_logic;
+
+  constant clk_period : time := 10 ns;
+
+
+begin  -- testbench
+
+  -- component instantiation
+  DUT : sequencer_v3_top
+    port map (
+      reset                    => reset,
+      clk                      => clk,
+      start_sequence           => start_sequence,
+      program_mem_we           => program_mem_we,
+      program_mem_w_add        => program_mem_w_add,
+      program_mem_data_in      => program_mem_data_in,
+      prog_mem_redbk           => prog_mem_redbk,
+      program_mem_init_en      => program_mem_init_en,
+      program_mem_init_add     => program_mem_init_add,
+      program_mem_init_add_rbk => program_mem_init_add_rbk,
+      time_mem_w_en            => time_mem_w_en,
+      time_mem_in              => time_mem_in,
+      time_mem_w_add           => time_mem_w_add,
+      time_mem_readbk          => time_mem_readbk,
+      out_mem_w_en             => out_mem_w_en,
+      out_mem_in               => out_mem_in,
+      out_mem_w_add            => out_mem_w_add,
+      out_mem_readbk           => out_mem_readbk,
+      stop_sequence            => stop_sequence,
+      step_sequence            => step_sequence,
+      sequencer_busy           => sequencer_busy,
+      sequencer_out            => sequencer_out,
+      end_sequence             => end_sequence);
+
+  -- clock generation
+  Clk <= not Clk after clk_period/2;
+
+  -- waveform generation
+  WaveGen_Proc : process
+  begin
+    -- insert signal assignments here
+
+    reset <= '1';
+    -- hold reset state for 100 ns.
+    wait for 100 ns;
+
+    wait for clk_period*10;
+
+    -- insert stimulus here 
+
+
+    reset <= '0';
+
+    wait for 200 ns;
+
+    -- set up sequencer
+    --default state
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"ffff_ffff";
+    out_mem_w_add <= x"00";
+    wait for clk_period*2;
+    out_mem_w_en  <= '0';
+    out_mem_in    <= x"0000_0000";
+    out_mem_w_add <= x"00";
+
+
+    -- function 1
+    -- time slice 0
+    wait for clk_period*2;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"1000_0032";
+    out_mem_w_add <= x"10";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0020";
+    time_mem_w_add <= x"10";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= x"0000";
+    time_mem_w_add <= x"00";
+
+    -- time slice 1
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"1100_0010";
+    out_mem_w_add <= x"11";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"000a";
+    time_mem_w_add <= x"11";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 2
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"1200_0032";
+    out_mem_w_add <= x"12";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0020";
+    time_mem_w_add <= x"12";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 3
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"1300_0010";
+    out_mem_w_add <= x"13";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"000a";
+    time_mem_w_add <= x"13";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+
+
+
+    -- function 2
+    -- time slice 0
+    wait for clk_period*2;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0011";
+    out_mem_w_add <= x"20";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0032";
+    time_mem_w_add <= x"20";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= x"0000";
+    time_mem_w_add <= x"00";
+
+    -- time slice 1
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0020";
+    out_mem_w_add <= x"21";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0032";
+    time_mem_w_add <= x"21";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 2
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0032";
+    out_mem_w_add <= x"22";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0032";
+    time_mem_w_add <= x"22";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 3
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0100";
+    out_mem_w_add <= x"23";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"1388";
+    time_mem_w_add <= x"23";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 4
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0200";
+    out_mem_w_add <= x"24";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"1388";
+    time_mem_w_add <= x"24";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 5
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0400";
+    out_mem_w_add <= x"25";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"1388";
+    time_mem_w_add <= x"25";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 6
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"0000_0800";
+    out_mem_w_add <= x"26";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"1388";
+    time_mem_w_add <= x"26";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+
+    -- function 3
+    -- time slice 0             
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"3000_0032";
+    out_mem_w_add <= x"30";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0020";
+    time_mem_w_add <= x"30";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= X"00";
+
+    -- time slice 1             
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"3100_0001";
+    out_mem_w_add <= x"31";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0001";
+    time_mem_w_add <= x"31";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= X"0000";
+    time_mem_w_add <= x"00";
+
+
+    -- time slice 2             
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"3200_0002";
+    out_mem_w_add <= x"32";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"0002";
+    time_mem_w_add <= x"32";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= x"0000";
+    time_mem_w_add <= x"00";
+
+    -- time slice 3             
+    wait for clk_period*5;
+    out_mem_w_en  <= '1';
+    out_mem_in    <= x"3300_0010";
+    out_mem_w_add <= x"33";
+
+    time_mem_w_en  <= '1';
+    time_mem_in    <= x"000a";
+    time_mem_w_add <= x"33";
+    wait for clk_period*2;
+    out_mem_w_en   <= '0';
+    out_mem_in     <= x"0000_0000";
+    out_mem_w_add  <= x"00";
+    time_mem_w_en  <= '0';
+    time_mem_in    <= x"0000";
+    time_mem_w_add <= x"00";
+
+-- write program mem
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"00";
+    program_mem_data_in <= x"11000002";
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"01";
+    program_mem_data_in <= x"f0000000";
+
+
+    -- sequencer trigger
+    wait for clk_period*20;
+    start_sequence <= '1';
+
+    wait for clk_period*2;
+    start_sequence <= '0';
+
+    wait for 30 us;
+
+    -- test prog mem init
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"00";
+    program_mem_data_in <= x"00000000";
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"01";
+    program_mem_data_in <= x"00000000";
+
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"05";
+    program_mem_data_in <= x"11000002";
+
+    wait for 100 ns;
+    program_mem_we      <= '1';
+    program_mem_w_add   <= "00" & x"06";
+    program_mem_data_in <= x"f0000000";
+
+    -- set start add at 5
+
+    program_mem_init_en  <= '1';
+    program_mem_init_add <= "000000" & x"5";
+    wait for clk_period;
+    program_mem_init_en  <= '0';
+    program_mem_init_add <= "000000" & x"0";
+
+    -- sequencer trigger
+    wait for clk_period*20;
+    start_sequence <= '1';
+
+    wait for clk_period*2;
+    start_sequence <= '0';
+
+
+
+    wait;
+    
+  end process WaveGen_Proc;
+
+  
+
+end testbench;
+
+-------------------------------------------------------------------------------
+
+--configuration sequencer_v3_top_tb_testbench_cfg of sequencer_v3_top_tb is
+--  for testbench
+--  end for;
+--end sequencer_v3_top_tb_testbench_cfg;
+
+-------------------------------------------------------------------------------

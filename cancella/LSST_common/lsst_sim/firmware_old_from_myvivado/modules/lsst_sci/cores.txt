@@ -1,0 +1,2 @@
+coregen/k7_afifo_36_to_18.ngc
+coregen/v5_afifo_36_to_18.ngc

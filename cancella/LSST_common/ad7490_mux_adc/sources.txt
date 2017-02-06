@@ -1,0 +1,4 @@
+vhdl work rtl/ad7490_and_mux_top_package.vhd
+vhdl work rtl/ad7490_and_mux_top.vhd
+vhdl work rtl/ad7490_controller_fsm.vhd
+vhdl work rtl/SPI_read_write.vhd

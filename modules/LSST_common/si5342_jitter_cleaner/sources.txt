@@ -1,0 +1,4 @@
+vhdl work rtl/si5342_jitter_cleaner_top.vhd
+vhdl work rtl/si5342_jitter_cleaner_fsm_rom.vhd
+vhdl work rtl/si5342_reg_write_fsm.vhd
+vhdl work rtl/SPI_write_BusyatStart.vhd

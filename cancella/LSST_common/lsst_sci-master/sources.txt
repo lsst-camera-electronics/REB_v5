@@ -1,0 +1,10 @@
+vhdl work rtl/LsstSciPackage.vhd
+vhdl work rtl/LsstSciRegEncoder.vhd
+vhdl work rtl/LsstSciNoticeEncoder.vhd
+vhdl work rtl/LsstSciDataEncoder.vhd
+vhdl work rtl/LsstSci18bPack.vhd
+vhdl work rtl/LsstSci16bTrunc.vhd
+vhdl work rtl/LsstSci32bZExt.vhd
+vhdl work rtl/LsstSciStatusBlock.vhd
+vhdl work rtl/LsstSci.vhd
+vhdl work rtl/LsstPgpFrontEnd.vhd

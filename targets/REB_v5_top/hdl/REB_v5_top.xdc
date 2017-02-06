@@ -42,9 +42,9 @@ set_property PACKAGE_PIN D1 [get_ports PgpTx_M]
 #set_property PACKAGE_PIN A3 [get_ports PgpTx_m]
 #set_property PACKAGE_PIN A4 [get_ports PgpTx_p]
 
-
-
-
+#Aux clk 
+set_property PACKAGE_PIN F17 [get_ports aux_100mhz_clk_in]
+#set_property PACKAGE_PIN E17 [get_ports aux_100mhz_clk_in]
 
 #### signals for CCD 1 ####
 #CCD ADC (Bank 13)
@@ -107,10 +107,10 @@ set_property PACKAGE_PIN AF20 [get_ports {par_clk_ccd_1_n[3]}]
 set_property PACKAGE_PIN AF19 [get_ports {par_clk_ccd_1_p[3]}]
 
 
-set_property PACKAGE_PIN AE15 [get_ports {ser_clk_ccd_1_n[1]}]
-set_property PACKAGE_PIN AD15 [get_ports {ser_clk_ccd_1_p[1]}]
-set_property PACKAGE_PIN AF18 [get_ports {ser_clk_ccd_1_n[0]}]
-set_property PACKAGE_PIN AE18 [get_ports {ser_clk_ccd_1_p[0]}]
+set_property PACKAGE_PIN AE15 [get_ports {ser_clk_ccd_1_n[0]}]
+set_property PACKAGE_PIN AD15 [get_ports {ser_clk_ccd_1_p[0]}]
+set_property PACKAGE_PIN AF18 [get_ports {ser_clk_ccd_1_n[1]}]
+set_property PACKAGE_PIN AE18 [get_ports {ser_clk_ccd_1_p[1]}]
 set_property PACKAGE_PIN AF15 [get_ports {ser_clk_ccd_1_n[2]}]
 set_property PACKAGE_PIN AF14 [get_ports {ser_clk_ccd_1_p[2]}]
 
@@ -185,10 +185,10 @@ set_property PACKAGE_PIN AF9 [get_ports {par_clk_ccd_2_n[2]}]
 set_property PACKAGE_PIN Y11 [get_ports {par_clk_ccd_2_p[3]}]
 set_property PACKAGE_PIN Y10 [get_ports {par_clk_ccd_2_n[3]}]
 
-set_property PACKAGE_PIN Y8  [get_ports {ser_clk_ccd_2_p[1]}]
-set_property PACKAGE_PIN Y7  [get_ports {ser_clk_ccd_2_n[1]}]
-set_property PACKAGE_PIN W10 [get_ports {ser_clk_ccd_2_p[0]}]
-set_property PACKAGE_PIN W9  [get_ports {ser_clk_ccd_2_n[0]}]
+set_property PACKAGE_PIN Y8  [get_ports {ser_clk_ccd_2_p[0]}]
+set_property PACKAGE_PIN Y7  [get_ports {ser_clk_ccd_2_n[0]}]
+set_property PACKAGE_PIN W10 [get_ports {ser_clk_ccd_2_p[1]}]
+set_property PACKAGE_PIN W9  [get_ports {ser_clk_ccd_2_n[1]}]
 set_property PACKAGE_PIN V8  [get_ports {ser_clk_ccd_2_p[2]}]
 set_property PACKAGE_PIN V7  [get_ports {ser_clk_ccd_2_n[2]}]
 set_property PACKAGE_PIN V11 [get_ports reset_gate_ccd_2_p]
@@ -262,10 +262,10 @@ set_property PACKAGE_PIN W4 [get_ports {par_clk_ccd_3_n[2]}]
 set_property PACKAGE_PIN AD1 [get_ports {par_clk_ccd_3_p[3]}]
 set_property PACKAGE_PIN AE1 [get_ports {par_clk_ccd_3_n[3]}]
 
-set_property PACKAGE_PIN AF5 [get_ports {ser_clk_ccd_3_p[1]}]
-set_property PACKAGE_PIN AF4 [get_ports {ser_clk_ccd_3_n[1]}]
-set_property PACKAGE_PIN AE3 [get_ports {ser_clk_ccd_3_p[0]}]
-set_property PACKAGE_PIN AE2 [get_ports {ser_clk_ccd_3_n[0]}]
+set_property PACKAGE_PIN AF5 [get_ports {ser_clk_ccd_3_p[0]}]
+set_property PACKAGE_PIN AF4 [get_ports {ser_clk_ccd_3_n[0]}]
+set_property PACKAGE_PIN AE3 [get_ports {ser_clk_ccd_3_p[1]}]
+set_property PACKAGE_PIN AE2 [get_ports {ser_clk_ccd_3_n[1]}]
 set_property PACKAGE_PIN U2  [get_ports {ser_clk_ccd_3_p[2]}]
 set_property PACKAGE_PIN U1  [get_ports {ser_clk_ccd_3_n[2]}]
 set_property PACKAGE_PIN AF3 [get_ports reset_gate_ccd_3_p]
@@ -345,6 +345,24 @@ set_property PACKAGE_PIN AB26 [get_ports sclk_HTR]
 set_property PACKAGE_PIN L19 [get_ports backbias_clamp]
 set_property PACKAGE_PIN J19 [get_ports backbias_ssbe]
 
+### Jitter Cleaner
+#(Bank14)
+set_property PACKAGE_PIN C21 [get_ports jc_miso]
+set_property PACKAGE_PIN B20 [get_ports jc_mosi]
+set_property PACKAGE_PIN A20 [get_ports jc_sclk]
+set_property PACKAGE_PIN B21 [get_ports jc_cs]
+#set_property PACKAGE_PIN F25 [get_ports jc_oe]
+set_property PACKAGE_PIN E26 [get_ports jc_reset]
+#set_property PACKAGE_PIN E21 [get_ports jc_sel0]
+#set_property PACKAGE_PIN E22 [get_ports jc_sel1]
+set_property PACKAGE_PIN J26 [get_ports jc_lol]
+set_property PACKAGE_PIN H26 [get_ports jc_los0]
+
+set_property PACKAGE_PIN AC18 [get_ports jc_refclk_out_p]
+set_property PACKAGE_PIN AD18 [get_ports jc_refclk_out_n]
+set_property PACKAGE_PIN AB11 [get_ports jc_refclk_in_p]
+set_property PACKAGE_PIN AC11 [get_ports jc_refclk_in_n]
+
 
 #### MISC ####
 #Resistors (Bank 13)
@@ -400,6 +418,10 @@ set_property PACKAGE_PIN AC6 [get_ports PWR_SYNC1]
 #REB serial number (Bank 12)
 set_property PACKAGE_PIN A12 [get_ports reb_sn_onewire]
 
+set_property PACKAGE_PIN AA4 [get_ports gpio_p]
+set_property PACKAGE_PIN AB4 [get_ports gpio_n]
+
+
 
 #### set voltages ####
 
@@ -409,6 +431,10 @@ set_property IOSTANDARD LVDS [get_ports ASPIC_clamp*]
 set_property IOSTANDARD LVDS [get_ports par_clk*]
 set_property IOSTANDARD LVDS [get_ports ser_clk*]
 set_property IOSTANDARD LVDS [get_ports reset_gate*]
+set_property IOSTANDARD LVDS [get_ports jc_refclk*]
+set_property IOSTANDARD LVDS [get_ports gpio_*]
+
+set_property IOSTANDARD LVCMOS33 [get_ports aux_100mhz_clk_in]
 
 
 set_property IOSTANDARD LVCMOS33 [get_ports adc_*]
@@ -434,4 +460,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports CCD_OPAMP_PD]
 set_property IOSTANDARD LVCMOS18 [get_ports PWR_SYNC1]
 set_property IOSTANDARD LVCMOS33 [get_ports reb_sn_onewire]
 set_property IOSTANDARD LVCMOS33 [get_ports ASPIC_pwdn_ccd_*]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_miso]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_mosi]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_sclk]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_cs]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_los0]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_lol]
+set_property IOSTANDARD LVCMOS33 [get_ports jc_reset]
+#set_property IOSTANDARD LVCMOS33 [get_ports jc_oe]
+
 
