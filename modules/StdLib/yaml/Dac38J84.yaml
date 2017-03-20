@@ -16,8 +16,6 @@ Dac38J84: &Dac38J84
   size: 0x200
   class: MMIODev
   configPrio: 1
-  metadata:
-    numTxLanes: &numTxLanes 2
   children:
     #########################################################    
     DacReg:
@@ -29,7 +27,7 @@ Dac38J84: &Dac38J84
       name: DacReg
       sizeBits: 16
       mode: RW
-      description: "DAC Registers[125:0]"
+      description: DAC Registers[125:0]
     #########################################################    
     LaneBufferDelay:
       at:
@@ -52,157 +50,156 @@ Dac38J84: &Dac38J84
     LinkErrCnt:
       at:
         offset: 0x104
-        stride: 4
-        nelms: *numTxLanes
       class: IntField
       name: LinkErrCnt
       sizeBits: 16
+        stride: 4
       mode: RO
-      description: "Link Error Count"
+      description: Link[3:0] Error Count
     #########################################################    
     ReadFifoEmpty:
       at:
         offset: 0x190
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: ReadFifoEmpty
       sizeBits: 1
       lsBit: 0
       mode: RO
-      description: "ReadFifoEmpty"
+      description: ReadFifoEmpty[7:0]
     #########################################################    
     ReadFifoUnderflow:
       at:
         offset: 0x190
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: ReadFifoUnderflow
       sizeBits: 1
       lsBit: 1
       mode: RO
-      description: "ReadFifoUnderflow"
+      description: ReadFifoUnderflow[7:0]
     #########################################################    
     ReadFifoFull:
       at:
         offset: 0x190
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: ReadFifoFull
       sizeBits: 1
       lsBit: 2
       mode: RO
-      description: "ReadFifoFull"
+      description: ReadFifoFull[7:0]
     #########################################################    
     ReadFifoOverflow:
       at:
         offset: 0x190
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: ReadFifoOverflow
       sizeBits: 1
       lsBit: 3
       mode: RO
-      description: "ReadFifoOverflow"
+      description: ReadFifoOverflow[7:0]
     #########################################################    
     DispErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: DispErr
       sizeBits: 1
       lsBit: 0
       mode: RO
-      description: "DispErr"
+      description: DispErr[7:0]
     #########################################################    
     NotitableErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: NotitableErr
       sizeBits: 1
       lsBit: 1
       mode: RO
-      description: "NotitableErr"
+      description: NotitableErr[7:0]
     #########################################################    
     CodeSyncErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: CodeSyncErr
       sizeBits: 1
       lsBit: 2
       mode: RO
-      description: "CodeSyncErr"
+      description: CodeSyncErr[7:0]
     #########################################################    
     FirstDataMatchErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: FirstDataMatchErr
       sizeBits: 1
       lsBit: 3
       mode: RO
-      description: "FirstDataMatchErr"
+      description: FirstDataMatchErr[7:0]
     #########################################################    
     ElasticBuffOverflow:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: ElasticBuffOverflow
       sizeBits: 1
       lsBit: 4
       mode: RO
-      description: "ElasticBuffOverflow"
+      description: ElasticBuffOverflow[7:0]
     #########################################################    
     LinkConfigErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: LinkConfigErr
       sizeBits: 1
       lsBit: 5
       mode: RO
-      description: "LinkConfigErr"
+      description: LinkConfigErr[7:0]
     #########################################################    
     FrameAlignErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: FrameAlignErr
       sizeBits: 1
       lsBit: 6
       mode: RO
-      description: "FrameAlignErr"
+      description: FrameAlignErr[7:0]
     #########################################################    
     MultiFrameAlignErr:
       at:
         offset: 0x191
         stride: 4
-        nelms: *numTxLanes
+        nelms: 8
       class: IntField
       name: MultiFrameAlignErr
       sizeBits: 1
       lsBit: 7
       mode: RO
-      description: "MultiFrameAlignErr"
+      description: MultiFrameAlignErr[7:0]
     #########################################################    
     Serdes1pllAlarm:
       at:
@@ -241,7 +238,7 @@ Dac38J84: &Dac38J84
       name: LaneLoss
       sizeBits: 8
       mode: RO
-      description: "LaneLoss"
+      description: LaneLoss[7:0]
     #########################################################    
     LaneAlarm:
       at:
@@ -250,7 +247,7 @@ Dac38J84: &Dac38J84
       name: LaneAlarm
       sizeBits: 8
       mode: RO
-      description: "LaneAlarm"
+      description: LaneAlarm[7:0]
     #########################################################    
     ID:
       at:
@@ -281,34 +278,32 @@ Dac38J84: &Dac38J84
       description: InitJesd
     #########################################################    
     ClearAlarms:
+      name: ClearAlarms
       class: SequenceCommand
-      at:
-        offset: 0x0
       description: Clear all the DAC alarms
       sequence:
-        - entry: DacReg[100]
-          value: 0x0
-        - entry: DacReg[101]
-          value: 0x0
-        - entry: DacReg[102]
-          value: 0x0
-        - entry: DacReg[103]
-          value: 0x0
-        - entry: DacReg[104]
-          value: 0x0
-        - entry: DacReg[105]
-          value: 0x0
-        - entry: DacReg[106]
-          value: 0x0
-        - entry: DacReg[107]
-          value: 0x0
-        - entry: DacReg[108]
-          value: 0x0
+      - entry: DacReg[100]
+        value: 0xFFFF
+      - entry: DacReg[101]
+        value: 0xFFFF
+      - entry: DacReg[102]
+        value: 0xFFFF
+      - entry: DacReg[103]
+        value: 0xFFFF
+      - entry: DacReg[104]
+        value: 0xFFFF
+      - entry: DacReg[105]
+        value: 0xFFFF
+      - entry: DacReg[106]
+        value: 0xFFFF
+      - entry: DacReg[107]
+        value: 0xFFFF
+      - entry: DacReg[108]
+        value: 0xFFFF
     #########################################################
     InitDac:
+      name: InitDac
       class: SequenceCommand
-      at:
-        offset: 0x0
       description: Initialization sequence for the DAC JESD core
       sequence:
         # Disable TX

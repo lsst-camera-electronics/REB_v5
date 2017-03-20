@@ -5,7 +5,7 @@
 -- Author     : Larry Ruckman  <ruckman@slac.stanford.edu>
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2014-05-02
--- Last update: 2016-10-17
+-- Last update: 2015-09-15
 -- Platform   : Vivado 2013.3
 -- Standard   : VHDL'93/02
 -------------------------------------------------------------------------------
@@ -33,28 +33,24 @@ use work.SsiPkg.all;
 entity SsiFifo is
    generic (
       -- General Configurations
-      TPD_G               : time                  := 1 ns;
-      INT_PIPE_STAGES_G   : natural               := 0;
-      PIPE_STAGES_G       : natural               := 1;
-      SLAVE_READY_EN_G    : boolean               := true;
-      EN_FRAME_FILTER_G   : boolean               := true;
-      OR_DROP_FLAGS_G     : boolean               := false;
-      VALID_THOLD_G       : natural               := 1;
+      TPD_G               : time                       := 1 ns;
+      PIPE_STAGES_G       : natural range 0 to 16      := 0;
+      EN_FRAME_FILTER_G   : boolean                    := true;
+      VALID_THOLD_G       : integer range 0 to (2**24) := 1;
       -- FIFO configurations
-      BRAM_EN_G           : boolean               := true;
-      XIL_DEVICE_G        : string                := "7SERIES";
-      USE_BUILT_IN_G      : boolean               := false;
-      GEN_SYNC_FIFO_G     : boolean               := false;
-      ALTERA_SYN_G        : boolean               := false;
-      ALTERA_RAM_G        : string                := "M9K";
-      CASCADE_SIZE_G      : positive              := 1;
-      CASCADE_PAUSE_SEL_G : natural               := 0;
-      FIFO_ADDR_WIDTH_G   : integer range 4 to 48 := 9;
-      FIFO_FIXED_THRESH_G : boolean               := true;
-      FIFO_PAUSE_THRESH_G : positive              := 1;
+      BRAM_EN_G           : boolean                    := true;
+      XIL_DEVICE_G        : string                     := "7SERIES";
+      USE_BUILT_IN_G      : boolean                    := false;
+      GEN_SYNC_FIFO_G     : boolean                    := false;
+      ALTERA_SYN_G        : boolean                    := false;
+      ALTERA_RAM_G        : string                     := "M9K";
+      CASCADE_SIZE_G      : integer range 1 to (2**24) := 1;
+      FIFO_ADDR_WIDTH_G   : integer range 4 to 48      := 9;
+      FIFO_FIXED_THRESH_G : boolean                    := true;
+      FIFO_PAUSE_THRESH_G : integer range 1 to (2**24) := 500;
       -- AXI Stream Port Configurations
-      SLAVE_AXI_CONFIG_G  : AxiStreamConfigType   := SSI_CONFIG_INIT_C;
-      MASTER_AXI_CONFIG_G : AxiStreamConfigType   := SSI_CONFIG_INIT_C);  
+      SLAVE_AXI_CONFIG_G  : AxiStreamConfigType;
+      MASTER_AXI_CONFIG_G : AxiStreamConfigType);  
    port (
       -- Slave Port
       sAxisClk        : in  sl;
@@ -64,71 +60,49 @@ entity SsiFifo is
       sAxisCtrl       : out AxiStreamCtrlType;
       sAxisDropWrite  : out sl;
       sAxisTermFrame  : out sl;
+      -- FIFO status & config , synchronous to sAxisClk
       fifoPauseThresh : in  slv(FIFO_ADDR_WIDTH_G-1 downto 0) := (others => '1');
       -- Master Port
       mAxisClk        : in  sl;
       mAxisRst        : in  sl;
       mAxisMaster     : out AxiStreamMasterType;
       mAxisSlave      : in  AxiStreamSlaveType;
-      mAxisDropWrite  : out sl;
-      mAxisTermFrame  : out sl);
+      mTLastTUser     : out slv(127 downto 0));  -- when VALID_THOLD_G /= 1, used to look ahead at tLast's tUser
 end SsiFifo;
 
 architecture mapping of SsiFifo is
    
-   signal rxMaster   : AxiStreamMasterType;
-   signal rxSlave    : AxiStreamSlaveType;
-   signal rxCtrl     : AxiStreamCtrlType;
-   signal sAxisReset : sl;
-
-   signal txMaster     : AxiStreamMasterType;
-   signal txSlave      : AxiStreamSlaveType;
-   signal txTLastTUser : slv(7 downto 0);
-   signal overflow     : sl;
-
-   signal sDropWrite     : sl;
-   signal sDropWriteSync : sl;
-   signal sTermFrame     : sl;
-   signal sTermFrameSync : sl;
-
-   signal mDropWrite     : sl;
-   signal mDropWriteSync : sl;
-   signal mTermFrame     : sl;
-   signal mTermFrameSync : sl;
+   signal axisMaster : AxiStreamMasterType;
+   signal axisSlave  : AxiStreamSlaveType;
    
 begin
 
-   assert (SLAVE_AXI_CONFIG_G.TUSER_BITS_C >= 2) report "SsiFifo:  SLAVE_AXI_CONFIG_G.TUSER_BITS_C must be >= 2" severity failure;
-   assert (MASTER_AXI_CONFIG_G.TUSER_BITS_C >= 2) report "SsiFifo:  MASTER_AXI_CONFIG_G.TUSER_BITS_C must be >= 2" severity failure;
-
-   U_IbFilter : entity work.SsiIbFrameFilter
+   U_Filter : entity work.SsiFrameFilter
       generic map (
+         -- General Configurations
          TPD_G             => TPD_G,
-         SLAVE_READY_EN_G  => SLAVE_READY_EN_G,
          EN_FRAME_FILTER_G => EN_FRAME_FILTER_G,
+         -- AXI Stream Port Configurations
          AXIS_CONFIG_G     => SLAVE_AXI_CONFIG_G)          
       port map (
          -- Slave Port
          sAxisMaster    => sAxisMaster,
          sAxisSlave     => sAxisSlave,
-         sAxisCtrl      => sAxisCtrl,
-         sAxisDropWrite => sDropWrite,
-         sAxisTermFrame => sTermFrame,
+         sAxisDropWrite => sAxisDropWrite,
+         sAxisTermFrame => sAxisTermFrame,
          -- Master Port
-         mAxisMaster    => rxMaster,
-         mAxisSlave     => rxSlave,
-         mAxisCtrl      => rxCtrl,
+         mAxisMaster    => axisMaster,
+         mAxisSlave     => axisSlave,
          -- Clock and Reset
          axisClk        => sAxisClk,
-         axisRst        => sAxisReset);  
+         axisRst        => sAxisRst);   
 
-   U_Fifo : entity work.AxiStreamFifoV2
+   U_Fifo : entity work.AxiStreamFifo
       generic map (
          -- General Configurations
          TPD_G               => TPD_G,
-         INT_PIPE_STAGES_G   => INT_PIPE_STAGES_G,
          PIPE_STAGES_G       => PIPE_STAGES_G,
-         SLAVE_READY_EN_G    => SLAVE_READY_EN_G,
+         SLAVE_READY_EN_G    => true,
          VALID_THOLD_G       => VALID_THOLD_G,
          -- FIFO configurations
          BRAM_EN_G           => BRAM_EN_G,
@@ -141,121 +115,24 @@ begin
          FIFO_ADDR_WIDTH_G   => FIFO_ADDR_WIDTH_G,
          FIFO_FIXED_THRESH_G => FIFO_FIXED_THRESH_G,
          FIFO_PAUSE_THRESH_G => FIFO_PAUSE_THRESH_G,
-         CASCADE_PAUSE_SEL_G => CASCADE_PAUSE_SEL_G,
+         CASCADE_PAUSE_SEL_G => (CASCADE_SIZE_G-1),
          -- AXI Stream Port Configurations
          SLAVE_AXI_CONFIG_G  => SLAVE_AXI_CONFIG_G,
          MASTER_AXI_CONFIG_G => MASTER_AXI_CONFIG_G)      
       port map (
          -- Slave Port
          sAxisClk        => sAxisClk,
-         sAxisRst        => sAxisReset,
-         sAxisMaster     => rxMaster,
-         sAxisSlave      => rxSlave,
-         sAxisCtrl       => rxCtrl,
+         sAxisRst        => sAxisRst,
+         sAxisMaster     => axisMaster,
+         sAxisSlave      => axisSlave,
+         sAxisCtrl       => sAxisCtrl,
          -- FIFO status & config , synchronous to sAxisClk
          fifoPauseThresh => fifoPauseThresh,
          -- Master Port
          mAxisClk        => mAxisClk,
          mAxisRst        => mAxisRst,
-         mAxisMaster     => txMaster,
-         mAxisSlave      => txSlave,
-         mTLastTUser     => txTLastTUser);      
-
-   sAxisReset <= (sAxisRst or (rxCtrl.overflow and not(rxCtrl.idle))) when(EN_FRAME_FILTER_G) else sAxisRst;
-
-   GEN_SYNC_SLAVE : if (GEN_SYNC_FIFO_G = true) generate
-      overflow <= rxCtrl.overflow;
-   end generate;
-
-   GEN_ASYNC_SLAVE : if (GEN_SYNC_FIFO_G = false) generate
-      Sync_Overflow : entity work.SynchronizerOneShot
-         generic map (
-            TPD_G => TPD_G)
-         port map (
-            clk     => mAxisClk,
-            rst     => mAxisRst,
-            dataIn  => rxCtrl.overflow,
-            dataOut => overflow);             
-   end generate;
-
-   U_ObFilter : entity work.SsiObFrameFilter
-      generic map (
-         TPD_G             => TPD_G,
-         VALID_THOLD_G     => VALID_THOLD_G,
-         EN_FRAME_FILTER_G => EN_FRAME_FILTER_G,
-         AXIS_CONFIG_G     => MASTER_AXI_CONFIG_G)          
-      port map (
-         -- Slave Port
-         sAxisMaster    => txMaster,
-         sAxisSlave     => txSlave,
-         sTLastTUser    => txTLastTUser,
-         overflow       => overflow,
-         -- Master Port
-         mAxisMaster    => mAxisMaster,
-         mAxisSlave     => mAxisSlave,
-         mAxisDropWrite => mDropWrite,
-         mAxisTermFrame => mTermFrame,
-         -- Clock and Reset
-         axisClk        => mAxisClk,
-         axisRst        => mAxisRst);          
-
-   
-   ORING_DROP : if (OR_DROP_FLAGS_G = true) generate
-      
-      GEN_SYNC : if (GEN_SYNC_FIFO_G = true) generate
-         sAxisDropWrite <= sDropWrite or mDropWrite;
-         sAxisTermFrame <= sTermFrame or mTermFrame;
-         mAxisDropWrite <= sDropWrite or mDropWrite;
-         mAxisTermFrame <= sTermFrame or mTermFrame;
-      end generate;
-
-      GEN_ASYNC : if (GEN_SYNC_FIFO_G = false) generate
-         
-         sAxisDropWrite <= sDropWrite or mDropWriteSync;
-         sAxisTermFrame <= sTermFrame or mTermFrameSync;
-         mAxisDropWrite <= sDropWriteSync or mDropWrite;
-         mAxisTermFrame <= sTermFrameSync or mTermFrame;
-
-         Sync_0 : entity work.SynchronizerOneShot
-            generic map (
-               TPD_G => TPD_G)
-            port map (
-               clk     => sAxisClk,
-               dataIn  => mDropWrite,
-               dataOut => mDropWriteSync);  
-
-         Sync_1 : entity work.SynchronizerOneShot
-            generic map (
-               TPD_G => TPD_G)
-            port map (
-               clk     => sAxisClk,
-               dataIn  => mTermFrame,
-               dataOut => mTermFrameSync);   
-
-         Sync_2 : entity work.SynchronizerOneShot
-            generic map (
-               TPD_G => TPD_G)
-            port map (
-               clk     => mAxisClk,
-               dataIn  => sDropWrite,
-               dataOut => sDropWriteSync);  
-
-         Sync_3 : entity work.SynchronizerOneShot
-            generic map (
-               TPD_G => TPD_G)
-            port map (
-               clk     => mAxisClk,
-               dataIn  => sTermFrame,
-               dataOut => sTermFrameSync);                  
-
-      end generate;
-   end generate;
-
-   NO_ORING_DROP : if (OR_DROP_FLAGS_G = false) generate
-      sAxisDropWrite <= sDropWrite;
-      sAxisTermFrame <= sTermFrame;
-      mAxisDropWrite <= mDropWrite;
-      mAxisTermFrame <= mTermFrame;
-   end generate;
+         mAxisMaster     => mAxisMaster,
+         mAxisSlave      => mAxisSlave,
+         mTLastTUser     => mTLastTUser);      
 
 end mapping;

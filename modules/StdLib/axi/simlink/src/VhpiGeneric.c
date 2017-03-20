@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 // Convert input values from enum to int
 void VhpiGenericConvertIn( portDataT *portData ) {
 
@@ -157,12 +158,7 @@ void VhpiGenericElab(vhpiHandleT compInst) {
    pCbData->cbf    = VhpiGenericErrors;
    pCbData->time   = (vhpiTimeT*) malloc(sizeof(vhpiTimeT));
    pCbData->reason = vhpiCbPLIError;
-   
-#if (VCS_VERSION >= 2016)
-   vhpi_register_cb(pCbData,vhpiReturnCb);
-#else
    vhpi_register_cb(pCbData);
-#endif   
 }
 
 
@@ -234,10 +230,6 @@ void VhpiGenericInit(vhpiHandleT compInst, portDataT *portData ) {
       cbData->cbf       = VhpiGenericCallBack;
       cbData->time      = (vhpiTimeT *) malloc(sizeof(vhpiTimeT));
       cbData->user_data = (void *)portData;
-      #if (VCS_VERSION >= 2016)
-         vhpi_register_cb(cbData,vhpiReturnCb);
-      #else
-         vhpi_register_cb(cbData);
-      #endif       
+      vhpi_register_cb(cbData);
    }
 }

@@ -25,7 +25,7 @@ entity LsstSciStatusBlock is
     DataFormat  :  in std_logic_vector( 3 downto 0);
 
     NoticeSent  :  in std_logic;
-    NoticeLast  :  in std_logic_vector(31 downto 0);
+    NoticeLast  :  in std_logic_vector(15 downto 0);
     
     PgpRxOut    :  in Pgp2bRxOutType;
     PgpTxOut    :  in Pgp2bTxOutType);
@@ -476,7 +476,7 @@ begin
 
        if(NoticeSent = '1') then
          v.notice_cnt := r.notice_cnt + 1;
-         v.notice_last := NoticeLast;
+         v.notice_last := x"0000"&NoticeLast;
        end if;
      end if;
 

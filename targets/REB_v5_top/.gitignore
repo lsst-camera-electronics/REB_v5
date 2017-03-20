@@ -1,0 +1,11 @@
+# temporary emacs files
+*.vhd~
+*.xdc~
+.gitignore~
+
+#vivado files
+*.jou
+*.log
+
+#build directory
+build

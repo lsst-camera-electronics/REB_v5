@@ -7,12 +7,16 @@ use ieee.std_logic_arith.all;
 use work.StdRtlPkg.all;
 use work.AxiStreamPkg.all;
 use work.Pgp2bPkg.all;
+use work.Gtx7CfgPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
 
 entity LsstPgpFrontEnd is
   port ( 
+    stableClk    : in  sl;
+    stableRst    : in  sl;
+
     -- Frame Transmit Interface - 1 Lane, Array of 4 VCs
     pgpTxMasters : in  AxiStreamMasterArray(3 downto 0);
     pgpTxSlaves  : out AxiStreamSlaveArray(3 downto 0);
@@ -29,16 +33,17 @@ entity LsstPgpFrontEnd is
 
     -- Clock, Resets, and Status Signals
     fpgaRstL     : in  sl;
-    pgpClk       : out sl;
-    pgpRst       : out sl;
-
+    pgpRxClk     : out sl;
+    pgpRxRst     : out sl;
+    pgpTxClk     : out sl;
+    pgpTxRst     : out sl;
+    
     -- GT Pins
-    refClkP      : in  sl;
-    refClkN      : in  sl;
+    gtRefClk     : in  sl;
     gtTxP        : out sl;
     gtTxN        : out sl;
     gtRxP        : in  sl;
-    gtRxN        : in  sl);        
+    gtRxN        : in  sl);
 
 end LsstPgpFrontEnd;
 
@@ -49,128 +54,92 @@ architecture mapping of LsstPgpFrontEnd is
   ----------------------------------------------------------------------------
   -- PGP Clock and Reset Signals
   ----------------------------------------------------------------------------
-  component PgpClkCore
-    port(
-      -- Clock in ports
-      clk_in1 : in  sl;
-      -- Clock out ports
-      pgpClk  : out sl;
-      -- Status and control signals
-      reset   : in  sl;
-      locked  : out sl);
-  end component;
-
-  attribute SYN_BLACK_BOX               : boolean;
-  attribute SYN_BLACK_BOX of PgpClkCore : component is true;
-
-  attribute BLACK_BOX_PAD_PIN               : string;
-  attribute BLACK_BOX_PAD_PIN of PgpClkCore : component is "clk_in1,pgpClk,reset,locked";
-
-  signal stableClk : sl;
-  signal stableRst : sl;
-  signal gtClkDiv2 : sl;
-  signal intPgpClk : sl;
-  signal intPgpRst : sl;
-  signal pgpLocked : sl;
+  -- Get PGP configuration. 250MHz Ref clk. 3.125 Gbps line rate.
+  constant GTX_CONFIG_C : Gtx7CPllCfgType := getGtx7CPllCfg(250.0E6, 3.125E9);
   
+  signal cPllLock  : sl;
+
+  signal recClkGt : sl;
+  
+  signal intPgpClk : sl;
+  signal refPgpClkIn : sl;
+  signal refPgpClk : sl;
+  signal intPgpRst : sl;
+  signal refPgpRst : sl;
+  signal pgpLocked : sl;
+  signal recPgpClk : sl;
+
+  signal recPgpClkBufg : sl;
+  signal recPgpRst : sl;
+  
+  signal intPgpRxOut  : Pgp2bRxOutType;
+
+  signal intPgpTxClk : sl;
+  signal intPgpTxClkBufg : sl;
+  signal intPgpRxClk : sl;
+  signal intPgpRxRst : sl;
+  
+  attribute KEEP_HIERARCHY : string;
+  attribute KEEP_HIERARCHY of
+    Pgp2bGtx7Fixedlat_Inst : label is "TRUE";
+
 begin
 
-  pgpClk <= intPgpClk;
-  pgpRst <= intPgpRst;
+  TXOUTCLK_BUFG : BUFG
+    port map (
+      I => intPgpTxClk,
+      O => intPgpTxClkBufg);
+
+  pgpTxClk <= intPgpTxClkBufg;
+  pgpTxRst <= '0';
+  pgpRxClk <= intPgpRxClk;
+  pgpRxRst <= intPgpRxRst;
   
-  -------------------------
-  -- SCI Clk/Rst Generation
-  -------------------------         
-  IBUFDS_GTE2_Inst : IBUFDS_GTE2
-    port map (
-      I     => refClkP,
-      IB    => refClkN,
-      CEB   => '0',
-      ODIV2 => gtClkDiv2,
-      O     => open);
-
-  BUFG_Inst : BUFG
-    port map (
-      I => gtClkDiv2,
-      O => stableClk);
-
-  -- Power Up Reset      
-  PwrUpRst_Inst : entity work.PwrUpRst
-    generic map (
-      IN_POLARITY_G => '0')
-    port map (
-      arst   => fpgaRstL,
-      clk    => stableClk,
-      rstOut => stableRst);
-
-  -- PGP Clock
-  PgpClkCore_Inst : PgpClkCore
-    port map (
-      -- Clock in ports
-      clk_in1 => stableClk,
-      -- Clock out ports  
-      pgpClk  => intPgpClk,
-      -- Status and control signals                
-      reset   => stableRst,
-      locked  => pgpLocked);
-
-  PgpRst_Inst : entity work.RstSync
-    generic map(
-      IN_POLARITY_G  => '0',
-      OUT_POLARITY_G => '1')
-    port map(
-      clk      => intPgpClk,
-      asyncRst => pgpLocked,
-      syncRst  => intPgpRst);  
-
   -------------------------
   -- PGP Core
   -------------------------         
-  Pgp2bGtx7MultiLane_Inst : entity work.Pgp2bGtx7MultiLane
+  Pgp2bGtx7Fixedlat_Inst : entity work.Pgp2bGtx7Fixedlat
     generic map (
+      STABLE_CLOCK_PERIOD_G => 10.0E-9,
       -- CPLL Settings
-      CPLL_REFCLK_SEL_G => "111",
-      CPLL_FBDIV_G      => 4,
-      CPLL_FBDIV_45_G   => 5,
-      CPLL_REFCLK_DIV_G => 1,
-      RXOUT_DIV_G       => 2,
-      TXOUT_DIV_G       => 2,
-      RX_CLK25_DIV_G    => 13,
-      TX_CLK25_DIV_G    => 13,
+      CPLL_FBDIV_G      => GTX_CONFIG_C.CPLL_FBDIV_G, 
+      CPLL_FBDIV_45_G   => GTX_CONFIG_C.CPLL_FBDIV_45_G,
+      CPLL_REFCLK_DIV_G => GTX_CONFIG_C.CPLL_REFCLK_DIV_G,
+      RXOUT_DIV_G       => GTX_CONFIG_C.OUT_DIV_G,
+      TXOUT_DIV_G       => GTX_CONFIG_C.OUT_DIV_G,
+      RX_CLK25_DIV_G    => GTX_CONFIG_C.CLK25_DIV_G,
+      TX_CLK25_DIV_G    => GTX_CONFIG_C.CLK25_DIV_G,
+      RXDFEXYDEN_G      => '1',
       -- Configure PLL sources
       TX_PLL_G          => "CPLL",
       RX_PLL_G          => "CPLL",
+      -- Allow TX to run in var lat mode by altering these generics
+      TX_BUF_EN_G       => true,
+      TX_OUTCLK_SRC_G   => "OUTCLKPMA",
+      TX_PHASE_ALIGN_G  => "AUTO",
       -- Configure Number of Virtual Channels
       NUM_VC_EN_G       => 4,
-      VC_INTERLEAVE_G   => 1,
-      -- Configure Number of Lanes
-      LANE_CNT_G        => 1)
+      VC_INTERLEAVE_G   => 1)
     port map (
       -- GT Clocking
       stableClk         => stableClk,
-      gtCPllRefClk      => intPgpClk,
-      gtCPllLock        => open,
-      gtQPllRefClk      => '0',
-      gtQPllClk         => '0',
-      gtQPllLock        => '1',
-      gtQPllRefClkLost  => '0',
-      gtQPllReset       => open,
+      gtCPllRefClk      => gtRefClk,
+      gtCPllLock        => cPllLock,
+      gtRxRefClkBufg    => '0',
+      gtTxOutClk        => intPgpTxClk,
       -- Gt Serial IO
-      gtTxP(0)          => gtTxP,
-      gtTxN(0)          => gtTxN,
-      gtRxP(0)          => gtRxP,
-      gtRxN(0)          => gtRxN,
+      gtTxP             => gtTxP,
+      gtTxN             => gtTxN,
+      gtRxP             => gtRxP,
+      gtRxN             => gtRxN,
       -- Tx Clocking
-      pgpTxReset        => intPgpRst,
-      pgpTxClk          => intPgpClk,
-      pgpTxMmcmReset    => open,
-      pgpTxMmcmLocked   => '1',
+      pgpTxReset        => '0',
+      pgpTxClk          => intPgpTxClkBufg,
       -- Rx clocking
-      pgpRxReset        => intPgpRst,
-      pgpRxRecClk       => open,
-      pgpRxClk          => intPgpClk,
-      pgpRxMmcmReset    => open,
-      pgpRxMmcmLocked   => '1',
+      pgpRxReset        => '0',
+      pgpRxRecClk       => intPgpRxClk,
+      pgpRxRecClkRst    => intPgpRxRst,
+      pgpRxClk          => intPgpRxClk,
       -- Non VC Rx Signals
       pgpRxIn           => pgpRxIn,
       pgpRxOut          => pgpRxOut,
@@ -183,6 +152,6 @@ begin
       -- Frame Receive Interface - 1 Lane, Array of 4 VCs
       pgpRxMasters      => pgpRxMasters,
       pgpRxMasterMuxed  => open,
-      pgpRxCtrl         => pgpRxCtrl);    
- 
+      pgpRxCtrl         => pgpRxCtrl);
+
 end mapping;

@@ -37,6 +37,10 @@ package REB_v5_commands_package is
 
   constant read_v_ok_cmd : std_logic_vector(23 downto 0) := x"000014";
 
+  constant sync_cmd_delay_cmd : std_logic_vector(23 downto 0) := x"000015";
+
+
+
 -- Image parameters
   constant image_size_cmd        : std_logic_vector(23 downto 0) := x"400005";
   constant image_patter_mode_cmd : std_logic_vector(23 downto 0) := x"400006";

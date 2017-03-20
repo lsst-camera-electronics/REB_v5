@@ -47,8 +47,7 @@ entity AxiSpiMaster is
       ADDRESS_SIZE_G    : natural         := 15;
       DATA_SIZE_G       : natural         := 8;
       CLK_PERIOD_G      : real            := 6.4E-9;
-      SPI_SCLK_PERIOD_G : real            := 100.0E-6;
-      WO_SPI_G          : boolean         := false
+      SPI_SCLK_PERIOD_G : real            := 100.0E-6
       );
    port (
       axiClk : in sl;
@@ -126,12 +125,7 @@ begin
                -- Address               
                v.wrData(DATA_SIZE_G+ADDRESS_SIZE_G-1 downto DATA_SIZE_G) := axiReadMaster.araddr(2+ADDRESS_SIZE_G-1 downto 2);
                -- Make bus float to Z so slave can drive during data segment
-               if (WO_SPI_G = true) then
-                  v.wrData(DATA_SIZE_G-1 downto 0) := r.wrData(DATA_SIZE_G-1 downto 0);                  
-               else
-                  v.wrData(DATA_SIZE_G-1 downto 0) := (others => '1');
-               end if;
-
+               v.wrData(DATA_SIZE_G-1 downto 0)                          := (others => '1');
                v.wrEn                                                    := '1';
                v.state                                                   := WAIT_CYCLE_S;
             end if;
@@ -151,11 +145,7 @@ begin
                else
                   -- Finish read
                   v.axiReadSlave.rdata                         := (others => '0');
-                  if (WO_SPI_G = true) then
-                     v.axiReadSlave.rdata(DATA_SIZE_G-1 downto 0) := r.wrData(DATA_SIZE_G-1 downto 0);                  
-                  else
-                     v.axiReadSlave.rdata(DATA_SIZE_G-1 downto 0) := rdData(DATA_SIZE_G-1 downto 0);
-                  end if;
+                  v.axiReadSlave.rdata(DATA_SIZE_G-1 downto 0) := rdData(DATA_SIZE_G-1 downto 0);
                   axiSlaveReadResponse(v.axiReadSlave);
                end if;
             end if;

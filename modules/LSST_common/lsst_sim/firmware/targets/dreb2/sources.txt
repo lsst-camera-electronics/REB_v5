@@ -1,2 +1,0 @@
-vhdl work Version.vhd
-vhdl work hdl/dreb2.vhd

@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-  constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"302c5001"; -- MAKE_VERSION
+  constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"30325002"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Mon Feb  6 13:53:05 PST 2017 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Thu Mar 16 14:36:36 PDT 2017 by srusso";
 
 end Version;
 
@@ -33,5 +33,6 @@ end Version;
 -- Revision History:
 -- 00000000 First version (imported from REB v4_6)
 -- 302c5001 serial clk pin assigment corrected. Video ADC machine corrected.
---          Jitter cleaner function added 
+--          Jitter cleaner function added
+-- 302c5002 synchronous command decoder for senqwuencer start added           
 -------------------------------------------------------------------------------

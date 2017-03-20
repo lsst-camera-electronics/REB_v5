@@ -1,22 +1,56 @@
 #### Timing constraints ####
 
-# clock from the quartz
+#### Define input clocks ####
+
+# clock from the quartz (250 MHz)
 create_clock -period 4.000 -name PgpRefClk_P -waveform {0.000 2.000} [get_ports PgpRefClk_P]
 
-#Generated clocks (report clock network to see unconstrained clk)
+#clock form the aux quartz (100 MHz)
+create_clock -period 10.000 -name aux_100mhz_clk -waveform {0.000 5.000} [get_ports aux_100mhz_clk_in]
 
+# clock from the external PLL (configurable. Now is 100 MHz)
+create_clock -period 10.000 -name jc_100mhz_clk -waveform {0.000 5.000} [get_ports jc_refclk_in_p]
+
+# GTX RX reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name RXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/RXOUTCLK]
+
+# GTX TX reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name TXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
+
+
+#### Renaming Generated clocks (report clock network to see unconstrained clk) ####
+
+# stable clock for GTX (100 MHz from board main quartz)
+#create_generated_clock -name stable_clk [get_pins ClockManager_local_100MHz/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks PgpRefClk_P]
+
+# local clock for front end (100 MHz from RX reconstructed clock)
+create_generated_clock -name clk_100_Mhz_local [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT0] -master_clock [get_clocks RXOUTCLK_0]
+
+# local clock for front end (50 MHz from RX reconstructed clock)
+create_generated_clock -name clk_50_Mhz [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT1] -master_clock [get_clocks RXOUTCLK_0]
+
+#clocks for 1 wire block genretated from local 100 MHz 
+#create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 104 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
+#create_generated_clock -name REB_onewire_50khz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 20 [get_pins REB_1wire_sn/ow_master_i/jcnt2/pro2.qi_reg[9]/Q]
 create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 104 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
 create_generated_clock -name REB_onewire_50khz -source  [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q] -divide_by 20 [get_pins REB_1wire_sn/ow_master_i/jcnt2/pro2.qi_reg[9]/Q]
 
+
+#### set clocks interactions ####
+
+# set the input clk for the clk mux as mutually exclusive
+set_clock_groups -logically_exclusive -group {jc_100mhz_clk}  -group {clk_100_Mhz_local}
+
+
 #set asynchronous clocks
-#clocks CLK_OUT1_dcm_user_clk CLK_OUT2_dcm_user_clk REB_onewire_1Mhz REB_onewire_50khz are synchronous between them but asynchronous to the rest
-set_clock_groups -asynchronous -group {CLK_OUT1_dcm_user_clk CLK_OUT2_dcm_user_clk}
-set_clock_groups -asynchronous -group {REB_onewire_1Mhz REB_onewire_50khz}
 
-
-#clock mmcm_adv_inst_n_6 and I are asynchronous to each other
-set_clock_groups -asynchronous -group {pgpClk_PgpClkCore} -group {I}
-
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] \
+		 	       -group {aux_100mhz_clk} \
+			       -group {jc_100mhz_clk} \
+			       -group {RXOUTCLK_0} \
+			       -group {TXOUTCLK_0} \
+			       -group {clk_100_Mhz_local clk_50_Mhz} \
+			       -group {REB_onewire_1Mhz REB_onewire_50khz} 
 
 
 ### Pin Assignment ###
@@ -26,6 +60,8 @@ set_clock_groups -asynchronous -group {pgpClk_PgpClkCore} -group {I}
 
 set_property PACKAGE_PIN F6 [get_ports PgpRefClk_P]
 set_property PACKAGE_PIN F5 [get_ports PgpRefClk_M]
+
+#set_property CLOCK_DEDICATED_ROUTE false [get_nets PgpRefClk]
 
 
 ## PGP serial com lines (Bank 116)
@@ -469,4 +505,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports jc_lol]
 set_property IOSTANDARD LVCMOS33 [get_ports jc_reset]
 #set_property IOSTANDARD LVCMOS33 [get_ports jc_oe]
 
+#### set flash SPI speed ####
+#more command options are in UG908 programming and debugging appendix A 
 
+set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design] 
+
+#### set hardware configuration ####
+## setting to avoid warning CFGBVS in vivado DRC
+
+set_property CFGBVS VCCO         [current_design]
+set_property CONFIG_VOLTAGE 3.3  [current_design]

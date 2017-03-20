@@ -73,6 +73,9 @@ entity REB_v5_cmd_interpreter is
         V3_3v_ok      : in std_logic;
         Switch_addr   : in std_logic_vector(7 downto 0);
 
+        sync_cmd_delay_en   : out std_logic;
+        sync_cmd_delay_read : in  std_logic_vector(7 downto 0);
+
 -- Image parameters
         image_size        : in  std_logic_vector(31 downto 0);  -- this register contains the image size
         image_patter_read : in  std_logic;  -- this register gives the state of image patter gen. 1 is ON
@@ -241,6 +244,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       trigger_time_TB_lsw, trigger_time_TB_MSW, trigger_time_seq_lsw, trigger_time_seq_MSW,
                       trigger_time_V_I_lsw, trigger_time_V_I_MSW, trigger_time_pcb_t_lsw, trigger_time_pcb_t_MSW,
                       v_ok_state, time_base_set_lsw, time_base_set_MSW, trigger_state, statusReg_rd,
+                      sync_cmd_delay_wr_state, sync_cmd_delay_rd_state,
 -- Image parameters
                       read_image_size_state, read_image_patter_mode_state, read_ccd_sel_state,
                       set_image_size_state, set_img_pattern_gen_state,
@@ -348,6 +352,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
   signal next_load_time_base_lsw : std_logic;
   signal next_load_time_base_MSW : std_logic;
   signal next_cnt_preset         : std_logic_vector(63 downto 0);
+  signal next_sync_cmd_delay_en  : std_logic;
 
 -- Image parameters
   signal next_image_size_en   : std_logic;
@@ -437,6 +442,7 @@ begin
         load_time_base_lsw <= '0';
         load_time_base_MSW <= '0';
         cnt_preset         <= (others => '0');
+        sync_cmd_delay_en  <= '0';
 
         -- image parameters reset state
         image_size_en   <= '0';
@@ -520,6 +526,7 @@ begin
         load_time_base_lsw <= next_load_time_base_lsw;
         load_time_base_MSW <= next_load_time_base_MSW;
         cnt_preset         <= next_cnt_preset;
+        sync_cmd_delay_en  <= next_sync_cmd_delay_en;
 
         -- image parameters latch
         image_size_en   <= next_image_size_en;
@@ -598,6 +605,7 @@ begin
            switch_addr, time_base_actual_value,
            busy_bus, trig_tm_value_sb, trig_tm_value_tb, trig_tm_value_seq, trig_tm_value_v_i, trig_tm_value_pcb_t,
            mgt_avcc_ok, statusreg,
+           sync_cmd_delay_read,
 
            -- image param
            image_size, image_patter_read, ccd_sel_read,
@@ -656,6 +664,7 @@ begin
     next_load_time_base_lsw <= '0';
     next_load_time_base_MSW <= '0';
     next_cnt_preset         <= (others => '0');
+    next_sync_cmd_delay_en  <= '0';
 
                                         -- Image Parameters default state
     next_image_size_en   <= '0';
@@ -823,6 +832,10 @@ begin
                                         -- read status register         
             elsif (regAddr >= read_status_reg_base) and (regAddr <= read_status_reg_high) then
               next_state <= statusReg_rd;
+
+            elsif regAddr = sync_cmd_delay_cmd then
+              next_state <= sync_cmd_delay_rd_state;
+
 
               -------- Image parameters read                            
               -- read image size          
@@ -1071,6 +1084,11 @@ begin
               next_state           <= trigger_state;
               next_trigger_ce_bus  <= regWrEn;
               next_trigger_val_bus <= regDataWr_masked;
+
+              -- sync command 0 delay set
+            elsif regAddr = sync_cmd_delay_cmd then
+              next_state             <= sync_cmd_delay_wr_state;
+              next_sync_cmd_delay_en <= '1';
 
 ---------- Image Parameters Write
 
@@ -1362,6 +1380,11 @@ begin
         next_regAck    <= '1';
         next_regDataRd <= trig_tm_value_seq(63 downto 32);
 
+        -- Sync command 0 delay
+      when sync_cmd_delay_rd_state =>
+        next_state     <= wait_end_cmd;
+        next_regAck    <= '1';
+        next_regDataRd <= x"000000"&sync_cmd_delay_read;
 
         -- TRIGGER TIME READ V_I lsw  (add10)
       when trigger_time_V_I_lsw =>
@@ -1405,8 +1428,6 @@ begin
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & '0' & ccd_sel_read;
 
-
-
         -- status block read  
       when statusReg_rd =>
         next_state     <= wait_end_cmd;
@@ -1425,6 +1446,10 @@ begin
 
         -- TRIGGER write (add 9)
       when trigger_state =>
+        next_state <= ack_del_1;
+
+        -- sync command 0 delay set
+      when sync_cmd_delay_wr_state =>
         next_state <= ack_del_1;
 
 ---------------------- Image Parameters Write --------------------------

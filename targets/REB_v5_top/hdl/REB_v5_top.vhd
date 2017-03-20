@@ -273,14 +273,18 @@ architecture Behavioral of REB_v5_top is
       -------------------------------------------------------------------------
       -- FPGA Interface
       -------------------------------------------------------------------------
+
+
+      StableClk : in std_logic;
+      StableRst : in std_logic;
+
       FpgaRstL : in std_logic;
 
-      PgpClkP : in  std_logic;
-      PgpClkM : in  std_logic;
-      PgpRxP  : in  std_logic;
-      PgpRxM  : in  std_logic;
-      PgpTxP  : out std_logic;
-      PgpTxM  : out std_logic;
+      PgpRefClk : in  std_logic;
+      PgpRxP    : in  std_logic;
+      PgpRxM    : in  std_logic;
+      PgpTxP    : out std_logic;
+      PgpTxM    : out std_logic;
 
       -------------------------------------------------------------------------
       -- Clock/Reset Generator Interface
@@ -314,7 +318,7 @@ architecture Behavioral of REB_v5_top is
       -- Notification Interface
       -------------------------------------------------------------------------
       NoticeEn : in std_logic;
-      Notice   : in std_logic_vector(31 downto 0);
+      Notice   : in std_logic_vector(15 downto 0);
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -333,10 +337,13 @@ architecture Behavioral of REB_v5_top is
       -- Debug Interface
       -------------------------------------------------------------------------
       PgpLocLinkReadyOut : out std_logic;
-      PgpRemLinkReadyOut : out std_logic
+      PgpRemLinkReadyOut : out std_logic;
+      PgpRxPhyReadyOut   : out std_logic;
+      PgpTxPhyReadyOut   : out std_logic
       );
 
   end component;
+
 
   component REB_v5_cmd_interpreter is
     port (reset                    : in  std_logic;
@@ -370,6 +377,8 @@ architecture Behavioral of REB_v5_top is
           Mgt_avtt_ok              : in  std_logic;
           V3_3v_ok                 : in  std_logic;
           Switch_addr              : in  std_logic_vector(7 downto 0);
+          sync_cmd_delay_en        : out std_logic;  -- set the sync command0 delay 
+          sync_cmd_delay_read      : in  std_logic_vector(7 downto 0);
 -- Image parameters
           image_size               : in  std_logic_vector(31 downto 0);  -- this register contains the image size
           image_patter_read        : in  std_logic;  -- this register gives the state of image patter gen. 1 is ON
@@ -507,6 +516,20 @@ architecture Behavioral of REB_v5_top is
           dcdc_clk_en_in           : in  std_logic;
           dcdc_clk_en              : out std_logic
           );
+  end component;
+
+  component sync_cmd_decoder_top
+    port (
+      pgp_clk      : in  std_logic;
+      pgp_reset    : in  std_logic;
+      clk          : in  std_logic;
+      reset        : in  std_logic;
+      sync_cmd_en  : in  std_logic;
+      delay_en     : in  std_logic;
+      delay_in     : in  std_logic_vector(7 downto 0);
+      delay_read   : out std_logic_vector(7 downto 0);
+      sync_cmd     : in  std_logic_vector(7 downto 0);
+      sync_cmd_out : out std_logic_vector(7 downto 0));
   end component;
 
   component base_reg_set_top is
@@ -938,6 +961,9 @@ architecture Behavioral of REB_v5_top is
 
 -- Clocks
   signal pgpRefClk         : std_logic;
+  signal stable_clk        : std_logic;
+  signal stable_reset      : std_logic;
+  signal stable_clk_lock   : std_logic;
   signal usrClk            : std_logic;
   signal clk_100_Mhz_local : std_logic;
   signal clk_100_Mhz       : std_logic;
@@ -980,6 +1006,13 @@ architecture Behavioral of REB_v5_top is
   signal load_time_base_lsw : std_logic;
   signal load_time_base_MSW : std_logic;
   signal cnt_preset         : std_logic_vector(63 downto 0);
+
+-- sync commands signals
+  signal sync_cmd_en         : std_logic;
+  signal sync_cmd_in         : std_logic_vector(7 downto 0);
+  signal sync_cmd_out        : std_logic_vector(7 downto 0);
+  signal sync_cmd_delay_en   : std_logic;
+  signal sync_cmd_delay_read : std_logic_vector(7 downto 0);
 
   -- BRS signals
   signal time_base_actual_value : std_logic_vector(63 downto 0);
@@ -1183,11 +1216,12 @@ architecture Behavioral of REB_v5_top is
   signal gpio_int  : std_logic;
 
 -- REB 1wire serial number
-  signal reb_onewire_reset : std_logic;
-  signal reb_sn_crc_ok     : std_logic;
-  signal reb_sn_dev_error  : std_logic;
-  signal reb_sn            : std_logic_vector(47 downto 0);
-  signal reb_sn_timeout    : std_logic;
+  signal reb_onewire_reset      : std_logic;
+  signal reb_onewire_reset_lock : std_logic;
+  signal reb_sn_crc_ok          : std_logic;
+  signal reb_sn_dev_error       : std_logic;
+  signal reb_sn                 : std_logic_vector(47 downto 0);
+  signal reb_sn_timeout         : std_logic;
 
 -- Jitter Cleaner
   signal jc_start_config  : std_logic;
@@ -1254,6 +1288,8 @@ architecture Behavioral of REB_v5_top is
   signal bias_t_adc_sclk_int : std_logic;
   signal bias_t_adc_shdn_int : std_logic;
 
+  constant TPD_C : time := 1 ns;
+
 begin
 
   regDataWr_masked         <= regDataWr and regWrEn;
@@ -1270,7 +1306,7 @@ begin
   adc_data_ccd_3           <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
 
 -- trigger signals
-  seq_start       <= trigger_val_bus(2) and trigger_ce_bus(2);
+  seq_start       <= (trigger_val_bus(2) and trigger_ce_bus(2)) or sync_cmd_out(0);
   V_I_read_start  <= trigger_val_bus(3) and trigger_ce_bus(3);
   temp_read_start <= trigger_val_bus(4) and trigger_ce_bus(4);
 
@@ -1377,9 +1413,13 @@ begin
   ASPIC_spi_reset_ccd_3 <= ASPIC_spi_reset_int;
 
 ------------ assignment for test ------------
-  test_port(10 downto 0) <= sequencer_outputs(10 downto 0);
-  test_port(11)          <= sequencer_outputs(12);
-  test_port(12)          <= sequencer_outputs(16);
+  -- test_port(10 downto 0) <= sequencer_outputs(10 downto 0);
+  test_port(11) <= sequencer_outputs(12);
+  test_port(12) <= sequencer_outputs(16);
+  test_port(0)  <= sync_cmd_en;
+  test_port(1)  <= sync_cmd_out(0);
+
+
 
   gpio_int <= sequencer_outputs(16);
 
@@ -1403,27 +1443,75 @@ begin
   bias_t_adc_shdn <= bias_t_adc_shdn_int;
 
 
+  U_LocRefClkIbufds : IBUFDS_GTE2
+    port map (
+      I     => PgpRefClk_P,
+      IB    => PgpRefClk_M,
+      CEB   => '0',
+      O     => PgpRefClk,
+      ODIV2 => open);
+
+  --stable_clk_bufg : BUFG
+  --  port map (
+  --    I => PgpRefClk,
+  --    O => stable_clk);
+
+
+
+
+  ClockManager_local_100MHz : entity work.ClockManager7
+    generic map (
+      TPD_G              => TPD_C,
+      TYPE_G             => "MMCM",
+      INPUT_BUFG_G       => true,
+      FB_BUFG_G          => true,
+      OUTPUT_BUFG_G      => false,
+      RST_IN_POLARITY_G  => '1',
+      NUM_CLOCKS_G       => 1,
+      BANDWIDTH_G        => "OPTIMIZED",
+      CLKIN_PERIOD_G     => 4.0,
+      DIVCLK_DIVIDE_G    => 1,
+      CLKFBOUT_MULT_F_G  => 4.000,
+      CLKOUT0_DIVIDE_F_G => 10.000,
+      CLKOUT0_RST_HOLD_G => 8)
+    port map (
+      clkIn     => PgpRefClk,
+      rstIn     => '0',
+      clkOut(0) => stable_clk,
+      locked    => stable_clk_lock,
+      rstOut(0) => open);
+
+  --stable_reset <= not stable_clk_lock;
+
 
   LsstSci_0 : LsstSci
     port map (
       -------------------------------------------------------------------------
       -- FPGA Interface
       -------------------------------------------------------------------------
+
+      --   StableClk => loc_stable_clk,
+      --   StableRst => stable_reset,
+
+      StableClk => stable_clk,
+      StableRst => '0',                 -- not used
+
       FpgaRstL => n_rst,
 
-      PgpClkP => PgpRefClk_P,
-      PgpClkM => PgpRefClk_M,
-      PgpRxP  => PgpRx_p,
-      PgpRxM  => PgpRx_m,
-      PgpTxP  => PgpTx_p,
-      PgpTxM  => PgpTx_m,
+      PgpRefClk => PgpRefClk,
+
+
+      PgpRxP => PgpRx_p,
+      PgpRxM => PgpRx_m,
+      PgpTxP => PgpTx_p,
+      PgpTxM => PgpTx_m,
       -------------------------------------------------------------------------
       -- Clock/Reset Generator Interface
       -------------------------------------------------------------------------
-      ClkOut  => usrClk,
-      RstOut  => usrRst,
-      ClkIn   => clk_100_Mhz,
-      RstIn   => sync_res,
+      ClkOut => usrClk,
+      RstOut => usrRst,
+      ClkIn  => clk_100_Mhz,
+      RstIn  => sync_res,
 
       -------------------------------------------------------------------------
       -- SCI Register Encoder/Decoder Interface
@@ -1453,8 +1541,8 @@ begin
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
       -------------------------------------------------------------------------
-      SyncCmdEn => open,
-      SyncCmd   => open,
+      SyncCmdEn => sync_cmd_en,
+      SyncCmd   => sync_cmd_in,
 
       -------------------------------------------------------------------------
       -- Status Block Interface
@@ -1467,7 +1555,9 @@ begin
       -- Debug Interface
       -------------------------------------------------------------------------
       PgpLocLinkReadyOut => pgpLocLinkReady,
-      PgpRemLinkReadyOut => pgpRemLinkReady
+      PgpRemLinkReadyOut => pgpRemLinkReady,
+      PgpRxPhyReadyOut   => open,
+      PgpTxPhyReadyOut   => open
       );
 
   REB_v5_cmd_interpreter_0 : REB_v5_cmd_interpreter
@@ -1503,6 +1593,8 @@ begin
       Mgt_avtt_ok              => '0',
       V3_3v_ok                 => '0',
       Switch_addr              => r_add,
+      sync_cmd_delay_en        => sync_cmd_delay_en,
+      sync_cmd_delay_read      => sync_cmd_delay_read,
 -- Image parameters
       image_size               => x"00000000",  -- this register contains the image size
       image_patter_read        => image_patter_read,  -- this register gives the state of image patter gen. 1 is ON
@@ -1671,6 +1763,19 @@ begin
       trig_tm_value_V_I  => trig_tm_value_V_I,
       trig_tm_value_pcb  => trig_tm_value_pcb_t
       );
+
+  sync_cmd_decoder_top_1 : sync_cmd_decoder_top
+    port map (
+      pgp_clk      => usrClk,
+      pgp_reset    => usrRst,
+      clk          => clk_100_Mhz,
+      reset        => sync_res,
+      sync_cmd_en  => sync_cmd_en,
+      delay_en     => sync_cmd_delay_en,
+      delay_in     => regDataWr_masked(7 downto 0),
+      delay_read   => sync_cmd_delay_read,
+      sync_cmd     => sync_cmd_in,
+      sync_cmd_out => sync_cmd_out);
 
   Image_data_handler_0 : ADC_data_handler_v4
     port map (
@@ -2011,8 +2116,10 @@ begin
       CLK_DIV    => 12)
     port map(
       sys_clk     => clk_100_Mhz,
-      latch_reset => sync_res,
-      sys_reset   => reb_onewire_reset,
+    --  latch_reset => sync_res,
+      latch_reset => reb_onewire_reset_lock,
+      -- sys_reset   => reb_onewire_reset,
+      sys_reset   => reb_onewire_reset_lock,
       crc_ok      => reb_sn_crc_ok,
       dev_error   => reb_sn_dev_error,
       data        => open,
@@ -2020,6 +2127,8 @@ begin
       sn_data     => reb_sn,
       timeout     => reb_sn_timeout,
       dq          => reb_sn_onewire);
+
+  reb_onewire_reset_lock <= not  dcm_locked;
 
   back_bias_sw : ff_ce
     port map (
@@ -2103,8 +2212,8 @@ begin
       SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
       ) port map (
         Q  => jc_refclk_out,            -- 1-bit DDR output
-        --C  => clk_100_Mhz_local,        -- 1-bit clock input
-        C  => aux_100mhz_clk,           -- 1-bit clock input
+        C  => clk_100_Mhz_local,        -- 1-bit clock input
+        --  C  => aux_100mhz_clk,           -- 1-bit clock input
         CE => jc_clk_in_en,             -- 1-bit clock enable input
         D1 => '1',                      -- 1-bit data input (positive edge)
         D2 => '0',                      -- 1-bit data input (negative edge)

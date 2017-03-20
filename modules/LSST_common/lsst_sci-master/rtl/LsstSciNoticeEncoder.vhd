@@ -24,7 +24,7 @@ entity LsstSciNoticeEncoder is
     -- Notice Encoder Input Interface
     -------------------------------------------------------------------------
     noticeEn : in std_logic;
-    notice   : in std_logic_vector(31 downto 0);
+    notice   : in std_logic_vector(15 downto 0);
     
     -------------------------------------------------------------------------
     -- AXI-Stream Interface
@@ -36,7 +36,7 @@ entity LsstSciNoticeEncoder is
     -- Internal Status Interface
     -------------------------------------------------------------------------
     noticeSent : out std_logic;
-    noticeLast : out std_logic_vector(31 downto 0));
+    noticeLast : out std_logic_vector(15 downto 0));
   
 end LsstSciNoticeEncoder;
 
@@ -46,7 +46,7 @@ architecture LsstSciNoticeEncoder of LsstSciNoticeEncoder is
   type RegType is record
     dataSsiMaster : SsiMasterType;
     noticeSent    : std_logic;
-    noticeLast    : std_logic_vector(31 downto 0);
+    noticeLast    : std_logic_vector(15 downto 0);
   end record RegType;
 
   constant REG_INIT_C : RegType := (
@@ -76,13 +76,13 @@ begin
   begin
     v := r;
     
-    v.dataSsiMaster.data(31 downto 0) := notice;
+    v.dataSsiMaster.data(15 downto 0) := notice;
     v.dataSsiMaster.valid := noticeEn;
     v.dataSsiMaster.sof   := noticeEn;
     v.dataSsiMaster.eof   := noticeEn;
     v.dataSsiMaster.eofe  := '0';
-    v.dataSsiMaster.keep  := X"000F";
-    v.dataSsiMaster.strb  := X"000F";
+    v.dataSsiMaster.keep  := X"000f";
+    v.dataSsiMaster.strb  := X"000f";
     v.noticeSent          := noticeEn;
 
     if(noticeEn = '1') then

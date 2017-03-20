@@ -14,10 +14,12 @@ entity LsstSci is
     -------------------------------------------------------------------------
     -- FPGA Interface
     -------------------------------------------------------------------------
+    StableClk : in std_logic;
+    StableRst : in std_logic;
+    
     FpgaRstL : in std_logic;
 
-    PgpClkP : in  std_logic;
-    PgpClkM : in  std_logic;
+    PgpRefClk : in std_logic;
     PgpRxP  : in  std_logic;
     PgpRxM  : in  std_logic;
     PgpTxP  : out std_logic;
@@ -55,7 +57,7 @@ entity LsstSci is
     -- Notification Interface
     -------------------------------------------------------------------------
     NoticeEn : in std_logic;
-    Notice   : in std_logic_vector(31 downto 0);
+    Notice   : in std_logic_vector(15 downto 0);
 
     -------------------------------------------------------------------------
     -- Synchronous Command Interface
@@ -74,9 +76,10 @@ entity LsstSci is
     -- Debug Interface
     -------------------------------------------------------------------------
     PgpLocLinkReadyOut : out std_logic;
-    PgpRemLinkReadyOut : out std_logic);
+    PgpRemLinkReadyOut : out std_logic;
+    PgpRxPhyReadyOut   : out std_logic;
+    PgpTxPhyReadyOut   : out std_logic);
 
-  
 end LsstSci;
 
 architecture LsstSci_axi of LsstSci is
@@ -100,10 +103,12 @@ architecture LsstSci_axi of LsstSci is
   -- User/Application Logic Reset signals
   -----------------------------------------------------------------------------
   constant REM_DATA_RESET_PATTERN : slv(7 downto 0) := x"a5";
-  signal   reqSysRst : slv(0 downto 0);
+  signal   reqSysRst : sl;
 
-  signal pgpClk     : sl;
-  signal pgpRst     : sl;
+  signal pgpRxClk   : sl;
+  signal pgpRxRst   : sl;
+  signal pgpTxClk   : sl;
+  signal pgpTxRst   : sl;
   signal sciRst     : sl;
   signal sysClk     : sl;
   signal sysRst     : sl;
@@ -114,7 +119,15 @@ architecture LsstSci_axi of LsstSci is
   signal dataFormat : slv( 3 downto 0);
 
   signal noticeSent : sl;
-  signal noticeLast : slv(31 downto 0);
+  signal noticeLast : slv(15 downto 0);
+
+  attribute KEEP_HIERARCHY : string;
+  attribute KEEP_HIERARCHY of
+    LsstPgpFrontEnd_Inst,
+    LsstSciRegEncoder_Inst,
+    LsstSciDataEncoder_Inst,
+    LsstSciNoticeEncoder_Inst,
+    LsstSciStatusBlock_Inst : label is "TRUE";
   
 begin
 
@@ -122,24 +135,21 @@ begin
   -- SCI System Clock/Reset
   -------------------------         
   sciRst <= '1' when (pgpRxOut.remLinkData = REM_DATA_RESET_PATTERN
-                      or pgpRst = '1') else '0';
+                      or pgpRxOut.phyRxReady = '0') else '0';
 
   -- Hold reqSysRst for a time after sciRst
-  ReqSysRst_delay : entity work.SlvDelay
+  ReqSysRst_delay : entity work.RstSync
     generic map (
-      DELAY_G => 16,
-      WIDTH_G => 1,
-      INIT_G  => x"FFFF")
+      RELEASE_DELAY_G => 16)
     port map (
-      clk => pgpClk,
-      rst => sciRst,
-      din => "0",
-      dout => reqSysRst);
+      clk => pgpRxClk,
+      asyncRst => sciRst,
+      syncRst => reqSysRst);
   
   pgpTxIn.locData <= pgpRxOut.remLinkData;
   
-  ClkOut <= pgpClk;
-  RstOut <= reqSysRst(0) or sciRst;
+  ClkOut <= pgpRxClk;
+  RstOut <= reqSysRst or sciRst;
   sysClk <= ClkIn;
   sysRst <= RstIn;
   
@@ -148,6 +158,8 @@ begin
   -------------------------         
   LsstPgpFrontEnd_Inst : entity work.LsstPgpFrontEnd
     port map (
+      stableClk    => StableClk,
+      stableRst    => StableRst,
       -- VC PGP Signals (array of 4 VCs)
       pgpTxMasters => pgpTxMasters,
       pgpTxSlaves  => pgpTxSlaves,
@@ -160,27 +172,30 @@ begin
       pgpTxOut     => pgpTxOut,
       -- Clock, Resets, and Status Signals
       fpgaRstL     => FpgaRstL,
-      pgpClk       => pgpClk,
-      pgpRst       => pgpRst,
+      pgpRxClk     => pgpRxClk,
+      pgpRxRst     => pgpRxRst,
+      pgpTxClk     => pgpTxClk,
+      pgpTxRst     => pgpTxRst,
       -- GT Pins
-      refClkP      => PgpClkP,
-      refClkN      => PgpClkM,
+      --refClkP      => PgpClkP,
+      --refClkN      => PgpClkM,
+      gtRefClk       => PgpRefClk,
       gtTxP        => PgpTxP,
       gtTxN        => PgpTxM,
       gtRxP        => PgpRxP,
-      gtRxN        => PgpRxM);        
-
+      gtRxN        => PgpRxM);
+  
   ------------------------------
   -- SCI Register Interface VC0
   ------------------------------         
   LsstSciRegEncoder_Inst : entity work.LsstSciRegEncoder
     port map (
-      sAxisClk    => pgpClk,
-      sAxisRst    => sciRst,
+      sAxisClk    => pgpRxClk,
+      sAxisRst    => pgpRxRst,
       sAxisMaster => pgpRxMasters(0),
       sAxisCtrl   => pgpRxCtrl(0),
-      mAxisClk    => pgpClk,
-      mAxisRst    => sciRst,
+      mAxisClk    => pgpTxClk,
+      mAxisRst    => pgpTxRst,
       mAxisMaster => pgpTxMasters(0),
       mAxisSlave  => pgpTxSlaves(0),
       regClk      => sysClk,
@@ -204,8 +219,8 @@ begin
     port map (
       sysClk      => sysClk,
       sysRst      => sysRst,
-      pgpClk      => pgpClk,
-      pgpRst      => sciRst,
+      pgpClk      => pgpTxClk,
+      pgpRst      => pgpTxRst,
       dataWrEn    => dataWrEn,
       dataSOT     => dataSOT,
       dataEOT     => dataEOT,
@@ -227,8 +242,8 @@ begin
     port map (
       sysClk      => sysClk,
       sysRst      => sysRst,
-      pgpClk      => pgpClk,
-      pgpRst      => sciRst,
+      pgpClk      => pgpTxClk,
+      pgpRst      => pgpTxRst,
       noticeEn    => NoticeEn,
       notice      => Notice,
       mAxisMaster => pgpTxMasters(2),
@@ -248,8 +263,8 @@ begin
       StatusRst  => StatusRst,
       StatusAddr => StatusAddr,
       StatusReg  => StatusReg,
-      PgpClk     => pgpClk,
-      PgpRst     => sciRst,
+      PgpClk     => pgpRxClk,
+      PgpRst     => pgpRxRst,
       ImagesSent => imagesSent,
       ImagesTrunc=> imagesTrunc,
       ImagesDisc => imagesDisc,
@@ -261,6 +276,8 @@ begin
 
   PgpLocLinkReadyOut <= pgpRxOut.linkReady;
   PgpRemLinkReadyOut <= pgpRxOut.remLinkReady;
+  PgpRxPhyReadyOut   <= pgpRxOut.phyRxReady;
+  PgpTxPhyReadyOut   <= pgpTxOut.phyTxReady;
 
   ------------------------------
   -- SCI Sync Commands
