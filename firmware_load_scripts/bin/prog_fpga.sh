@@ -23,7 +23,7 @@ else
 	    echo "writing FPGA"
 #	    cd vivado
 	    source /afs/slac.stanford.edu/g/reseng/xilinx/vivado_2015.3/Vivado/2015.3/settings64.sh
-	    vivado -mode batch -source ../fpga_load.tcl -tclargs $file_name
+	    vivado -mode batch -source /afs/slac.stanford.edu/g/lsst/daq/REB_prog_files/fpga_load.tcl -tclargs ${file_name}
 	fi
     elif [ "$operation_type" == "flash" ] 
     then
@@ -34,7 +34,7 @@ else
 	    echo "writing flash"
 #	    cd vivado
 	    source /afs/slac.stanford.edu/g/reseng/xilinx/vivado_2015.3/Vivado/2015.3/settings64.sh
-	    vivado -mode batch -source ../flash_load.tcl -tclargs $file_name
+	    vivado -mode batch -source /afs/slac.stanford.edu/g/lsst/daq/REB_prog_files/flash_load.tcl -tclargs ${file_name}
 	fi
     else 
 	echo "Unrecognized option it can be either memory or fpga"
