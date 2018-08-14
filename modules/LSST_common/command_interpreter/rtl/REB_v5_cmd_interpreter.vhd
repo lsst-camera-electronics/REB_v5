@@ -67,14 +67,20 @@ entity REB_v5_cmd_interpreter is
         load_time_base_MSW : out std_logic;  -- ce signal to load the time base MSW
         cnt_preset         : out std_logic_vector(63 downto 0);  -- preset value for the time base counter
 
-        Mgt_avcc_ok   : in std_logic;
-        Mgt_accpll_ok : in std_logic;
-        Mgt_avtt_ok   : in std_logic;
-        V3_3v_ok      : in std_logic;
-        Switch_addr   : in std_logic_vector(7 downto 0);
-
+        Mgt_avcc_ok         : in  std_logic;
+        Mgt_accpll_ok       : in  std_logic;
+        Mgt_avtt_ok         : in  std_logic;
+        V3_3v_ok            : in  std_logic;
+        Switch_addr         : in  std_logic_vector(7 downto 0);
+-- sync commands
         sync_cmd_delay_en   : out std_logic;
         sync_cmd_delay_read : in  std_logic_vector(7 downto 0);
+        sync_cmd_mask_en    : out std_logic;
+        sync_cmd_mask_read  : in  std_logic_vector(31 downto 0);
+
+-- interrupt commands
+        interrupt_mask_wr_en : out std_logic;
+        interrupt_mask_read  : in  std_logic_vector(13 downto 0);
 
 -- Image parameters
         image_size        : in  std_logic_vector(31 downto 0);  -- this register contains the image size
@@ -118,13 +124,16 @@ entity REB_v5_cmd_interpreter is
         aspic_start_trans    : out std_logic;
         aspic_start_reset    : out std_logic;
 
--- CCD bias DAC         
+-- CCD bias DAC
+        bias_dac_cmd_err      : in  std_logic_vector(8 downto 0);
+        bias_v_undr_th        : in  std_logic_vector(8 downto 0);
         ccd_1_bias_load_start : out std_logic;
         ccd_1_bias_ldac_start : out std_logic;
         ccd_2_bias_load_start : out std_logic;
         ccd_2_bias_ldac_start : out std_logic;
         ccd_3_bias_load_start : out std_logic;
         ccd_3_bias_ldac_start : out std_logic;
+
 
 -- CCD clock rails DAC          
         clk_rail_load_start : out std_logic;
@@ -204,9 +213,10 @@ entity REB_v5_cmd_interpreter is
         reb_sn_timeout    : in  std_logic;
 
 -- back bias switch
-        back_bias_sw_rb : in  std_logic;
-        back_bias_cl_rb : in  std_logic;
-        en_back_bias_sw : out std_logic;
+        back_bias_sw_rb    : in  std_logic;
+        back_bias_cl_rb    : in  std_logic;
+        back_bias_sw_error : in  std_logic;
+        en_back_bias_sw    : out std_logic;
 
 -- Jitter Cleaner
         jc_status_bus   : in  std_logic_vector(5 downto 0);
@@ -245,6 +255,8 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       trigger_time_V_I_lsw, trigger_time_V_I_MSW, trigger_time_pcb_t_lsw, trigger_time_pcb_t_MSW,
                       v_ok_state, time_base_set_lsw, time_base_set_MSW, trigger_state, statusReg_rd,
                       sync_cmd_delay_wr_state, sync_cmd_delay_rd_state,
+                      sync_cmd_mask_wr_state, sync_cmd_mask_rd_state,
+                      interrupt_mask_wr_state, interrupt_mask_rd_state, status_block_rst_state,
 -- Image parameters
                       read_image_size_state, read_image_patter_mode_state, read_ccd_sel_state,
                       set_image_size_state, set_img_pattern_gen_state,
@@ -273,6 +285,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       ccd_1_bias_load_config_state, ccd_1_bias_ldac_state,
                       ccd_2_bias_load_config_state, ccd_2_bias_ldac_state,
                       ccd_3_bias_load_config_state, ccd_3_bias_ldac_state,
+                      ccd_bias_read_error_vut_state,
 
 
 -- CCD clock rails DAC  
@@ -352,7 +365,13 @@ architecture Behavioral of REB_v5_cmd_interpreter is
   signal next_load_time_base_lsw : std_logic;
   signal next_load_time_base_MSW : std_logic;
   signal next_cnt_preset         : std_logic_vector(63 downto 0);
-  signal next_sync_cmd_delay_en  : std_logic;
+
+-- sync commands signals
+  signal next_sync_cmd_delay_en : std_logic;
+  signal next_sync_cmd_mask_en  : std_logic;
+
+  -- interrupt signals 
+  signal next_interrupt_mask_wr_en : std_logic;
 
 -- Image parameters
   signal next_image_size_en   : std_logic;
@@ -443,6 +462,10 @@ begin
         load_time_base_MSW <= '0';
         cnt_preset         <= (others => '0');
         sync_cmd_delay_en  <= '0';
+        sync_cmd_mask_en   <= '0';
+
+        -- ineterrupt signals reset state
+        interrupt_mask_wr_en <= '0';
 
         -- image parameters reset state
         image_size_en   <= '0';
@@ -521,12 +544,14 @@ begin
         StatusReset <= next_StatusReset;
 
         -- BRS latch
-        trigger_ce_bus     <= next_trigger_ce_bus;
-        trigger_val_bus    <= next_trigger_val_bus;
-        load_time_base_lsw <= next_load_time_base_lsw;
-        load_time_base_MSW <= next_load_time_base_MSW;
-        cnt_preset         <= next_cnt_preset;
-        sync_cmd_delay_en  <= next_sync_cmd_delay_en;
+        trigger_ce_bus       <= next_trigger_ce_bus;
+        trigger_val_bus      <= next_trigger_val_bus;
+        load_time_base_lsw   <= next_load_time_base_lsw;
+        load_time_base_MSW   <= next_load_time_base_MSW;
+        cnt_preset           <= next_cnt_preset;
+        sync_cmd_delay_en    <= next_sync_cmd_delay_en;
+        sync_cmd_mask_en     <= next_sync_cmd_mask_en;
+        interrupt_mask_wr_en <= next_interrupt_mask_wr_en;
 
         -- image parameters latch
         image_size_en   <= next_image_size_en;
@@ -605,7 +630,8 @@ begin
            switch_addr, time_base_actual_value,
            busy_bus, trig_tm_value_sb, trig_tm_value_tb, trig_tm_value_seq, trig_tm_value_v_i, trig_tm_value_pcb_t,
            mgt_avcc_ok, statusreg,
-           sync_cmd_delay_read,
+           sync_cmd_delay_read, sync_cmd_mask_read,
+           interrupt_mask_read,
 
            -- image param
            image_size, image_patter_read, ccd_sel_read,
@@ -616,6 +642,9 @@ begin
 
            -- ASPIC
            aspic_config_r_ccd_1, aspic_config_r_ccd_2, aspic_config_r_ccd_3, aspic_op_end,
+
+           -- CCD bias
+           bias_dac_cmd_err, bias_v_undr_th,
 
            -- V&I measure
            v6_voltage, v6_current, v9_voltage, v9_current, v24_voltage, v24_current, v40_voltage, v40_current,
@@ -644,7 +673,7 @@ begin
            xadc_user_temp_alarm_out, xadc_vbram_alarm_out, xadc_alarm_out,
 
            -- Bacbias switch
-           back_bias_sw_rb, back_bias_cl_rb,
+           back_bias_sw_rb, back_bias_cl_rb, back_bias_sw_error,
 
            -- others
            dcdc_clk_en_in, mgt_accpll_ok, seq_op_code_error_add
@@ -659,12 +688,14 @@ begin
     next_StatusReset <= '0';
 
                                         -- BRS default state
-    next_trigger_ce_bus     <= (others => '0');
-    next_trigger_val_bus    <= (others => '0');
-    next_load_time_base_lsw <= '0';
-    next_load_time_base_MSW <= '0';
-    next_cnt_preset         <= (others => '0');
-    next_sync_cmd_delay_en  <= '0';
+    next_trigger_ce_bus       <= (others => '0');
+    next_trigger_val_bus      <= (others => '0');
+    next_load_time_base_lsw   <= '0';
+    next_load_time_base_MSW   <= '0';
+    next_cnt_preset           <= (others => '0');
+    next_sync_cmd_delay_en    <= '0';
+    next_sync_cmd_mask_en     <= '0';
+    next_interrupt_mask_wr_en <= '0';
 
                                         -- Image Parameters default state
     next_image_size_en   <= '0';
@@ -785,11 +816,11 @@ begin
             elsif regAddr = read_state_busy_cmd then
               next_state <= state_busy;
 
-                                        -- read Status Block trigger time lsw
+                                        -- read trigger time lsw
             elsif regAddr = read_trig_time_SB_lsw_cmd then
               next_state <= trigger_time_SB_lsw;
 
-                                        -- read Status Block trigger time MSW           
+                                        -- read trigger time MSW           
             elsif regAddr = read_trig_time_SB_MSW_cmd then
               next_state <= trigger_time_SB_MSW;
 
@@ -835,6 +866,12 @@ begin
 
             elsif regAddr = sync_cmd_delay_cmd then
               next_state <= sync_cmd_delay_rd_state;
+
+            elsif regAddr = sync_cmd_mask_cmd then
+              next_state <= sync_cmd_mask_rd_state;
+
+            elsif regAddr = interrupt_mask_cmd then
+              next_state <= interrupt_mask_rd_state;
 
 
               -------- Image parameters read                            
@@ -903,6 +940,11 @@ begin
                                         -- ASPIC configuration ccd 3 read
             elsif regAddr = aspic_conf_read_ccd3_cmd then
               next_state <= aspic_read_conf_ccd_3_state;
+
+              --------CCD bias protection error and flag read
+
+            elsif regAddr = ccd_bias_err_vut_cmd then
+              next_state <= ccd_bias_read_error_vut_state;
 
               --------DREB voltage and current sensors read                             
               -- V6 voltage read
@@ -1085,10 +1127,27 @@ begin
               next_trigger_ce_bus  <= regWrEn;
               next_trigger_val_bus <= regDataWr_masked;
 
+---------- Status block
+              -- status block reset
+            elsif regAddr = read_status_reg_base then
+              next_state       <= status_block_rst_state;
+              next_StatusReset <= '1';
+
+---------- Sync Commands 
               -- sync command 0 delay set
             elsif regAddr = sync_cmd_delay_cmd then
               next_state             <= sync_cmd_delay_wr_state;
               next_sync_cmd_delay_en <= '1';
+
+              -- sync command mask set
+            elsif regAddr = sync_cmd_mask_cmd then
+              next_state            <= sync_cmd_mask_wr_state;
+              next_sync_cmd_mask_en <= '1';
+
+              -- interrupt mask set
+            elsif regAddr = interrupt_mask_cmd then
+              next_state                <= interrupt_mask_wr_state;
+              next_interrupt_mask_wr_en <= '1';
 
 ---------- Image Parameters Write
 
@@ -1386,6 +1445,18 @@ begin
         next_regAck    <= '1';
         next_regDataRd <= x"000000"&sync_cmd_delay_read;
 
+        -- Sync command mask
+      when sync_cmd_mask_rd_state =>
+        next_state     <= wait_end_cmd;
+        next_regAck    <= '1';
+        next_regDataRd <= sync_cmd_mask_read;
+
+        -- interrupt mask read
+      when interrupt_mask_rd_state =>
+        next_state     <= wait_end_cmd;
+        next_regAck    <= '1';
+        next_regDataRd <= x"0000" & "00" & interrupt_mask_read;
+
         -- TRIGGER TIME READ V_I lsw  (add10)
       when trigger_time_V_I_lsw =>
         next_state     <= wait_end_cmd;
@@ -1451,6 +1522,20 @@ begin
         -- sync command 0 delay set
       when sync_cmd_delay_wr_state =>
         next_state <= ack_del_1;
+
+        -- sync command mask set
+      when sync_cmd_mask_wr_state =>
+        next_state <= ack_del_1;
+
+
+        -- interrupt mask set
+      when interrupt_mask_wr_state =>
+        next_state <= ack_del_1;
+
+      when status_block_rst_state =>
+        next_state <= ack_del_1;
+
+
 
 ---------------------- Image Parameters Write --------------------------
 
@@ -1652,6 +1737,11 @@ begin
         next_state <= ack_del_1;
       when ccd_3_bias_ldac_state =>
         next_state <= ack_del_1;
+        -- error and Voltage Under Threshold read
+      when ccd_bias_read_error_vut_state =>
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= "0000" & "000" & bias_v_undr_th & "0000" & "000" & bias_dac_cmd_err;
+        next_regAck    <= '1';
 
 ---------------------- CCD clock rails DAC Write --------------------------
         
@@ -1921,7 +2011,7 @@ begin
 -- Back bias enable read        
       when back_bias_sw_read_state =>
         next_state     <= wait_end_cmd;
-        next_regDataRd <= X"0000000" & "00" & back_bias_cl_rb & back_bias_sw_rb;
+        next_regDataRd <= X"0000000" & '0' & back_bias_sw_error & back_bias_cl_rb & back_bias_sw_rb;
         next_regAck    <= '1';
 
         -- Back bias enable 

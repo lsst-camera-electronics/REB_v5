@@ -38,8 +38,9 @@ package REB_v5_commands_package is
   constant read_v_ok_cmd : std_logic_vector(23 downto 0) := x"000014";
 
   constant sync_cmd_delay_cmd : std_logic_vector(23 downto 0) := x"000015";
+  constant sync_cmd_mask_cmd  : std_logic_vector(23 downto 0) := x"000016";
 
-
+  constant interrupt_mask_cmd : std_logic_vector(23 downto 0) := x"000017";
 
 -- Image parameters
   constant image_size_cmd        : std_logic_vector(23 downto 0) := x"400005";
@@ -94,6 +95,7 @@ package REB_v5_commands_package is
   constant ccd_2_bias_ldac_cmd        : std_logic_vector(23 downto 0) := x"400111";
   constant ccd_3_bias_load_config_cmd : std_logic_vector(23 downto 0) := x"400120";
   constant ccd_3_bias_ldac_cmd        : std_logic_vector(23 downto 0) := x"400121";
+  constant ccd_bias_err_vut_cmd       : std_logic_vector(23 downto 0) := x"40010F";
 
 ---------- CCD clock rails DAC
   constant clk_rail_load_config_cmd : std_logic_vector(23 downto 0) := x"400000";

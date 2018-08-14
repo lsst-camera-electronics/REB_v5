@@ -9,6 +9,11 @@ use work.SsiPkg.all;
 use work.SsiCmdMasterPkg.all;
 use work.Pgp2bPkg.all;
 
+use work.LsstSciPackage.all;
+
+library UNISIM;
+use UNISIM.VCOMPONENTS.all;
+
 entity LsstSci is
   port (
     -------------------------------------------------------------------------
@@ -46,18 +51,15 @@ entity LsstSci is
     RegDataRd : in  std_logic_vector(31 downto 0);
 
     -------------------------------------------------------------------------
-    -- Data Encoder Interface
+    -- Data Encoder Interface (up to 2 video channels)
     -------------------------------------------------------------------------
-    DataWrEn : in std_logic;
-    DataSOT  : in std_logic;
-    DataEOT  : in std_logic;
-    DataIn   : in std_logic_vector(17 downto 0);
+    DataIn   : in LsstSciImageDataArray(1 downto 0);
 
     -------------------------------------------------------------------------
     -- Notification Interface
     -------------------------------------------------------------------------
-    NoticeEn : in std_logic;
-    Notice   : in std_logic_vector(15 downto 0);
+    NoticeEn : in std_logic := '0';
+    Notice   : in std_logic_vector(13 downto 0) := (others => '0');
 
     -------------------------------------------------------------------------
     -- Synchronous Command Interface
@@ -102,9 +104,13 @@ architecture LsstSci_axi of LsstSci is
   -----------------------------------------------------------------------------
   -- User/Application Logic Reset signals
   -----------------------------------------------------------------------------
+  signal stablePOR  : sl;
+  signal pgpRxPOR   : sl;
+  
   constant REM_DATA_RESET_PATTERN : slv(7 downto 0) := x"a5";
-  signal   reqSysRst : sl;
 
+  signal pgpTxLinkReady : sl;
+  
   signal pgpRxClk   : sl;
   signal pgpRxRst   : sl;
   signal pgpTxClk   : sl;
@@ -112,12 +118,18 @@ architecture LsstSci_axi of LsstSci is
   signal sciRst     : sl;
   signal sysClk     : sl;
   signal sysRst     : sl;
-  
-  signal imagesSent : sl;
-  signal imagesTrunc: sl;
-  signal imagesDisc : sl;
-  signal dataFormat : slv( 3 downto 0);
 
+  signal pgpLinkUp     : sl;
+  signal pgpLinkUpEdge : sl;
+  signal pgpLinkUpSync : sl;
+
+  signal sciRstEdge : sl;
+  signal sciRstSync : sl;
+
+  signal imageStatus : LsstSciImageStatusArray(1 downto 0);
+
+  signal noticeIn   : slv(15 downto 0);
+  signal noticeInEn : sl;
   signal noticeSent : sl;
   signal noticeLast : slv(15 downto 0);
 
@@ -134,22 +146,28 @@ begin
   -------------------------
   -- SCI System Clock/Reset
   -------------------------         
-  sciRst <= '1' when (pgpRxOut.remLinkData = REM_DATA_RESET_PATTERN
-                      or pgpRxOut.phyRxReady = '0') else '0';
-
-  -- Hold reqSysRst for a time after sciRst
-  ReqSysRst_delay : entity work.RstSync
-    generic map (
-      RELEASE_DELAY_G => 16)
-    port map (
-      clk => pgpRxClk,
-      asyncRst => sciRst,
-      syncRst => reqSysRst);
+  POR : entity work.PwrUpRst
+     generic map (
+        DURATION_G => 100E6) -- 1 sec in ticks
+     port map (
+        clk    => stableClk,
+        arst   => stableRst,
+        rstOut => stablePOR);
+   
+  SysRstOut : entity work.PwrUpRst
+     generic map (
+        DURATION_G => 15625) --  100 usec in ticks
+     port map (
+        clk    => pgpRxClk,
+        arst   => stablePOR,
+        rstOut => pgpRxPOR);
   
+  sciRst <= '1' when (pgpRxOut.remLinkData = REM_DATA_RESET_PATTERN) else '0';
+
   pgpTxIn.locData <= pgpRxOut.remLinkData;
   
   ClkOut <= pgpRxClk;
-  RstOut <= reqSysRst or sciRst;
+  RstOut <= pgpRxPOR or sciRst;
   sysClk <= ClkIn;
   sysRst <= RstIn;
   
@@ -160,6 +178,7 @@ begin
     port map (
       stableClk    => StableClk,
       stableRst    => StableRst,
+      stablePOR    => stablePOR,
       -- VC PGP Signals (array of 4 VCs)
       pgpTxMasters => pgpTxMasters,
       pgpTxSlaves  => pgpTxSlaves,
@@ -177,9 +196,7 @@ begin
       pgpTxClk     => pgpTxClk,
       pgpTxRst     => pgpTxRst,
       -- GT Pins
-      --refClkP      => PgpClkP,
-      --refClkN      => PgpClkM,
-      gtRefClk       => PgpRefClk,
+      gtRefClk     => PgpRefClk,
       gtTxP        => PgpTxP,
       gtTxN        => PgpTxM,
       gtRxP        => PgpRxP,
@@ -221,31 +238,83 @@ begin
       sysRst      => sysRst,
       pgpClk      => pgpTxClk,
       pgpRst      => pgpTxRst,
-      dataWrEn    => dataWrEn,
-      dataSOT     => dataSOT,
-      dataEOT     => dataEOT,
-      dataIn      => dataIn,
+      dataIn      => DataIn(0),
+      statusOut   => imageStatus(0),
       mAxisMaster => pgpTxMasters(1),
-      mAxisSlave  => pgpTxSlaves(1),
-      imagesSent  => imagesSent,
-      imagesTrunc => imagesTrunc,
-      imagesDisc  => imagesDisc,
-      dataFormat  => dataFormat);
+      mAxisSlave  => pgpTxSlaves(1));
 
   pgpRxMasters(1) <= AXI_STREAM_MASTER_INIT_C;
   pgpRxCtrl(1)    <= AXI_STREAM_CTRL_INIT_C;
 
+  ------------------------------
+  -- Second SCI Image Interface VC3
+  ------------------------------         
+  LsstSciDataEncoder_Inst1 : entity work.LsstSciDataEncoder
+    generic map (
+      RAFT_DATA_CONVERSION => "18B_PACK")
+    port map (
+      sysClk      => sysClk,
+      sysRst      => sysRst,
+      pgpClk      => pgpTxClk,
+      pgpRst      => pgpTxRst,
+      dataIn      => DataIn(1),
+      statusOut   => imageStatus(1),
+      mAxisMaster => pgpTxMasters(3),
+      mAxisSlave  => pgpTxSlaves(3));
+
+  pgpRxMasters(3) <= AXI_STREAM_MASTER_INIT_C;
+  pgpRxCtrl(3)    <= AXI_STREAM_CTRL_INIT_C;
+
+  ------------------------------
+  -- PGP Link detection and Notice Synchronization
+  ------------------------------         
+  TxLinkSync : entity work.Synchronizer
+     port map (
+        clk     => pgpRxClk,
+        dataIn  => pgpTxOut.linkReady,
+        dataOut => pgpTxLinkReady);
+
+  pgpLinkUp <=  pgpTxLinkReady and pgpRxOut.linkReady and pgpRxOut.remLinkReady;
+  
+  -- Link Up Edge detection synchronization
+  LinkSync : entity work.SynchronizerEdge
+     port map (
+        clk        => pgpRxClk,
+        dataIn     => pgpLinkUp,
+        risingEdge => pgpLinkUpEdge);
+
+  LinkPulse : entity work.PulseSynchronizer
+     port map (
+        inClk    => pgpRxClk,
+        inPulse  => pgpLinkUpEdge,
+        outClk   => sysClk,
+        outPulse => pgpLinkUpSync);
+  
+  -- SciRst Edge detection synchronization
+  SciRstSync_Edge : entity work.SynchronizerEdge
+     port map (
+        clk        => pgpRxClk,
+        dataIn     => sciRst,
+        risingEdge => sciRstEdge);
+
+  ResetPulse : entity work.PulseSynchronizer
+     port map (
+        inClk    => pgpRxClk,
+        inPulse  => sciRstEdge,
+        outClk   => sysClk,
+        outPulse => sciRstSync);
+  
   ------------------------------
   -- SCI Notifications VC2
   ------------------------------         
   LsstSciNoticeEncoder_Inst : entity work.LsstSciNoticeEncoder
     port map (
       sysClk      => sysClk,
-      sysRst      => sysRst,
+      sysRst      => '0',--sysRst,
       pgpClk      => pgpTxClk,
       pgpRst      => pgpTxRst,
-      noticeEn    => NoticeEn,
-      notice      => Notice,
+      noticeEn    => noticeInEn,
+      notice      => noticeIn,
       mAxisMaster => pgpTxMasters(2),
       mAxisSlave  => pgpTxSlaves(2),
       noticeSent  => noticeSent,
@@ -253,6 +322,9 @@ begin
   
   pgpRxMasters(2) <= AXI_STREAM_MASTER_INIT_C;
   pgpRxCtrl(2)    <= AXI_STREAM_CTRL_INIT_C;
+
+  noticeInEn <= NoticeEn or pgpLinkUpSync or sciRstSync;
+  noticeIn   <= pgpLinkUpSync & sciRstSync & Notice;
   
   ------------------------------
   -- SCI Status Block
@@ -263,12 +335,11 @@ begin
       StatusRst  => StatusRst,
       StatusAddr => StatusAddr,
       StatusReg  => StatusReg,
-      PgpClk     => pgpRxClk,
-      PgpRst     => pgpRxRst,
-      ImagesSent => imagesSent,
-      ImagesTrunc=> imagesTrunc,
-      ImagesDisc => imagesDisc,
-      DataFormat => dataFormat,
+      PgpRxClk   => pgpRxClk,
+      PgpRxRst   => pgpRxRst,
+      PgpTxClk   => pgpTxClk,
+      PgpTxRst   => pgpTxRst,
+      ImageStatus => imageStatus,
       NoticeSent => noticeSent,
       NoticeLast => noticeLast,
       PgpRxOut   => pgpRxOut,
@@ -285,10 +356,4 @@ begin
   SyncCmdEn <= pgpRxOut.opCodeEn;
   SyncCmd   <= pgpRxOut.opCode;
 
-  ------------------------------
-  -- Unused VC3
-  ------------------------------         
-  pgpTxMasters(3) <= AXI_STREAM_MASTER_INIT_C;
-  pgpRxCtrl(3)    <= AXI_STREAM_CTRL_UNUSED_C;
-      
 end LsstSci_axi;

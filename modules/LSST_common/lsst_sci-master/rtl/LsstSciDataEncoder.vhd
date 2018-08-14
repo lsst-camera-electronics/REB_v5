@@ -34,10 +34,7 @@ entity LsstSciDataEncoder is
     -------------------------------------------------------------------------
     -- Data Encoder Input Interface
     -------------------------------------------------------------------------
-    dataWrEn : in std_logic;
-    dataSOT  : in std_logic;
-    dataEOT  : in std_logic;
-    dataIn   : in std_logic_vector(17 downto 0);
+    dataIn : in LsstSciImageDataType;
 
     -------------------------------------------------------------------------
     -- AXI-Stream Interface
@@ -48,10 +45,7 @@ entity LsstSciDataEncoder is
     -------------------------------------------------------------------------
     -- Internal Status Interface
     -------------------------------------------------------------------------
-    imagesSent  : out std_logic;
-    imagesTrunc : out std_logic;
-    imagesDisc  : out std_logic;
-    dataFormat  : out std_logic_vector(3 downto 0));
+    statusOut     : out LsstSciImageStatusType);
 
 end LsstSciDataEncoder;
 
@@ -110,10 +104,10 @@ begin
     data_encoder : entity work.LsstSci32bZExt
       port map (
         DataClk    => sysClk,
-        DataWrEn   => dataWrEn,
-        DataSOT    => dataSOT,
-        DataEOT    => dataEOT,
-        DataIn     => dataIn(17 downto 0),
+        DataWrEn   => dataIn.wrEn,
+        DataSOT    => dataIn.sot,
+        DataEOT    => dataIn.eot,
+        DataIn     => dataIn.data,
         FrameReset => pgpRst,
         FrameRdClk => pgpClk,
         FrameRdEn  => fifoRdEn,
@@ -130,10 +124,10 @@ begin
     data_encoder : entity work.LsstSci16bTrunc
       port map (
         DataClk    => sysClk,
-        DataWrEn   => dataWrEn,
-        DataSOT    => dataSOT,
-        DataEOT    => dataEOT,
-        DataIn     => dataIn(17 downto 0),
+        DataWrEn   => dataIn.wrEn,
+        DataSOT    => dataIn.sot,
+        DataEOT    => dataIn.eot,
+        DataIn     => dataIn.data,
         FrameReset => pgpRst,
         FrameRdClk => pgpClk,
         FrameRdEn  => fifoRdEn,
@@ -150,10 +144,10 @@ begin
     data_encoder : entity work.LsstSci18bPack
       port map (
         DataClk    => sysClk,
-        DataWrEn   => dataWrEn,
-        DataSOT    => dataSOT,
-        DataEOT    => dataEOT,
-        DataIn     => dataIn(17 downto 0),
+        DataWrEn   => dataIn.wrEn,
+        DataSOT    => dataIn.sot,
+        DataEOT    => dataIn.eot,
+        DataIn     => dataIn.data,
         FrameReset => pgpRst,
         FrameRdClk => pgpClk,
         FrameRdEn  => fifoRdEn,
@@ -164,7 +158,7 @@ begin
         FrameData  => fifoDataOut(15 downto 0));
   end generate;
 
-  dataFormat  <= imageDataFormat;
+  statusOut.format  <= imageDataFormat;
 
   ----------------------------------------------------------------------------
   -- AxiStream Translation
@@ -240,9 +234,9 @@ begin
     sAxisMaster <= ssi2AxisMaster(SSI_PGP2B_CONFIG_C, r.dataSsiMaster);
     fifoRdEn    <= v.fifoRdEn;
   
-    imagesSent  <= v.imagesSent;
-    imagesTrunc <= v.imagesTrunc;
-    imagesDisc  <= v.imagesDisc;
+    statusOut.sent  <= v.imagesSent;
+    statusOut.trunc <= v.imagesTrunc;
+    statusOut.disc  <= v.imagesDisc;
 
     rin <= v;
     

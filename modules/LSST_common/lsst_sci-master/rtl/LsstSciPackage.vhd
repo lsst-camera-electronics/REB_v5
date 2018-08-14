@@ -2,6 +2,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.StdRtlPkg.all;
+
 package LsstSciPackage is
 
    -- Firmware revision number
@@ -40,13 +42,55 @@ package LsstSciPackage is
    -- Version 2F Tag-up version to show Ben
    -- Version 30 12-channel fixed latency version
    -- Version 31 Fix to LsstPgpFrontEnd (which will eventually move into pgp2b_core)
-   -- Version 32 Changed StableClk frequency to 250MHz
-  constant LSST_SCI_VERSION : std_logic_vector(11 downto 0) := x"032";
+   -- Version 32 Added POR to MGTs to reduce garbage on power up
+   -- Version 33 Fixed LsstSciStatus to work with different Tx and Rx clocks
+   --            SCI now generates notices on Link Up and FE reset
+   --            FE is no longer reset when PGP link is lost
+   -- Version 34 Added 4th virtual channel data encoder (nominally for guiding)
+   --            Changed Image Data interface to use record structure
+   constant LSST_SCI_VERSION : std_logic_vector(11 downto 0) := x"034";
 
    -- Image Data Format Version
    constant LSST_DATA_UNSPECIFIED     : std_logic_vector(3 downto 0) := x"0";
    constant LSST_DATA_32B_ZERO_EXTEND : std_logic_vector(3 downto 0) := x"1";
    constant LSST_DATA_16B_TRUNC_LOW_2 : std_logic_vector(3 downto 0) := x"2";
    constant LSST_DATA_18B_PACKED      : std_logic_vector(3 downto 0) := x"3";
-   
+
+
+   ----------------------------------------------------------------------------
+   -- Data Interface Types
+   ----------------------------------------------------------------------------
+   type LsstSciImageDataType is record
+      wrEn : sl;
+      sot  : sl;
+      eot  : sl;
+      data : slv(17 downto 0);
+   end record LsstSciImageDataType;
+
+   type LsstSciImageDataArray is array (natural range <>) of LsstSciImageDataType;
+
+   constant LSST_SCI_IMAGE_DATA_IN_INIT_C : LsstSciImageDataType := (
+      '0',
+      '0',
+      '0',
+      (others => '0'));
+
+   ----------------------------------------------------------------------------
+   -- Internal Data Status Interface Types
+   ----------------------------------------------------------------------------
+   type LsstSciImageStatusType is record
+      sent   : sl;
+      trunc  : sl;
+      disc   : sl;
+      format : slv(3 downto 0);
+   end record LsstSciImageStatusType;
+
+   type LsstSciImageStatusArray is array (natural range <>) of LsstSciImageStatusType;
+
+   constant LSST_SCI_IMAGE_STATUS_INIT_C : LsstSciImageStatusType := (
+      '0',
+      '0',
+      '0',
+      (others => '0'));
+
 end LsstSciPackage;

@@ -48,8 +48,8 @@ entity sequencer_v3_top is
 
     ind_rep_mem_we    : in  std_logic;
     ind_rep_mem_redbk : out std_logic_vector(23 downto 0);
-	 
-	 ind_sub_add_mem_we    : in  std_logic;
+
+    ind_sub_add_mem_we    : in  std_logic;
     ind_sub_add_mem_redbk : out std_logic_vector(9 downto 0);
 
     ind_sub_rep_mem_we    : in  std_logic;
@@ -64,9 +64,9 @@ entity sequencer_v3_top is
     stop_sequence : in std_logic;
     step_sequence : in std_logic;
 
-	 op_code_error_reset	: in  std_logic;
-    op_code_error		   : out std_logic;
-	 op_code_error_add	: out std_logic_vector(9 downto 0);
+    op_code_error_reset : in  std_logic;
+    op_code_error       : out std_logic;
+    op_code_error_add   : out std_logic_vector(9 downto 0);
 
     sequencer_busy : out std_logic;
     sequencer_out  : out std_logic_vector(31 downto 0);
@@ -94,18 +94,18 @@ architecture Behavioral of sequencer_v3_top is
 
       ind_rep_mem_we    : in  std_logic;
       ind_rep_mem_redbk : out std_logic_vector(23 downto 0);
-		
-		ind_sub_add_mem_we    : in  std_logic;
-		ind_sub_add_mem_redbk : out std_logic_vector(9 downto 0);
 
-		ind_sub_rep_mem_we    : in  std_logic;
-		ind_sub_rep_mem_redbk : out std_logic_vector(15 downto 0);
+      ind_sub_add_mem_we    : in  std_logic;
+      ind_sub_add_mem_redbk : out std_logic_vector(9 downto 0);
+
+      ind_sub_rep_mem_we    : in  std_logic;
+      ind_sub_rep_mem_redbk : out std_logic_vector(15 downto 0);
 
       fifo_param_re : in std_logic;
-		
-		op_code_error_reset	: in  std_logic;
-      op_code_error		   : out std_logic;
-		op_code_error_add		: out std_logic_vector(9 downto 0);
+
+      op_code_error_reset : in  std_logic;
+      op_code_error       : out std_logic;
+      op_code_error_add   : out std_logic_vector(9 downto 0);
 
 
       prog_mem_redbk   : out std_logic_vector(31 downto 0);
@@ -166,18 +166,18 @@ begin
 
       ind_rep_mem_we    => ind_rep_mem_we,
       ind_rep_mem_redbk => ind_rep_mem_redbk,
-		
-		ind_sub_add_mem_we    => ind_sub_add_mem_we,
-		ind_sub_add_mem_redbk => ind_sub_add_mem_redbk,
 
-		ind_sub_rep_mem_we    => ind_sub_rep_mem_we,
-		ind_sub_rep_mem_redbk => ind_sub_rep_mem_redbk,
+      ind_sub_add_mem_we    => ind_sub_add_mem_we,
+      ind_sub_add_mem_redbk => ind_sub_add_mem_redbk,
+
+      ind_sub_rep_mem_we    => ind_sub_rep_mem_we,
+      ind_sub_rep_mem_redbk => ind_sub_rep_mem_redbk,
 
       fifo_param_re => fifo_param_re,
 
-		op_code_error_reset	=> op_code_error_reset,
-		op_code_error		   => op_code_error,
-		op_code_error_add		=> op_code_error_add,
+      op_code_error_reset => op_code_error_reset,
+      op_code_error       => op_code_error,
+      op_code_error_add   => op_code_error_add,
 
       prog_mem_redbk   => prog_mem_redbk,
       fifo_param_empty => fifo_param_empty,

@@ -16,13 +16,12 @@ entity LsstSciStatusBlock is
     StatusReg   : out std_logic_vector(31 downto 0);
     
     -- SCI side signals
-    PgpClk      :  in std_logic;
-    PgpRst      :  in std_logic;
-    
-    ImagesSent  :  in std_logic;
-    ImagesTrunc :  in std_logic;
-    ImagesDisc  :  in std_logic;
-    DataFormat  :  in std_logic_vector( 3 downto 0);
+    PgpRxClk      :  in std_logic;
+    PgpRxRst      :  in std_logic;
+    PgpTxClk      :  in std_logic;
+    PgpTxRst      :  in std_logic;
+
+    ImageStatus : in LsstSciImageStatusArray(1 downto 0);
 
     NoticeSent  :  in std_logic;
     NoticeLast  :  in std_logic_vector(15 downto 0);
@@ -34,461 +33,397 @@ end LsstSciStatusBlock;
 
 architecture LsstSciStatusBlock of LsstSciStatusBlock is
   constant TPD_G : time := 1 ns;
+
+  type RxStatusType is record
+     pgpRxOut          : Pgp2bRxOutType;
+     frameCount        : std_logic_vector(31 downto 0);
+     frameErrCount     : std_logic_vector(31 downto 0);
+     cellErrCount      : std_logic_vector(31 downto 0);
+     linkDownCount     : std_logic_vector(31 downto 0);
+     linkErrCount      : std_logic_vector(31 downto 0);
+     remOverflow0Count : std_logic_vector(31 downto 0);
+     remOverflow1Count : std_logic_vector(31 downto 0);
+     remOverflow2Count : std_logic_vector(31 downto 0);
+     remOverflow3Count : std_logic_vector(31 downto 0);
+     remPause0Count    : std_logic_vector(31 downto 0);
+     remPause1Count    : std_logic_vector(31 downto 0);
+     remPause2Count    : std_logic_vector(31 downto 0);
+     remPause3Count    : std_logic_vector(31 downto 0);
+     opCodeCount       : std_logic_vector(31 downto 0);
+     opCodeLast        : std_logic_vector( 7 downto 0);
+     remLinkData       : std_logic_vector( 7 downto 0);
+  end record RxStatusType;
+
+  
+  constant RX_STATUS_INIT_C : RxStatusType := (
+     pgpRxOut => PGP2B_RX_OUT_INIT_C,
+     frameCount        => (others => '0'),
+     frameErrCount     => (others => '0'),
+     cellErrCount      => (others => '0'),
+     linkDownCount     => (others => '0'),
+     linkErrCount      => (others => '0'),
+     remOverflow0Count => (others => '0'),
+     remOverflow1Count => (others => '0'),
+     remOverflow2Count => (others => '0'),
+     remOverflow3Count => (others => '0'),
+     remPause0Count    => (others => '0'),
+     remPause1Count    => (others => '0'),
+     remPause2Count    => (others => '0'),
+     remPause3Count    => (others => '0'),
+     opCodeCount       => (others => '0'),
+     opCodeLast        => (others => '0'),
+     remLinkData       => (others => '0'));
+     
+  type TxStatusType is record
+     pgpTxOut       : Pgp2bTxOutType;
+     noticeLast     : std_logic_vector(15 downto 0);
+     noticeCount    : std_logic_vector(31 downto 0);
+     sentCount      : std_logic_vector(31 downto 0);
+     truncCount     : std_logic_vector(31 downto 0);
+     discCount      : std_logic_vector(31 downto 0);
+     sent1Count     : std_logic_vector(31 downto 0);
+     trunc1Count    : std_logic_vector(31 downto 0);
+     disc1Count     : std_logic_vector(31 downto 0);
+     overflow0Count : std_logic_vector(31 downto 0);
+     overflow1Count : std_logic_vector(31 downto 0);
+     overflow2Count : std_logic_vector(31 downto 0);
+     overflow3Count : std_logic_vector(31 downto 0);
+     pause0Count    : std_logic_vector(31 downto 0);
+     pause1Count    : std_logic_vector(31 downto 0);
+     pause2Count    : std_logic_vector(31 downto 0);
+     pause3Count    : std_logic_vector(31 downto 0);
+     frameCount     : std_logic_vector(31 downto 0);
+     frameErrCount  : std_logic_vector(31 downto 0);
+  end record TxStatusType;
+
+  constant TX_STATUS_INIT_C : TxStatusType := (
+     pgpTxOut       => PGP2B_TX_OUT_INIT_C,
+     noticeLast     => (others => '0'),
+     noticeCount    => (others => '0'),
+     sentCount      => (others => '0'),
+     truncCount     => (others => '0'),
+     discCount      => (others => '0'),
+     sent1Count     => (others => '0'),
+     trunc1Count    => (others => '0'),
+     disc1Count     => (others => '0'),
+     overflow0Count => (others => '0'),
+     overflow1Count => (others => '0'),
+     overflow2Count => (others => '0'),
+     overflow3Count => (others => '0'),
+     pause0Count    => (others => '0'),
+     pause1Count    => (others => '0'),
+     pause2Count    => (others => '0'),
+     pause3Count    => (others => '0'),
+     frameCount     => (others => '0'),
+     frameErrCount  => (others => '0'));
+     
   
   -- Status Block Address Map
-  constant VERSION_ADDR       : std_logic_vector(9 downto 0) := "00" & x"00";
-  constant LNKSTAT_ADDR       : std_logic_vector(9 downto 0) := "00" & x"01";
-  constant REM_DATA_ADDR      : std_logic_vector(9 downto 0) := "00" & x"02";
-  constant CERR_CNT_ADDR      : std_logic_vector(9 downto 0) := "00" & x"03";
-  constant LDWN_CNT_ADDR      : std_logic_vector(9 downto 0) := "00" & x"04";
-  constant LERR_CNT_ADDR      : std_logic_vector(9 downto 0) := "00" & x"05";
-  constant REM_OFLOW_VC0_ADDR : std_logic_vector(9 downto 0) := "00" & x"06";
-  constant REM_OFLOW_VC1_ADDR : std_logic_vector(9 downto 0) := "00" & x"07";
-  constant REM_OFLOW_VC2_ADDR : std_logic_vector(9 downto 0) := "00" & x"08";
-  constant REM_OFLOW_VC3_ADDR : std_logic_vector(9 downto 0) := "00" & x"09";
-  constant REM_PAUSE_VC0_ADDR : std_logic_vector(9 downto 0) := "00" & x"0A"; 
-  constant REM_PAUSE_VC1_ADDR : std_logic_vector(9 downto 0) := "00" & x"0B";
-  constant REM_PAUSE_VC2_ADDR : std_logic_vector(9 downto 0) := "00" & x"0C";
-  constant REM_PAUSE_VC3_ADDR : std_logic_vector(9 downto 0) := "00" & x"0D";
-  constant RX_ERR_CNT_ADDR    : std_logic_vector(9 downto 0) := "00" & x"0E";
-  constant RX_CNT_ADDR        : std_logic_vector(9 downto 0) := "00" & x"0F";
-  constant LOC_OFLOW_VC0_ADDR : std_logic_vector(9 downto 0) := "00" & x"10";
-  constant LOC_OFLOW_VC1_ADDR : std_logic_vector(9 downto 0) := "00" & x"11";
-  constant LOC_OFLOW_VC2_ADDR : std_logic_vector(9 downto 0) := "00" & x"12";
-  constant LOC_OFLOW_VC3_ADDR : std_logic_vector(9 downto 0) := "00" & x"13";
-  constant LOC_PAUSE_VC0_ADDR : std_logic_vector(9 downto 0) := "00" & x"14"; 
-  constant LOC_PAUSE_VC1_ADDR : std_logic_vector(9 downto 0) := "00" & x"15";
-  constant LOC_PAUSE_VC2_ADDR : std_logic_vector(9 downto 0) := "00" & x"16";
-  constant LOC_PAUSE_VC3_ADDR : std_logic_vector(9 downto 0) := "00" & x"17";
-  constant TX_ERR_CNT_ADDR    : std_logic_vector(9 downto 0) := "00" & x"18";
-  constant TX_CNT_ADDR        : std_logic_vector(9 downto 0) := "00" & x"19";
-  constant IMAGE_SENT_ADDR    : std_logic_vector(9 downto 0) := "00" & x"20";
-  constant IMAGE_DISC_ADDR    : std_logic_vector(9 downto 0) := "00" & x"21";
-  constant IMAGE_TRUNC_ADDR   : std_logic_vector(9 downto 0) := "00" & x"22";
-  constant DATA_FORMAT_ADDR   : std_logic_vector(9 downto 0) := "00" & x"23";
-  constant OPCODE_CNT_ADDR    : std_logic_vector(9 downto 0) := "00" & x"24";
-  constant OPCODE_LAST_ADDR   : std_logic_vector(9 downto 0) := "00" & x"25";
-  constant NOTICE_CNT_ADDR    : std_logic_vector(9 downto 0) := "00" & x"26";
-  constant NOTICE_LAST_ADDR   : std_logic_vector(9 downto 0) := "00" & x"27";
+  constant VERSION_ADDR       : std_logic_vector(23 downto 0) := x"000000";
+  constant LNKSTAT_ADDR       : std_logic_vector(23 downto 0) := x"000001";
+  constant REM_DATA_ADDR      : std_logic_vector(23 downto 0) := x"000002";
+  constant CERR_CNT_ADDR      : std_logic_vector(23 downto 0) := x"000003";
+  constant LDWN_CNT_ADDR      : std_logic_vector(23 downto 0) := x"000004";
+  constant LERR_CNT_ADDR      : std_logic_vector(23 downto 0) := x"000005";
+  constant REM_OFLOW_VC0_ADDR : std_logic_vector(23 downto 0) := x"000006";
+  constant REM_OFLOW_VC1_ADDR : std_logic_vector(23 downto 0) := x"000007";
+  constant REM_OFLOW_VC2_ADDR : std_logic_vector(23 downto 0) := x"000008";
+  constant REM_OFLOW_VC3_ADDR : std_logic_vector(23 downto 0) := x"000009";
+  constant REM_PAUSE_VC0_ADDR : std_logic_vector(23 downto 0) := x"00000A"; 
+  constant REM_PAUSE_VC1_ADDR : std_logic_vector(23 downto 0) := x"00000B";
+  constant REM_PAUSE_VC2_ADDR : std_logic_vector(23 downto 0) := x"00000C";
+  constant REM_PAUSE_VC3_ADDR : std_logic_vector(23 downto 0) := x"00000D";
+  constant RX_ERR_CNT_ADDR    : std_logic_vector(23 downto 0) := x"00000E";
+  constant RX_CNT_ADDR        : std_logic_vector(23 downto 0) := x"00000F";
+  constant LOC_OFLOW_VC0_ADDR : std_logic_vector(23 downto 0) := x"000010";
+  constant LOC_OFLOW_VC1_ADDR : std_logic_vector(23 downto 0) := x"000011";
+  constant LOC_OFLOW_VC2_ADDR : std_logic_vector(23 downto 0) := x"000012";
+  constant LOC_OFLOW_VC3_ADDR : std_logic_vector(23 downto 0) := x"000013";
+  constant LOC_PAUSE_VC0_ADDR : std_logic_vector(23 downto 0) := x"000014"; 
+  constant LOC_PAUSE_VC1_ADDR : std_logic_vector(23 downto 0) := x"000015";
+  constant LOC_PAUSE_VC2_ADDR : std_logic_vector(23 downto 0) := x"000016";
+  constant LOC_PAUSE_VC3_ADDR : std_logic_vector(23 downto 0) := x"000017";
+  constant TX_ERR_CNT_ADDR    : std_logic_vector(23 downto 0) := x"000018";
+  constant TX_CNT_ADDR        : std_logic_vector(23 downto 0) := x"000019";
+  constant IMAGE_SENT_ADDR    : std_logic_vector(23 downto 0) := x"000020";
+  constant IMAGE_DISC_ADDR    : std_logic_vector(23 downto 0) := x"000021";
+  constant IMAGE_TRUNC_ADDR   : std_logic_vector(23 downto 0) := x"000022";
+  constant IMAGE_FORMAT_ADDR  : std_logic_vector(23 downto 0) := x"000023";
+  constant IMAGE_SENT1_ADDR   : std_logic_vector(23 downto 0) := x"000024";
+  constant IMAGE_DISC1_ADDR   : std_logic_vector(23 downto 0) := x"000025";
+  constant IMAGE_TRUNC1_ADDR  : std_logic_vector(23 downto 0) := x"000026";
+  constant IMAGE_FORMAT1_ADDR : std_logic_vector(23 downto 0) := x"000027";
+  constant OPCODE_CNT_ADDR    : std_logic_vector(23 downto 0) := x"000028";
+  constant OPCODE_LAST_ADDR   : std_logic_vector(23 downto 0) := x"000029";
+  constant NOTICE_CNT_ADDR    : std_logic_vector(23 downto 0) := x"00002A";
+  constant NOTICE_LAST_ADDR   : std_logic_vector(23 downto 0) := x"00002B";
   
-  constant REG_MAX_ADDR : std_logic_vector(11 downto 0) := x"027";
+  signal rxSync   : RxStatusType := RX_STATUS_INIT_C;
+  signal txSync   : TxStatusType := TX_STATUS_INIT_C;
+  signal rxSyncIn : RxStatusType;
+  signal txSyncIn : TxStatusType;
 
-  -- Update machine counter
-  signal registerCounter : std_logic_vector(11 downto 0);
+  signal pgpRxStatus : std_logic_vector(18 downto 0);
+  signal pgpTxStatus : std_logic_vector(18 downto 0);
 
-  -- Statistic counters
-  type CounterType is record
-    cell_error     : slv(31 downto 0);
-    link_down      : slv(31 downto 0);
-    link_error     : slv(31 downto 0);
-    rem_oflow_vc0  : slv(31 downto 0);
-    rem_oflow_vc1  : slv(31 downto 0);
-    rem_oflow_vc2  : slv(31 downto 0);
-    rem_oflow_vc3  : slv(31 downto 0);
-    rem_pause_vc0  : slv(31 downto 0);
-    rem_pause_vc1  : slv(31 downto 0);
-    rem_pause_vc2  : slv(31 downto 0);
-    rem_pause_vc3  : slv(31 downto 0);
-    rx_frame_error : slv(31 downto 0);
-    rx_frames      : slv(31 downto 0);
-    loc_oflow_vc0  : slv(31 downto 0);
-    loc_oflow_vc1  : slv(31 downto 0);
-    loc_oflow_vc2  : slv(31 downto 0);
-    loc_oflow_vc3  : slv(31 downto 0);
-    loc_pause_vc0  : slv(31 downto 0);
-    loc_pause_vc1  : slv(31 downto 0);
-    loc_pause_vc2  : slv(31 downto 0);
-    loc_pause_vc3  : slv(31 downto 0);
-    tx_frame_error : slv(31 downto 0);
-    tx_frames      : slv(31 downto 0);
-    image_sent     : slv(31 downto 0);
-    image_trunc    : slv(31 downto 0);
-    image_disc     : slv(31 downto 0);
-    opcode_cnt     : slv(31 downto 0);
-    opcode_last    : slv(31 downto 0);
-    notice_cnt     : slv(31 downto 0);
-    notice_last    : slv(31 downto 0);
-    pgpRxOut       : Pgp2bRxOutType;
-    pgpTxOut       : Pgp2bTxOutType;
-  end record CounterType;
-
-  constant COUNTER_INIT_C : CounterType := (
-    cell_error     => (others => '0'),
-    link_down      => (others => '0'),
-    link_error     => (others => '0'),
-    rem_oflow_vc0  => (others => '0'),
-    rem_oflow_vc1  => (others => '0'),
-    rem_oflow_vc2  => (others => '0'),
-    rem_oflow_vc3  => (others => '0'),
-    rem_pause_vc0  => (others => '0'),
-    rem_pause_vc1  => (others => '0'),
-    rem_pause_vc2  => (others => '0'),
-    rem_pause_vc3  => (others => '0'),
-    rx_frame_error => (others => '0'),
-    rx_frames      => (others => '0'),
-    loc_oflow_vc0  => (others => '0'),
-    loc_oflow_vc1  => (others => '0'),
-    loc_oflow_vc2  => (others => '0'),
-    loc_oflow_vc3  => (others => '0'),
-    loc_pause_vc0  => (others => '0'),
-    loc_pause_vc1  => (others => '0'),
-    loc_pause_vc2  => (others => '0'),
-    loc_pause_vc3  => (others => '0'),
-    tx_frame_error => (others => '0'),
-    tx_frames      => (others => '0'),
-    image_sent     => (others => '0'),
-    image_trunc    => (others => '0'),
-    image_disc     => (others => '0'),
-    opcode_cnt     => (others => '0'),
-    opcode_last    => (others => '0'),
-    notice_cnt     => (others => '0'),
-    notice_last    => (others => '0'),
-    pgpRxOut       => PGP2B_RX_OUT_INIT_C,
-    pgpTxOut       => PGP2B_TX_OUT_INIT_C);
-
-  signal r   : CounterType := COUNTER_INIT_C;
-  signal rin : CounterType;
-   
-  -- counter reset signal
-  signal statusReset      : std_logic;
-   
-  -- block ram interface signals
-  signal memWrClk  : std_logic;
-  signal memWrEn   : std_logic; 
-  signal memWrEnV  : std_logic_vector(0 downto 0); 
-  signal memWrAddr : std_logic_vector( 9 downto 0);
-  signal memWrData : std_logic_vector(31 downto 0);
-  signal memRdClk  : std_logic;
-  signal memRdAddr : std_logic_vector( 9 downto 0);
-  signal memRdData : std_logic_vector(31 downto 0);
-
+  signal pgpRxStatusCntOut : SlVectorArray(18 downto 0, 31 downto 0);
+  signal pgpTxStatusCntOut : SlVectorArray(18 downto 0, 31 downto 0);
+  
 begin
 
-  StatusRst_Inst : entity work.RstSync
-    generic map (
-      IN_POLARITY_G  => '1',
-      OUT_POLARITY_G => '1')
-    port map (
-      clk      => pgpClk,
-      asyncRst => StatusRst,
-      syncRst  => statusReset);
-  
-  ----------------------------------------------------------------------------
-  -- Block Memory
-  ----------------------------------------------------------------------------
-  memWrClk    <= PgpClk;
-  memRdClk    <= StatusClk;
-  statusReg   <= memRdData;
-  memRdAddr   <= StatusAddr(9 downto 0);
-  memWrEnV(0) <= memWrEn;
-  
-  U_status_block_mem : entity work.k7_status_block_mem
-    port map (
-      clka  => memWrClk,
-      wea   => memWrEnV,
-      addra => memWrAddr,
-      dina  => memWrData,
-      clkb  => memRdClk,
-      rstb  => StatusRst,
-      addrb => memRdAddr,
-      doutb => memRdData);
-  
-  ----------------------------------------------------------------------------
-  -- Update Machine
-  ----------------------------------------------------------------------------
-  process (PgpClk, PgpRst)
-  begin
-    if PgpRst = '1' then
-      registerCounter <=  (others => '0');
-    elsif rising_edge(PgpClk) then
-      if registerCounter /= REG_MAX_ADDR then
-        registerCounter <= registerCounter + 1;
-      else
-        registerCounter <= x"000";
+   RxOpCodeSync : entity work.SynchronizerFifo
+      generic map (
+         DATA_WIDTH_G => 8,
+         ADDR_WIDTH_G => 2,
+         INIT_G       => "0")
+      port map (
+         rst    => StatusRst,
+         wr_clk => pgpRxClk,
+         wr_en  => pgpRxOut.opCodeEn,
+         din    => pgpRxOut.opCode,
+         rd_clk => StatusClk,
+         rd_en  => '1',
+         dout   => rxSyncIn.opCodeLast);
+
+   RxDataSync : entity work.SynchronizerFifo
+      generic map (
+         DATA_WIDTH_G => 8,
+         ADDR_WIDTH_G => 2,
+         INIT_G       => "0")
+      port map (
+         rst    => StatusRst,
+         wr_clk => pgpRxClk,
+         wr_en  => '1',
+         din    => pgpRxOut.remLinkData,
+         rd_clk => StatusClk,
+         rd_en  => '1',
+         valid  => open,
+         dout   => rxSyncIn.remLinkData);
+
+   RxStatusSync : entity work.SyncStatusVector
+      generic map (
+         SYNTH_CNT_G => "1111111111111100000",
+         CNT_RST_EDGE_G => false,
+         CNT_WIDTH_G => 32,
+         WIDTH_G => 19)
+      port map (
+         statusIn(0)             => pgpRxOut.phyRxReady,
+         statusIn(1)             => pgpRxOut.linkReady,
+         statusIn(3  downto 2)   => pgpRxOut.linkPolarity,
+         statusIn(4)             => pgpRxOut.remLinkReady,
+         statusIn(8  downto 5)   => pgpRxOut.remOverflow,
+         statusIn(12 downto 9)   => pgpRxOut.remPause,
+         statusIn(13)            => pgpRxOut.cellError,
+         statusIn(14)            => pgpRxOut.linkDown,
+         statusIn(15)            => pgpRxOut.linkError,
+         statusIn(16)            => pgpRxOut.frameRxErr,
+         statusIn(17)            => pgpRxOut.opCodeEn,
+         statusIn(18)            => pgpRxOut.frameRx,
+         statusOut               => pgpRxStatus,
+         cntRstIn                => StatusRst,
+         rollOverEnIn            => (others => '0'),
+         cntOut                  => pgpRxStatusCntOut,
+         wrClk                   => PgpRxClk,
+         wrRst                   => PgpRxRst,
+         rdClk                   => StatusClk,
+         rdRst                   => StatusRst);
+
+   rxSyncIn.pgpRxOut.phyRxReady   <= pgpRxStatus(0);
+   rxSyncIn.pgpRxOut.linkReady    <= pgpRxStatus(1);
+   rxSyncIn.pgpRxOut.linkPolarity <= pgpRxStatus(3 downto 2);
+   rxSyncIn.pgpRxOut.remLinkReady <= pgpRxStatus(4);
+   rxSyncIn.pgpRxOut.remOverflow  <= pgpRxStatus(8 downto 5);
+   rxSyncIn.pgpRxOut.remPause     <= pgpRxStatus(12 downto 9);
+   rxSyncIn.pgpRxOut.cellError    <= pgpRxStatus(13);
+   rxSyncIn.pgpRxOut.linkDown     <= pgpRxStatus(14);
+   rxSyncIn.pgpRxOut.linkError    <= pgpRxStatus(15);
+   rxSyncIn.pgpRxOut.frameRxErr   <= pgpRxStatus(16);
+   rxSyncIn.pgpRxOut.opCodeEn     <= pgpRxStatus(17);
+   rxSyncIn.pgpRxOut.frameRx      <= pgpRxStatus(18);
+
+   rxSyncIn.frameCount        <= muxSlVectorArray(pgpRxStatusCntOut,18);
+   rxSyncIn.frameErrCount     <= muxSlVectorArray(pgpRxStatusCntOut,16);
+   rxSyncIn.cellErrCount      <= muxSlVectorArray(pgpRxStatusCntOut,13);
+   rxSyncIn.linkDownCount     <= muxSlVectorArray(pgpRxStatusCntOut,14);
+   rxSyncIn.linkErrCount      <= muxSlVectorArray(pgpRxStatusCntOut,15);
+   rxSyncIn.remOverflow0Count <= muxSlVectorArray(pgpRxStatusCntOut,5);
+   rxSyncIn.remOverflow1Count <= muxSlVectorArray(pgpRxStatusCntOut,6);
+   rxSyncIn.remOverflow2Count <= muxSlVectorArray(pgpRxStatusCntOut,7);
+   rxSyncIn.remOverflow3Count <= muxSlVectorArray(pgpRxStatusCntOut,8);
+   rxSyncIn.remPause0Count    <= muxSlVectorArray(pgpRxStatusCntOut,9);
+   rxSyncIn.remPause1Count    <= muxSlVectorArray(pgpRxStatusCntOut,10);
+   rxSyncIn.remPause2Count    <= muxSlVectorArray(pgpRxStatusCntOut,11);
+   rxSyncIn.remPause3Count    <= muxSlVectorArray(pgpRxStatusCntOut,12);
+   rxSyncIn.opCodeCount       <= muxSlVectorArray(pgpRxStatusCntOut,17);
+   
+
+   TxNoticeSync : entity work.SynchronizerFifo
+      generic map (
+         DATA_WIDTH_G  => 16,
+         ADDR_WIDTH_G  => 2,
+         INIT_G        => "0"
+      ) port map (
+         rst           => StatusRst,
+         wr_clk        => PgpTxClk,
+         wr_en         => NoticeSent,
+         din           => NoticeLast,
+         rd_clk        => StatusClk,
+         rd_en         => '1',
+         valid         => open,
+         dout          => txSyncIn.noticeLast
+      );
+
+
+   TxStatusSync : entity work.SyncStatusVector
+      generic map (
+         SYNTH_CNT_G => "1111111111111111100",
+         CNT_RST_EDGE_G => false,
+         CNT_WIDTH_G => 32,
+         WIDTH_G => 19)
+      port map (
+         statusIn(0)            => pgpTxOut.phyTxReady,
+         statusIn(1)            => pgpTxOut.linkReady,
+         statusIn(5 downto 2)   => pgpTxOut.locOverflow,
+         statusIn(9 downto 6)   => pgpTxOut.locPause,
+         statusIn(10)           => pgpTxOut.frameTxErr,
+         statusIn(11)           => NoticeSent,
+         statusIn(12)           => pgpTxOut.frameTx,
+         statusIn(13)           => ImageStatus(0).sent,
+         statusIn(14)           => ImageStatus(0).trunc,
+         statusIn(15)           => ImageStatus(0).disc,
+         statusIn(16)           => ImageStatus(1).sent,
+         statusIn(17)           => ImageStatus(1).trunc,
+         statusIn(18)           => ImageStatus(1).disc,
+         statusOut              => pgpTxStatus,
+         cntRstIn               => StatusRst,
+         cntOut                 => pgpTxStatusCntOut,
+         wrClk                  => PgpTxClk,
+         wrRst                  => PgpTxRst,
+         rdClk                  => StatusClk,
+         rdRst                  => StatusRst);
+
+   txSyncIn.pgpTxOut.locOverflow <= pgpTxStatus(5 downto 2);
+   txSyncIn.pgpTxOut.locPause    <= pgpTxStatus(9 downto 6);
+   txSyncIn.pgpTxOut.phyTxReady  <= pgpTxStatus(0);
+   txSyncIn.pgpTxOut.linkReady   <= pgpTxStatus(1);
+
+   txSyncIn.noticeCount    <= muxSlVectorArray(pgpTxStatusCntOut,11);
+   txSyncIn.sentCount      <= muxSlVectorArray(pgpTxStatusCntOut,13);
+   txSyncIn.truncCount     <= muxSlVectorArray(pgpTxStatusCntOut,14);
+   txSyncIn.discCount      <= muxSlVectorArray(pgpTxStatusCntOut,15);
+   txSyncIn.sent1Count     <= muxSlVectorArray(pgpTxStatusCntOut,16);
+   txSyncIn.trunc1Count    <= muxSlVectorArray(pgpTxStatusCntOut,17);
+   txSyncIn.disc1Count     <= muxSlVectorArray(pgpTxStatusCntOut,18);
+   txSyncIn.overflow0Count <= muxSlVectorArray(pgpTxStatusCntOut,2);
+   txSyncIn.overflow1Count <= muxSlVectorArray(pgpTxStatusCntOut,3);
+   txSyncIn.overflow2Count <= muxSlVectorArray(pgpTxStatusCntOut,4);
+   txSyncIn.overflow3Count <= muxSlVectorArray(pgpTxStatusCntOut,5);
+   txSyncIn.pause0Count    <= muxSlVectorArray(pgpTxStatusCntOut,6);
+   txSyncIn.pause1Count    <= muxSlVectorArray(pgpTxStatusCntOut,7);
+   txSyncIn.pause2Count    <= muxSlVectorArray(pgpTxStatusCntOut,8);
+   txSyncIn.pause3Count    <= muxSlVectorArray(pgpTxStatusCntOut,9);
+   txSyncIn.frameCount     <= muxSlVectorArray(pgpTxStatusCntOut,12);
+   txSyncIn.frameErrCount  <= muxSlVectorArray(pgpTxStatusCntOut,10);
+
+
+   process (StatusClk) is
+   begin
+      if(rising_edge(StatusClk)) then
+         txSync <= txSyncIn;
+         rxSync <= rxSyncIn;
       end if;
-    end if;
-  end process;
-
-  process (registerCounter, r, pgpTxOut, pgpRxOut, dataFormat)
-  begin
-    memWrEn   <= '0';
-    memWrData <= (others => '0');
-    memWrAddr <= (others => '0');
-    case registerCounter is
-      when x"000" => 
-        memWrEn   <= '1';
-        memWrAddr <= VERSION_ADDR;
-        memWrData(31 downto 12) <= (others => '0');
-        memWrData(11 downto  0) <= LSST_SCI_VERSION;
-      when x"001" =>
-        memWrEn <= '1';
-        memWrAddr <= LNKSTAT_ADDR;
-        memWrData <= "0000" &
-                     pgpTxOut.locOverflow & pgpRxOut.remOverflow
-                     & pgpTxOut.locPause & pgpRxOut.remPause
-                     & "00" & pgpRxOut.linkPolarity
-                     & "000" & pgpTxOut.linkReady
-                     & pgpRxOut.remLinkReady & pgpRxOut.linkReady
-                     & pgpTxOut.phyTxReady & pgpRxOut.phyRxReady;
-      when x"002" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_DATA_ADDR;
-        memWrData <= x"000000" & pgpRxOut.remLinkData;
-      when x"003" =>
-        memWrEn <= '1';
-        memWrAddr <= CERR_CNT_ADDR;
-        memWrData <= r.cell_error; 
-      when x"004" =>
-        memWrEn <= '1';
-        memWrAddr <= LDWN_CNT_ADDR;
-        memWrData <= r.link_down;
-      when x"005" =>
-        memWrEn <= '1';
-        memWrAddr <= LERR_CNT_ADDR;
-        memWrData <= r.link_error;
-      when x"006" =>
-        memWrEn <= '1'; 
-        memWrAddr <= REM_OFLOW_VC0_ADDR;
-        memWrData <= r.rem_oflow_vc0;
-      when x"007" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_OFLOW_VC1_ADDR;
-        memWrData <= r.rem_oflow_vc1;
-      when x"008" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_OFLOW_VC2_ADDR;
-        memWrData <= r.rem_oflow_vc2;
-      when x"009" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_OFLOW_VC3_ADDR;
-        memWrData <= r.rem_oflow_vc3;
-      when x"00A" =>
-        memWrEn <= '1'; 
-        memWrAddr <= REM_PAUSE_VC0_ADDR;
-        memWrData <= r.rem_pause_vc0;
-      when x"00B" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_PAUSE_VC1_ADDR;
-        memWrData <= r.rem_pause_vc1;
-      when x"00C" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_PAUSE_VC2_ADDR;
-        memWrData <= r.rem_pause_vc2;
-      when x"00D" =>
-        memWrEn <= '1';
-        memWrAddr <= REM_PAUSE_VC3_ADDR;
-        memWrData <= r.rem_pause_vc3;
-      when x"00E" =>
-        memWrEn <= '1';
-        memWrAddr <= RX_ERR_CNT_ADDR;
-        memWrData <= r.rx_frame_error;
-      when x"00F" =>
-        memWrEn <= '1';
-        memWrAddr <= RX_CNT_ADDR;
-        memWrData <= r.rx_frames;
-      when x"010" =>
-        memWrEn <= '1'; 
-        memWrAddr <= LOC_OFLOW_VC0_ADDR;
-        memWrData <= r.loc_oflow_vc0;
-      when x"011" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_OFLOW_VC1_ADDR;
-        memWrData <= r.loc_oflow_vc1;
-      when x"012" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_OFLOW_VC2_ADDR;
-        memWrData <= r.loc_oflow_vc2;
-      when x"013" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_OFLOW_VC3_ADDR;
-        memWrData <= r.loc_oflow_vc3;
-      when x"014" =>
-        memWrEn <= '1'; 
-        memWrAddr <= LOC_PAUSE_VC0_ADDR;
-        memWrData <= r.loc_pause_vc0;
-      when x"015" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_PAUSE_VC1_ADDR;
-        memWrData <= r.loc_pause_vc1;
-      when x"016" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_PAUSE_VC2_ADDR;
-        memWrData <= r.loc_pause_vc2;
-      when x"017" =>
-        memWrEn <= '1';
-        memWrAddr <= LOC_PAUSE_VC3_ADDR;
-        memWrData <= r.loc_pause_vc3;
-      when x"018" =>
-        memWrEn <= '1';
-        memWrAddr <= TX_ERR_CNT_ADDR;
-        memWrData <= r.tx_frame_error;
-      when x"019" =>
-        memWrEn <= '1';
-        memWrAddr <= TX_CNT_ADDR;
-        memWrData <= r.tx_frames;
-      when x"01A" =>
-        memWrEn <= '1';
-        memWrAddr <= IMAGE_SENT_ADDR;
-        memWrData <= r.image_sent;
-      when x"01B" =>
-        memWrEn <= '1';
-        memWrAddr <= IMAGE_DISC_ADDR;
-        memWrData <= r.image_disc;
-      when x"01C" =>
-        memWrEn <= '1';
-        memWrAddr <= IMAGE_TRUNC_ADDR;
-        memWrData <= r.image_trunc;
-      when x"01D" =>
-        memWrEn <= '1';
-        memWrAddr <= DATA_FORMAT_ADDR;
-        memWrData <= x"0000000" & DataFormat;
-      when x"01E" =>
-        memWrEn <= '1';
-        memWrAddr <= OPCODE_CNT_ADDR;
-        memWrData <= r.opcode_cnt;
-      when x"01F" =>
-        memWrEn <= '1';
-        memWrAddr <= OPCODE_LAST_ADDR;
-        memWrData <= r.opcode_last;
-      when x"020" =>
-        memWrEn <= '1';
-        memWrAddr <= NOTICE_CNT_ADDR;
-        memWrData <= r.notice_cnt;
-      when x"021" =>
-        memWrEn <= '1';
-        memWrAddr <= NOTICE_LAST_ADDR;
-        memWrData <= r.notice_last;
-      when others =>
-        memWrEn   <= '0';
-        memWrAddr <= (others => '0');
-        memWrData <= (others => '0');
-    end case;
-  end process;
-               
-  ----------------------------------------------------------------------------
-  -- Counters
-  ----------------------------------------------------------------------------
-   comb : process (statusReset, r, pgpRxOut, pgpTxOut,
-                   ImagesSent, ImagesTrunc, ImagesDisc,
-                   NoticeSent, NoticeLast) is
-     variable v : CounterType;
-
+   end process;
+   
+   process (StatusRst, StatusAddr, rxSync, txSync) is
    begin
-     v := r;
-
-     v.pgpRxOut := pgpRxOut;
-     v.pgpTxOut := pgpTxOut;
-     
-     if(statusReset = '1') then
-       v := COUNTER_INIT_C;
-     else
-     
-       if(pgpRxOut.cellError = '1') then
-         v.cell_error := r.cell_error + 1;
-       end if;
-  
-       if(pgpRxOut.linkDown = '1') then
-         v.link_down := r.link_down + 1;
-       end if;
-  
-       if(pgpRxOut.linkError = '1') then
-         v.link_error := r.link_error + 1;
-       end if;
-  
-       if(pgpRxOut.remOverflow(0)='1' and r.pgpRxOut.remOverflow(0)='0') then
-         v.rem_oflow_vc0 := r.rem_oflow_vc0 + 1;
-       end if;
-       if(pgpRxOut.remOverflow(1)='1' and r.pgpRxOut.remOverflow(1)='0') then
-         v.rem_oflow_vc1 := r.rem_oflow_vc1 + 1;
-       end if;
-       if(pgpRxOut.remOverflow(2)='1' and r.pgpRxOut.remOverflow(2)='0') then
-         v.rem_oflow_vc2 := r.rem_oflow_vc2 + 1;
-       end if;
-       if(pgpRxOut.remOverflow(3)='1' and r.pgpRxOut.remOverflow(3)='0') then
-         v.rem_oflow_vc3 := r.rem_oflow_vc3 + 1;
-       end if;
-       if(pgpRxOut.remPause(0)='1' and r.pgpRxOut.remPause(0)='0') then
-         v.rem_pause_vc0 := r.rem_pause_vc0 + 1;
-       end if;
-       if(pgpRxOut.remPause(1)='1' and r.pgpRxOut.remPause(1)='0') then
-         v.rem_pause_vc1 := r.rem_pause_vc1 + 1;
-       end if;
-       if(pgpRxOut.remPause(2)='1' and r.pgpRxOut.remPause(2)='0') then
-         v.rem_pause_vc2 := r.rem_pause_vc2 + 1;
-       end if;
-       if(pgpRxOut.remPause(3)='1' and r.pgpRxOut.remPause(3)='0') then
-         v.rem_pause_vc3 := r.rem_pause_vc3 + 1;
-       end if;
-  
-       if(pgpRxOut.frameRxErr = '1') then
-         v.rx_frame_error := r.rx_frame_error + 1;
-       end if;
-       if(pgpRxOut.frameRx = '1' or pgpRxOut.frameRxErr = '1') then
-         v.rx_frames := r.rx_frames + 1;
-       end if;
-  
-       if(pgpTxOut.locOverflow(0)='1' and r.pgpTxOut.locOverflow(0)='0') then
-         v.loc_oflow_vc0 := r.loc_oflow_vc0 + 1;
-       end if;
-       if(pgpTxOut.locOverflow(1)='1' and r.pgpTxOut.locOverflow(1)='0') then
-         v.loc_oflow_vc1 := r.loc_oflow_vc1 + 1;
-       end if;
-       if(pgpTxOut.locOverflow(2)='1' and r.pgpTxOut.locOverflow(2)='0') then
-         v.loc_oflow_vc2 := r.loc_oflow_vc2 + 1;
-       end if;
-       if(pgpTxOut.locOverflow(3)='1' and r.pgpTxOut.locOverflow(3)='0') then
-         v.loc_oflow_vc3 := r.loc_oflow_vc3 + 1;
-       end if;
-       if(pgpTxOut.locPause(0)='1' and r.pgpTxOut.locPause(0)='0') then
-         v.loc_pause_vc0 := r.loc_pause_vc0 + 1;
-       end if;
-       if(pgpTxOut.locPause(1)='1' and r.pgpTxOut.locPause(1)='0') then
-         v.loc_pause_vc1 := r.loc_pause_vc1 + 1;
-       end if;
-       if(pgpTxOut.locPause(2)='1' and r.pgpTxOut.locPause(2)='0') then
-         v.loc_pause_vc2 := r.loc_pause_vc2 + 1;
-       end if;
-       if(pgpTxOut.locPause(3)='1' and r.pgpTxOut.locPause(3)='0') then
-         v.loc_pause_vc3 := r.loc_pause_vc3 + 1;
-       end if;
-
-       if(pgpTxOut.frameTxErr = '1') then
-         v.tx_frame_error := r.tx_frame_error + 1;
-       end if;
-       if(pgpTxOut.frameTx = '1' or pgpTxOut.frameTxErr = '1') then
-         v.tx_frames := r.tx_frames + 1;
-       end if;
-       
-       if(ImagesSent = '1') then
-         v.image_sent := r.image_sent + 1;
-       end if;
-       if(ImagesTrunc = '1') then
-         v.image_trunc := r.image_trunc + 1;
-       end if;
-       if(ImagesDisc = '1') then
-         v.image_disc := r.image_disc + 1;
-       end if;
-
-       if(pgpRxOut.opCodeEn = '1') then
-         v.opcode_cnt := r.opcode_cnt + 1;
-         v.opcode_last := x"000000" & pgpRxOut.opCode;
-       end if;
-
-       if(NoticeSent = '1') then
-         v.notice_cnt := r.notice_cnt + 1;
-         v.notice_last := x"0000"&NoticeLast;
-       end if;
-     end if;
-
-     rin <= v;
-     
-   end process comb;
-
-   seq : process(pgpClk) is
-   begin
-     if(rising_edge(pgpClk)) then
-       r <= rin after TPD_G;
-     end if;
-   end process seq;
-     
+      case StatusAddr is
+         when VERSION_ADDR => 
+            StatusReg(31 downto 12) <= (others => '0');
+            StatusReg(11 downto  0) <= LSST_SCI_VERSION;
+         when LNKSTAT_ADDR =>
+            StatusReg <= "0000" &
+                         txSync.pgpTxOut.locOverflow & rxSync.pgpRxOut.remOverflow
+                         & txSync.pgpTxOut.locPause & rxSync.pgpRxOut.remPause
+                         & "00" & rxSync.pgpRxOut.linkPolarity
+                         & "000" & txSync.pgpTxOut.linkReady
+                         & rxSync.pgpRxOut.remLinkReady & rxSync.pgpRxOut.linkReady
+                         & txSync.pgpTxOut.phyTxReady & rxSync.pgpRxOut.phyRxReady;
+         when REM_DATA_ADDR =>
+            StatusReg <= x"000000" & rxSync.pgpRxOut.remLinkData;
+         when CERR_CNT_ADDR =>
+            StatusReg <= rxSync.cellErrCount;
+         when LDWN_CNT_ADDR =>
+            StatusReg <= rxSync.linkDownCount;
+         when LERR_CNT_ADDR =>
+            StatusReg <= rxSync.linkErrCount;
+         when REM_OFLOW_VC0_ADDR =>
+            StatusReg <= rxSync.remOverflow0Count;
+         when REM_OFLOW_VC1_ADDR =>
+            StatusReg <= rxSync.remOverflow1Count;
+         when REM_OFLOW_VC2_ADDR =>
+            StatusReg <= rxSync.remOverflow2Count;
+         when REM_OFLOW_VC3_ADDR =>
+            StatusReg <= rxSync.remOverflow3Count;
+         when REM_PAUSE_VC0_ADDR =>
+            StatusReg <= rxSync.remPause0Count;
+         when REM_PAUSE_VC1_ADDR =>
+            StatusReg <= rxSync.remPause1Count;
+         when REM_PAUSE_VC2_ADDR =>
+            StatusReg <= rxSync.remPause2Count;
+         when REM_PAUSE_VC3_ADDR =>
+            StatusReg <= rxSync.remPause3Count;
+         when RX_ERR_CNT_ADDR =>
+            StatusReg <= rxSync.frameErrCount;
+         when RX_CNT_ADDR =>
+            StatusReg <= rxSync.frameCount;
+         when LOC_OFLOW_VC0_ADDR =>
+            StatusReg <= txSync.overflow0Count;
+         when LOC_OFLOW_VC1_ADDR =>
+            StatusReg <= txSync.overflow1Count;
+         when LOC_OFLOW_VC2_ADDR =>
+            StatusReg <= txSync.overflow2Count;
+         when LOC_OFLOW_VC3_ADDR =>
+            StatusReg <= txSync.overflow3Count;
+         when LOC_PAUSE_VC0_ADDR =>
+            StatusReg <= txSync.pause0Count;
+         when LOC_PAUSE_VC1_ADDR =>
+            StatusReg <= txSync.pause1Count;
+         when LOC_PAUSE_VC2_ADDR =>
+            StatusReg <= txSync.pause2Count;
+         when LOC_PAUSE_VC3_ADDR =>
+            StatusReg <= txSync.pause3Count;
+         when TX_ERR_CNT_ADDR =>
+            StatusReg <= txSync.frameErrCount;
+         when TX_CNT_ADDR =>
+            StatusReg <= txSync.frameCount;
+         when IMAGE_SENT_ADDR =>
+            StatusReg <= txSync.sentCount;
+         when IMAGE_DISC_ADDR =>
+            StatusReg <= txSync.discCount;
+         when IMAGE_TRUNC_ADDR =>
+            StatusReg <= txSync.truncCount;
+         when IMAGE_FORMAT_ADDR =>
+            StatusReg <= x"0000000" & ImageStatus(0).format;
+         when IMAGE_SENT1_ADDR =>
+            StatusReg <= txSync.sent1Count;
+         when IMAGE_DISC1_ADDR =>
+            StatusReg <= txSync.disc1Count;
+         when IMAGE_TRUNC1_ADDR =>
+            StatusReg <= txSync.trunc1Count;
+         when IMAGE_FORMAT1_ADDR =>
+            StatusReg <= x"0000000" & ImageStatus(1).format;
+         when OPCODE_CNT_ADDR =>
+            StatusReg <= rxSync.opCodeCount;
+         when OPCODE_LAST_ADDR =>
+            StatusReg <= x"000000" & rxSync.opCodeLast;
+         when NOTICE_CNT_ADDR =>
+            StatusReg <= txSync.noticeCount;
+         when NOTICE_LAST_ADDR =>
+            StatusReg <= x"0000" & txSync.noticeLast;
+         when others =>
+            StatusReg <= (others => '0');
+      end case;
+   end process;
+      
+   
 end LsstSciStatusBlock;
