@@ -30,8 +30,10 @@ use ieee.std_logic_misc.all;            -- for or_reduce
 library UNISIM;
 use UNISIM.VComponents.all;
 
+use work.REB_v5_commands_package.all;
 use work.ads8634_and_mux_top_package.all;
 use work.LsstSciPackage.all;
+
 
 entity REB_v5_top is
 
@@ -392,36 +394,36 @@ architecture Behavioral of REB_v5_top is
           interrupt_mask_read      : in  std_logic_vector(13 downto 0);
 -- Image parameters
           image_size               : in  std_logic_vector(31 downto 0);  -- this register contains the image size
-          image_patter_read        : in  std_logic;  -- this register gives the state of image patter gen. 1 is ON
+          image_patter_read        : in  std_logic_vector(2 downto 0);  -- this register gives the state of image patter gen. 1 is ON
           ccd_sel_read             : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
           image_size_en            : out std_logic;  -- this line enables the register where the image size is written
           image_patter_en          : out std_logic;  -- this register enable the image patter gen. 1 is ON
           ccd_sel_en               : out std_logic;  -- register enable for CCD acquisition selector
 -- Sequencer
-          seq_time_mem_readbk      : in  std_logic_vector(15 downto 0);  -- time memory read bus
-          seq_out_mem_readbk       : in  std_logic_vector(31 downto 0);  -- time memory read bus
-          seq_prog_mem_readbk      : in  std_logic_vector(31 downto 0);  -- sequencer program memory read
-          seq_time_mem_w_en        : out std_logic;  -- this signal enables the time memory write
-          seq_out_mem_w_en         : out std_logic;  -- this signal enables the output memory write
-          seq_prog_mem_w_en        : out std_logic;  -- this signal enables the program memory write
-          seq_step                 : out std_logic;  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
-          seq_stop                 : out std_logic;  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-          enable_conv_shift_in     : in  std_logic;  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          enable_conv_shift        : out std_logic;  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          init_conv_shift          : out std_logic;  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          start_add_prog_mem_en    : out std_logic;
-          start_add_prog_mem_rbk   : in  std_logic_vector(9 downto 0);
-          seq_ind_func_mem_we      : out std_logic;
-          seq_ind_func_mem_rdbk    : in  std_logic_vector(3 downto 0);
-          seq_ind_rep_mem_we       : out std_logic;
-          seq_ind_rep_mem_rdbk     : in  std_logic_vector(23 downto 0);
-          seq_ind_sub_add_mem_we   : out std_logic;
-          seq_ind_sub_add_mem_rdbk : in  std_logic_vector(9 downto 0);
-          seq_ind_sub_rep_mem_we   : out std_logic;
-          seq_ind_sub_rep_mem_rdbk : in  std_logic_vector(15 downto 0);
-          seq_op_code_error        : in  std_logic;
-          seq_op_code_error_add    : in  std_logic_vector(9 downto 0);
-          seq_op_code_error_reset  : out std_logic;
+          seq_time_mem_readbk      : in  array316;  -- time memory read bus
+          seq_out_mem_readbk       : in  array332;  -- time memory read bus
+          seq_prog_mem_readbk      : in  array332;  -- sequencer program memory read
+          seq_time_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the time memory write
+          seq_out_mem_w_en         : out std_logic_vector(2 downto 0);  -- this signal enables the output memory write
+          seq_prog_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the program memory write
+          seq_step                 : out std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
+          seq_stop                 : out std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
+          enable_conv_shift_in     : in  std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+          enable_conv_shift        : out std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+          init_conv_shift          : out std_logic_vector(2 downto 0);  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+          start_add_prog_mem_en    : out std_logic_vector(2 downto 0);
+          start_add_prog_mem_rbk   : in  array310;
+          seq_ind_func_mem_we      : out std_logic_vector(2 downto 0);
+          seq_ind_func_mem_rdbk    : in  array34;
+          seq_ind_rep_mem_we       : out std_logic_vector(2 downto 0);
+          seq_ind_rep_mem_rdbk     : in  array324;
+          seq_ind_sub_add_mem_we   : out std_logic_vector(2 downto 0);
+          seq_ind_sub_add_mem_rdbk : in  array310;
+          seq_ind_sub_rep_mem_we   : out std_logic_vector(2 downto 0);
+          seq_ind_sub_rep_mem_rdbk : in  array316;
+          seq_op_code_error        : in  std_logic_vector(2 downto 0);
+          seq_op_code_error_add    : in  array310;
+          seq_op_code_error_reset  : out std_logic_vector(2 downto 0);
 -- ASPIC
           aspic_config_r_ccd_1     : in  std_logic_vector(15 downto 0);
           aspic_config_r_ccd_2     : in  std_logic_vector(15 downto 0);
@@ -566,16 +568,18 @@ architecture Behavioral of REB_v5_top is
 
   component REB_interrupt_top
     generic (
-      edge_en : std_logic_vector(13 downto 0));
+      interrupt_bus_width : integer := 32);
+
     port (
       clk               : in  std_logic;
       reset             : in  std_logic;
-      interrupt_bus_in  : in  std_logic_vector(13 downto 0);
+      edge_en           : in  std_logic_vector(interrupt_bus_width-1 downto 0);
+      interrupt_bus_in  : in  std_logic_vector(interrupt_bus_width-1 downto 0);
       mask_bus_in_en    : in  std_logic;
-      mask_bus_in       : in  std_logic_vector(13 downto 0);
-      mask_bus_out      : out std_logic_vector(13 downto 0);
+      mask_bus_in       : in  std_logic_vector(interrupt_bus_width-1 downto 0);
+      mask_bus_out      : out std_logic_vector(interrupt_bus_width-1 downto 0);
       interrupt_en_out  : out std_logic;
-      interrupt_bus_out : out std_logic_vector(13 downto 0));
+      interrupt_bus_out : out std_logic_vector(interrupt_bus_width-1 downto 0));
   end component;
 
   component base_reg_set_top is
@@ -1083,11 +1087,17 @@ architecture Behavioral of REB_v5_top is
 
 -- iterrupt signals
   signal interrupt_bus_in  : std_logic_vector(13 downto 0);
+  -- signal interrupt_bus_in  : std_logic_vector(31 downto 0);
   signal mask_bus_in_en    : std_logic;
   signal mask_bus_out      : std_logic_vector(13 downto 0);
+  --signal mask_bus_out      : std_logic_vector(31 downto 0);
   signal interrupt_en_out  : std_logic;
   signal interrupt_bus_out : std_logic_vector(13 downto 0);
+  --signal interrupt_bus_out : std_logic_vector(31 downto 0);
+  signal interrupt_edge_en : std_logic_vector(13 downto 0);
+  --  signal interrupt_edge_en : std_logic_vector(31 downto 0);
   signal fe_reset_notice   : std_logic;
+
 
 
   -- BRS signals
@@ -1100,48 +1110,49 @@ architecture Behavioral of REB_v5_top is
   signal time_base_busy         : std_logic;
 
   -- sequencer signals
-  signal sequencer_busy           : std_logic;
-  signal seq_time_mem_readbk      : std_logic_vector(15 downto 0);
-  signal seq_out_mem_readbk       : std_logic_vector(31 downto 0);
-  signal seq_prog_mem_readbk      : std_logic_vector(31 downto 0);
-  signal seq_time_mem_w_en        : std_logic;
-  signal seq_out_mem_w_en         : std_logic;
-  signal seq_prog_mem_w_en        : std_logic;
+  signal sequencer_busy           : std_logic_vector(2 downto 0);
+  signal sequencer_busy_or        : std_logic;
+  signal seq_time_mem_readbk      : array316;
+  signal seq_out_mem_readbk       : array332;
+  signal seq_prog_mem_readbk      : array332;
+  signal seq_time_mem_w_en        : std_logic_vector(2 downto 0);
+  signal seq_out_mem_w_en         : std_logic_vector(2 downto 0);
+  signal seq_prog_mem_w_en        : std_logic_vector(2 downto 0);
   signal seq_start                : std_logic;
-  signal seq_step                 : std_logic;
-  signal seq_stop                 : std_logic;
-  signal sequencer_outputs        : std_logic_vector(31 downto 0);
-  signal sequencer_outputs_int    : std_logic_vector(31 downto 0);
-  signal enable_conv_shift        : std_logic;
-  signal enable_conv_shift_out    : std_logic;
-  signal init_conv_shift          : std_logic;
-  signal end_sequence             : std_logic;
-  signal start_add_prog_mem_en    : std_logic;
-  signal start_add_prog_mem_rbk   : std_logic_vector(9 downto 0);
-  signal seq_ind_func_mem_we      : std_logic;
-  signal seq_ind_func_mem_rdbk    : std_logic_vector(3 downto 0);
-  signal seq_ind_rep_mem_we       : std_logic;
-  signal seq_ind_rep_mem_rdbk     : std_logic_vector(23 downto 0);
-  signal seq_ind_sub_add_mem_we   : std_logic;
-  signal seq_ind_sub_add_mem_rdbk : std_logic_vector(9 downto 0);
-  signal seq_ind_sub_rep_mem_we   : std_logic;
-  signal seq_ind_sub_rep_mem_rdbk : std_logic_vector(15 downto 0);
-  signal seq_op_code_error        : std_logic;
-  signal seq_op_code_error_reset  : std_logic;
-  signal seq_op_code_error_add    : std_logic_vector(9 downto 0);
+  signal seq_step                 : std_logic_vector(2 downto 0);
+  signal seq_stop                 : std_logic_vector(2 downto 0);
+  signal sequencer_outputs        : array332;
+  signal sequencer_outputs_int    : array332;
+  signal enable_conv_shift        : std_logic_vector(2 downto 0);
+  signal enable_conv_shift_out    : std_logic_vector(2 downto 0);
+  signal init_conv_shift          : std_logic_vector(2 downto 0);
+  signal end_sequence             : std_logic_vector(2 downto 0);
+  signal start_add_prog_mem_en    : std_logic_vector(2 downto 0);
+  signal start_add_prog_mem_rbk   : array310;
+  signal seq_ind_func_mem_we      : std_logic_vector(2 downto 0);
+  signal seq_ind_func_mem_rdbk    : array34;
+  signal seq_ind_rep_mem_we       : std_logic_vector(2 downto 0);
+  signal seq_ind_rep_mem_rdbk     : array324;
+  signal seq_ind_sub_add_mem_we   : std_logic_vector(2 downto 0);
+  signal seq_ind_sub_add_mem_rdbk : array310;
+  signal seq_ind_sub_rep_mem_we   : std_logic_vector(2 downto 0);
+  signal seq_ind_sub_rep_mem_rdbk : array316;
+  signal seq_op_code_error        : std_logic_vector(2 downto 0);
+  signal seq_op_code_error_reset  : std_logic_vector(2 downto 0);
+  signal seq_op_code_error_add    : array310;
 
 
 -- Image handler signals
 --      signal image_size                               : std_logic_vector(31 downto 0);
-  signal image_patter_read : std_logic;
+  signal image_patter_read : std_logic_vector(2 downto 0);
 --      signal image_size_en                    : std_logic;
   signal image_patter_en   : std_logic;
-  signal ADC_trigger       : std_logic;
+  signal ADC_trigger       : std_logic_vector(2 downto 0);
   signal CCD_sel_en        : std_logic;
   signal CCD_sel           : std_logic_vector(2 downto 0);
-  signal start_of_img      : std_logic;
-  signal end_of_img        : std_logic;
-  signal pattern_reset     : std_logic;
+  signal start_of_img      : std_logic_vector(2 downto 0);
+  signal end_of_img        : std_logic_vector(2 downto 0);
+  signal pattern_reset     : std_logic_vector(2 downto 0);
 
   -- ASPIC config signals
   signal aspic_start_trans    : std_logic;
@@ -1188,6 +1199,10 @@ architecture Behavioral of REB_v5_top is
   signal ser_clk_ccd_3    : std_logic_vector(2 downto 0);
   signal reset_gate_ccd_3 : std_logic;
   signal adc_data_ccd_3   : std_logic_vector(15 downto 0);
+
+  signal adc_data_int : array316;
+  signal adc_cnv_int  : std_logic_vector(2 downto 0);
+  signal adc_sck_int  : std_logic_vector(2 downto 0);
 
   -- ASPIC CCD 1
   signal ASPIC_r_up_ccd_1   : std_logic;
@@ -1384,10 +1399,25 @@ begin
   test_led_int(5)          <= dcm_locked;
 --test_led_int(4)                               <= '1';
 --test_led_int(2)                               <= ASPIC_miso_ccd_3;
-  busy_bus                 <= x"000000" & "000" & temp_busy & V_I_busy_or & sequencer_busy & time_base_busy & '0';
-  adc_data_ccd_1           <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
-  adc_data_ccd_2           <= adc_data_t_ccd_2 & adc_data_b_ccd_2;
-  adc_data_ccd_3           <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
+  busy_bus                 <= x"000000" & sequencer_busy & temp_busy & V_I_busy_or & sequencer_busy_or & time_base_busy & '0';
+  --adc_data_ccd_1           <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
+  --adc_data_ccd_2           <= adc_data_t_ccd_2 & adc_data_b_ccd_2;
+  --adc_data_ccd_3           <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
+  sequencer_busy_or        <= sequencer_busy(2) or sequencer_busy(1) or sequencer_busy(0);
+
+  adc_data_int(0) <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
+  adc_data_int(1) <= adc_data_t_ccd_2 & adc_data_b_ccd_2;
+  adc_data_int(2) <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
+
+  adc_cnv_ccd_1 <= adc_cnv_int(0);
+  adc_cnv_ccd_2 <= adc_cnv_int(1);
+  adc_cnv_ccd_3 <= adc_cnv_int(2);
+
+  adc_sck_ccd_1 <= adc_sck_int(0);
+  adc_sck_ccd_2 <= adc_sck_int(1);
+  adc_sck_ccd_3 <= adc_sck_int(2);
+
+
 
 -- trigger signals
   seq_start       <= (trigger_val_bus(2) and trigger_ce_bus(2)) or sync_cmd_out(0);
@@ -1407,57 +1437,68 @@ begin
 
   -- signals appears 2 times when both rising and falling edge notice has to be
   -- sent 
-  --interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & dataEOT & dataSOT & sequencer_busy & sequencer_busy & fe_reset_notice;
+  interrupt_edge_en <= "00" & x"0" & "10011011";
+  interrupt_bus_in  <= "00" & x"0" & sequencer_outputs(0)(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy_or & sequencer_busy_or & fe_reset_notice;
 
-  interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
+
+--interrupt_edge_en <= "00" & x"0000" & "001" & "11110" & "11110" & "11110";
+  --interrupt_bus_in <=  "00" & x"0000" & temp_busy & V_I_busy & fe_reset_notice &
+  --                    sequencer_outputs(2)(31) & SCI_DataIn(2).eot & SCI_DataIn(2).sot & sequencer_busy(2) & sequencer_busy(2) &
+  --                    sequencer_outputs(1)(31) & SCI_DataIn(1).eot & SCI_DataIn(1).sot & sequencer_busy(1) & sequencer_busy(1) &
+  --                    sequencer_outputs(0)(31) & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy(0) & sequencer_busy(0);
 
 ------------ Sequencer's signals assignment ------------
 -- CCD 1
-  ASPIC_r_up_ccd_1   <= sequencer_outputs(0) and CCD_sel(0);
-  ASPIC_r_down_ccd_1 <= sequencer_outputs(1) and CCD_sel(0);
-  ASPIC_reset_ccd_1  <= sequencer_outputs(2) and CCD_sel(0);
-  ASPIC_clamp_ccd_1  <= sequencer_outputs(3) and CCD_sel(0);
-  ser_clk_ccd_1(0)   <= sequencer_outputs(4) and CCD_sel(0);
-  ser_clk_ccd_1(1)   <= sequencer_outputs(5) and CCD_sel(0);
-  ser_clk_ccd_1(2)   <= sequencer_outputs(6) and CCD_sel(0);
-  reset_gate_ccd_1   <= sequencer_outputs(7) and CCD_sel(0);
-  par_clk_ccd_1(0)   <= sequencer_outputs(8) and CCD_sel(0);
-  par_clk_ccd_1(1)   <= sequencer_outputs(9) and CCD_sel(0);
-  par_clk_ccd_1(2)   <= sequencer_outputs(10) and CCD_sel(0);
-  par_clk_ccd_1(3)   <= sequencer_outputs(11) and CCD_sel(0);
+  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)(0);
+  ASPIC_r_down_ccd_1 <= sequencer_outputs(0)(1);
+  ASPIC_reset_ccd_1  <= sequencer_outputs(0)(2);
+  ASPIC_clamp_ccd_1  <= sequencer_outputs(0)(3);
+  ser_clk_ccd_1(0)   <= sequencer_outputs(0)(4);
+  ser_clk_ccd_1(1)   <= sequencer_outputs(0)(5);
+  ser_clk_ccd_1(2)   <= sequencer_outputs(0)(6);
+  reset_gate_ccd_1   <= sequencer_outputs(0)(7);
+  par_clk_ccd_1(0)   <= sequencer_outputs(0)(8);
+  par_clk_ccd_1(1)   <= sequencer_outputs(0)(9);
+  par_clk_ccd_1(2)   <= sequencer_outputs(0)(10);
+  par_clk_ccd_1(3)   <= sequencer_outputs(0)(11);
 
 -- CCD 2
-  ASPIC_r_up_ccd_2   <= sequencer_outputs(0) and CCD_sel(1);
-  ASPIC_r_down_ccd_2 <= sequencer_outputs(1) and CCD_sel(1);
-  ASPIC_reset_ccd_2  <= sequencer_outputs(2) and CCD_sel(1);
-  ASPIC_clamp_ccd_2  <= sequencer_outputs(3) and CCD_sel(1);
-  ser_clk_ccd_2(0)   <= sequencer_outputs(4) and CCD_sel(1);
-  ser_clk_ccd_2(1)   <= sequencer_outputs(5) and CCD_sel(1);
-  ser_clk_ccd_2(2)   <= sequencer_outputs(6) and CCD_sel(1);
-  reset_gate_ccd_2   <= sequencer_outputs(7) and CCD_sel(1);
-  par_clk_ccd_2(0)   <= sequencer_outputs(8) and CCD_sel(1);
-  par_clk_ccd_2(1)   <= sequencer_outputs(9) and CCD_sel(1);
-  par_clk_ccd_2(2)   <= sequencer_outputs(10) and CCD_sel(1);
-  par_clk_ccd_2(3)   <= sequencer_outputs(11) and CCD_sel(1);
+  ASPIC_r_up_ccd_2   <= sequencer_outputs(1)(0);
+  ASPIC_r_down_ccd_2 <= sequencer_outputs(1)(1);
+  ASPIC_reset_ccd_2  <= sequencer_outputs(1)(2);
+  ASPIC_clamp_ccd_2  <= sequencer_outputs(1)(3);
+  ser_clk_ccd_2(0)   <= sequencer_outputs(1)(4);
+  ser_clk_ccd_2(1)   <= sequencer_outputs(1)(5);
+  ser_clk_ccd_2(2)   <= sequencer_outputs(1)(6);
+  reset_gate_ccd_2   <= sequencer_outputs(1)(7);
+  par_clk_ccd_2(0)   <= sequencer_outputs(1)(8);
+  par_clk_ccd_2(1)   <= sequencer_outputs(1)(9);
+  par_clk_ccd_2(2)   <= sequencer_outputs(1)(10);
+  par_clk_ccd_2(3)   <= sequencer_outputs(1)(11);
 
 -- CCD 3
-  ASPIC_r_up_ccd_3   <= sequencer_outputs(0) and CCD_sel(2);
-  ASPIC_r_down_ccd_3 <= sequencer_outputs(1) and CCD_sel(2);
-  ASPIC_reset_ccd_3  <= sequencer_outputs(2) and CCD_sel(2);
-  ASPIC_clamp_ccd_3  <= sequencer_outputs(3) and CCD_sel(2);
-  ser_clk_ccd_3(0)   <= sequencer_outputs(4) and CCD_sel(2);
-  ser_clk_ccd_3(1)   <= sequencer_outputs(5) and CCD_sel(2);
-  ser_clk_ccd_3(2)   <= sequencer_outputs(6) and CCD_sel(2);
-  reset_gate_ccd_3   <= sequencer_outputs(7) and CCD_sel(2);
-  par_clk_ccd_3(0)   <= sequencer_outputs(8) and CCD_sel(2);
-  par_clk_ccd_3(1)   <= sequencer_outputs(9) and CCD_sel(2);
-  par_clk_ccd_3(2)   <= sequencer_outputs(10) and CCD_sel(2);
-  par_clk_ccd_3(3)   <= sequencer_outputs(11) and CCD_sel(2);
+  ASPIC_r_up_ccd_3   <= sequencer_outputs(2)(0);
+  ASPIC_r_down_ccd_3 <= sequencer_outputs(2)(1);
+  ASPIC_reset_ccd_3  <= sequencer_outputs(2)(2);
+  ASPIC_clamp_ccd_3  <= sequencer_outputs(2)(3);
+  ser_clk_ccd_3(0)   <= sequencer_outputs(2)(4);
+  ser_clk_ccd_3(1)   <= sequencer_outputs(2)(5);
+  ser_clk_ccd_3(2)   <= sequencer_outputs(2)(6);
+  reset_gate_ccd_3   <= sequencer_outputs(2)(7);
+  par_clk_ccd_3(0)   <= sequencer_outputs(2)(8);
+  par_clk_ccd_3(1)   <= sequencer_outputs(2)(9);
+  par_clk_ccd_3(2)   <= sequencer_outputs(2)(10);
+  par_clk_ccd_3(3)   <= sequencer_outputs(2)(11);
 
-  ADC_trigger   <= sequencer_outputs(12);
-  start_of_img  <= sequencer_outputs(13);
-  end_of_img    <= sequencer_outputs(14);
-  pattern_reset <= sequencer_outputs(16);
+  ADC_trigger <= (2 => sequencer_outputs(2)(12), 1 => sequencer_outputs(1)(12), 0 => sequencer_outputs(0)(12));
+  -- equivalent to :
+  -- ADC_trigger(2) <= sequencer_outputs(2)(12);
+  -- ADC_trigger(1) <= sequencer_outputs(1)(12);
+  -- ADC_trigger(0) <= sequencer_outputs(0)(12);
+
+  start_of_img  <= (2 => sequencer_outputs(2)(13), 1 => sequencer_outputs(1)(13), 0 => sequencer_outputs(0)(13));
+  end_of_img    <= (2 => sequencer_outputs(2)(14), 1 => sequencer_outputs(1)(14), 0 => sequencer_outputs(0)(14));
+  pattern_reset <= (2 => sequencer_outputs(2)(16), 1 => sequencer_outputs(1)(16), 0 => sequencer_outputs(0)(16));
 
 ------------ Chips NAP mode lines ------------
 --CCD 1 
@@ -1512,14 +1553,14 @@ begin
 
 ------------ assignment for test ------------
   -- test_port(10 downto 0) <= sequencer_outputs(10 downto 0);
-  test_port(11) <= sequencer_outputs(12);
-  test_port(12) <= sequencer_outputs(16);
+  test_port(11) <= sequencer_outputs(0)(12);
+  test_port(12) <= sequencer_outputs(0)(16);
   test_port(0)  <= sync_cmd_en;
   test_port(1)  <= sync_cmd_out(0);
 
 
 
-  gpio_int <= sequencer_outputs(16);
+  gpio_int <= sequencer_outputs(0)(16);
 
 -- Power down CCD ADC opamp (active low)
   CCD_OPAMP_PD <= '1';
@@ -1706,10 +1747,10 @@ begin
 -- Image parameters
       image_size               => x"00000000",  -- this register contains the image size
       image_patter_read        => image_patter_read,  -- this register gives the state of image patter gen. 1 is ON
-      ccd_sel_read             => CCD_sel,  -- this register contains the CCD to drive
+      ccd_sel_read             => "001",  -- this register contains the CCD to drive
       image_size_en            => open,  -- this line enables the register where the image size is written
       image_patter_en          => image_patter_en,  -- this register enable the image patter gen. 1 is ON
-      ccd_sel_en               => CCD_sel_en,  -- register enable for CCD acquisition selector
+      ccd_sel_en               => open,  -- register enable for CCD acquisition selector
 -- Sequencer
       seq_time_mem_readbk      => seq_time_mem_readbk,  -- time memory read bus
       seq_out_mem_readbk       => seq_out_mem_readbk,   -- time memory read bus
@@ -1911,110 +1952,117 @@ begin
   
   REB_interrupt_top_1 : REB_interrupt_top
     generic map (
-      edge_en => "00" & x"0" & "10011011")
+      --   interrupt_bus_width => 32)
+      interrupt_bus_width => 14)
     port map (
       clk               => usrClk,
       reset             => usrRst,
+      edge_en           => interrupt_edge_en,
       interrupt_bus_in  => interrupt_bus_in,
       mask_bus_in_en    => mask_bus_in_en,
       mask_bus_in       => regDataWr_masked(13 downto 0),
+      -- mask_bus_in       => regDataWr_masked(31 downto 0),
       mask_bus_out      => mask_bus_out,
       interrupt_en_out  => interrupt_en_out,
       interrupt_bus_out => interrupt_bus_out);
 
-  Image_data_handler_0 : ADC_data_handler_v4
-    port map (
-      reset => sync_res,
-      clk   => clk_100_Mhz,
+  three_sequencers_generate :
+  for i in 0 to 1 generate
+    
+    Image_data_handler_0 : ADC_data_handler_v4
+      port map (
+        reset => sync_res,
+        clk   => clk_100_Mhz,
 
-      testmode_rst => pattern_reset,
-      testmode_col => sequencer_outputs(8),
+        testmode_rst => pattern_reset(i),
+        testmode_col => sequencer_outputs(i)(8),
 
 --              start_of_img                    => seq_start,                                                                   -- this signal is generated by the user (using the sequencer) and has to arrive before the first trigger
-      start_of_img => start_of_img,
-      end_of_img   => end_of_img,  -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
-      end_sequence => end_sequence,  -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
+        start_of_img => start_of_img(i),
+        end_of_img   => end_of_img(i),  -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
+        end_sequence => end_sequence(i),  -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
 
-      trigger      => ADC_trigger,  -- this signal start the operations (ADC conv and send data to PGP)
-      en_test_mode => image_patter_en,  -- register enable for patter test mode
-      test_mode_in => regDataWr_masked(0),  -- test mode in 
+        trigger      => ADC_trigger(i),  -- this signal start the operations (ADC conv and send data to PGP)
+        en_test_mode => image_patter_en,  -- register enable for patter test mode
+        test_mode_in => regDataWr_masked(i),  -- test mode in 
 
-      en_load_ccd_sel => CCD_sel_en,    -- register enable for CCD enable
-      ccd_sel_in      => regDataWr_masked(2 downto 0),  -- register to select which CCD acquire (1, 2 or 3) 
-      ccd_sel_out     => CCD_sel,  -- register to select which CCD acquire (1, 2 or 3) 
+        --en_load_ccd_sel => CCD_sel_en,    -- register enable for CCD enable
+        --ccd_sel_in      => regDataWr_masked(2 downto 0),  -- register to select which CCD acquire (1, 2 or 3) 
+        --ccd_sel_out     => CCD_sel(0),  -- register to select which CCD acquire (1, 2 or 3)
 
-      --SOT          => dataSOT,          -- Start of Image
-      --EOT          => dataEOT,          -- End of Image
-      --write_enable => dataWrEn,         -- signal to write the image in the PGP
+        en_load_ccd_sel => '1',         -- register enable for CCD enable
+        ccd_sel_in      => "001",  -- register to select which CCD acquire (1, 2 or 3) 
+        ccd_sel_out     => open,  -- register to select which CCD acquire (1, 2 or 3) 
 
-      SOT          => SCI_DataIn(0).sot,   -- Start of Image
-      EOT          => SCI_DataIn(0).eot,   -- End of Image
-      write_enable => SCI_DataIn(0).wrEn,  -- signal to write the image in the PGP
+        SOT          => SCI_DataIn(i).sot,   -- Start of Image
+        EOT          => SCI_DataIn(i).eot,   -- End of Image
+        write_enable => SCI_DataIn(i).wrEn,  -- signal to write the image in the PGP
 
-      test_mode_enb_out => image_patter_read,
-      --data_out          => image_in,    -- 18 bits ADC word
+        test_mode_enb_out => image_patter_read(i),
 
-      data_out => SCI_DataIn(0).data,
+        data_out => SCI_DataIn(i).data,
 
-      adc_data_ccd_1 => adc_data_ccd_1,  -- CCD ADC data 
-      adc_cnv_ccd_1  => adc_cnv_ccd_1,   -- ADC conv
-      adc_sck_ccd_1  => adc_sck_ccd_1,   -- ADC serial clock
+        adc_data_ccd_1 => adc_data_int(i),  -- CCD ADC data 
+        adc_cnv_ccd_1  => adc_cnv_int(i),   -- ADC conv
+        adc_sck_ccd_1  => adc_sck_int(i),   -- ADC serial clock
 
-      adc_data_ccd_2 => adc_data_ccd_2,  -- CCD ADC data 
-      adc_cnv_ccd_2  => adc_cnv_ccd_2,   -- ADC conv
-      adc_sck_ccd_2  => adc_sck_ccd_2,   -- ADC serial clock
+        adc_data_ccd_2 => x"0000",      -- CCD ADC data 
+        adc_cnv_ccd_2  => open,         -- ADC conv
+        adc_sck_ccd_2  => open,         -- ADC serial clock
 
-      adc_data_ccd_3 => adc_data_ccd_3,  -- CCD ADC data 
-      adc_cnv_ccd_3  => adc_cnv_ccd_3,   -- ADC conv
-      adc_sck_ccd_3  => adc_sck_ccd_3    -- ADC serial clock
-      );
+        adc_data_ccd_3 => x"0000",      -- CCD ADC data 
+        adc_cnv_ccd_3  => open,         -- ADC conv
+        adc_sck_ccd_3  => open          -- ADC serial clock
+        );
 
-  sequencer_v3_0 : sequencer_v3_top
-    port map (
-      reset                    => sync_res,
-      clk                      => clk_100_MHz,
-      start_sequence           => seq_start,
-      program_mem_we           => seq_prog_mem_w_en,
-      seq_mem_w_add            => regAddr(9 downto 0),
-      seq_mem_data_in          => regDataWr_masked,
-      prog_mem_redbk           => seq_prog_mem_readbk,
-      program_mem_init_en      => start_add_prog_mem_en,
-      program_mem_init_add_rbk => start_add_prog_mem_rbk,
-      ind_func_mem_we          => seq_ind_func_mem_we,
-      ind_func_mem_redbk       => seq_ind_func_mem_rdbk,
-      ind_rep_mem_we           => seq_ind_rep_mem_we,
-      ind_rep_mem_redbk        => seq_ind_rep_mem_rdbk,
-      ind_sub_add_mem_we       => seq_ind_sub_add_mem_we,
-      ind_sub_add_mem_redbk    => seq_ind_sub_add_mem_rdbk,
-      ind_sub_rep_mem_we       => seq_ind_sub_rep_mem_we,
-      ind_sub_rep_mem_redbk    => seq_ind_sub_rep_mem_rdbk,
-      time_mem_w_en            => seq_time_mem_w_en,
-      time_mem_readbk          => seq_time_mem_readbk,
-      out_mem_w_en             => seq_out_mem_w_en,
-      out_mem_readbk           => seq_out_mem_readbk,
-      stop_sequence            => seq_stop,
-      step_sequence            => seq_step,
-      op_code_error_reset      => seq_op_code_error_reset,
-      op_code_error            => seq_op_code_error,
-      op_code_error_add        => seq_op_code_error_add,
-      sequencer_busy           => sequencer_busy,
-      sequencer_out            => sequencer_outputs_int,
-      end_sequence             => end_sequence
+    sequencer_v3_0 : sequencer_v3_top
+      port map (
+        reset                    => sync_res,
+        clk                      => clk_100_MHz,
+        start_sequence           => seq_start,
+        program_mem_we           => seq_prog_mem_w_en(i),
+        seq_mem_w_add            => regAddr(9 downto 0),
+        seq_mem_data_in          => regDataWr_masked,
+        prog_mem_redbk           => seq_prog_mem_readbk(i),
+        program_mem_init_en      => start_add_prog_mem_en(i),
+        program_mem_init_add_rbk => start_add_prog_mem_rbk(i),
+        ind_func_mem_we          => seq_ind_func_mem_we(i),
+        ind_func_mem_redbk       => seq_ind_func_mem_rdbk(i),
+        ind_rep_mem_we           => seq_ind_rep_mem_we(i),
+        ind_rep_mem_redbk        => seq_ind_rep_mem_rdbk(i),
+        ind_sub_add_mem_we       => seq_ind_sub_add_mem_we(i),
+        ind_sub_add_mem_redbk    => seq_ind_sub_add_mem_rdbk(i),
+        ind_sub_rep_mem_we       => seq_ind_sub_rep_mem_we(i),
+        ind_sub_rep_mem_redbk    => seq_ind_sub_rep_mem_rdbk(i),
+        time_mem_w_en            => seq_time_mem_w_en(i),
+        time_mem_readbk          => seq_time_mem_readbk(i),
+        out_mem_w_en             => seq_out_mem_w_en(i),
+        out_mem_readbk           => seq_out_mem_readbk(i),
+        stop_sequence            => seq_stop(i),
+        step_sequence            => seq_step(i),
+        op_code_error_reset      => seq_op_code_error_reset(i),
+        op_code_error            => seq_op_code_error(i),
+        op_code_error_add        => seq_op_code_error_add(i),
+        sequencer_busy           => sequencer_busy(i),
+        sequencer_out            => sequencer_outputs_int(i),
+        end_sequence             => end_sequence(i)
 --       CScopeControl => CONTROL1
-      );
+        );
 
-  sequencer_aligner_shifter : sequencer_aligner_shifter_top
-    generic map(start_adc_bit => 12)
-    port map (
-      clk           => clk_100_Mhz,
-      reset         => sync_res,
-      shift_on_en   => enable_conv_shift,
-      shift_on      => regDataWr_masked(0),
-      init_shift    => init_conv_shift,
-      sequencer_in  => sequencer_outputs_int,
-      shift_on_out  => enable_conv_shift_out,
-      sequencer_out => sequencer_outputs
-      );
+    sequencer_aligner_shifter : sequencer_aligner_shifter_top
+      generic map(start_adc_bit => 12)
+      port map (
+        clk           => clk_100_Mhz,
+        reset         => sync_res,
+        shift_on_en   => enable_conv_shift(i),
+        shift_on      => regDataWr_masked(i),
+        init_shift    => init_conv_shift(i),
+        sequencer_in  => sequencer_outputs_int(i),
+        shift_on_out  => enable_conv_shift_out(i),
+        sequencer_out => sequencer_outputs(i)
+        );
+
+  end generate;
 
 -- ASPIC 3 and ASPIC 4 have the same SPI link           
   aspic_4_spi_link_top_mux_0 : aspic_3_spi_link_top_mux

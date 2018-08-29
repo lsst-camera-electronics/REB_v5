@@ -52,30 +52,83 @@ package REB_v5_commands_package is
   constant read_status_reg_high : std_logic_vector(23 downto 0) := x"A003ff";
 
 -- Sequencer
-  constant func_time_set_base    : std_logic_vector(23 downto 0) := x"200000";
-  constant func_time_set_high    : std_logic_vector(23 downto 0) := x"2000ff";
-  constant func_out_set_base     : std_logic_vector(23 downto 0) := x"100000";
-  constant func_out_set_high     : std_logic_vector(23 downto 0) := x"1000ff";
-  constant prog_mem_base         : std_logic_vector(23 downto 0) := x"300000";
-  constant prog_mem_high         : std_logic_vector(23 downto 0) := x"300fff";
-  constant seq_step_cmd          : std_logic_vector(23 downto 0) := x"310000";
-  constant func_stop_cmd         : std_logic_vector(23 downto 0) := x"320000";
-  constant enable_conv_shift_cmd : std_logic_vector(23 downto 0) := x"330000";
-  constant init_conv_shift_cmd   : std_logic_vector(23 downto 0) := x"330001";
+  -- sequencer 0
+  constant func_time_set_base_0    : std_logic_vector(23 downto 0) := x"200000";
+  constant func_time_set_high_0    : std_logic_vector(23 downto 0) := x"2000ff";
+  constant func_out_set_base_0     : std_logic_vector(23 downto 0) := x"100000";
+  constant func_out_set_high_0     : std_logic_vector(23 downto 0) := x"1000ff";
+  constant prog_mem_base_0         : std_logic_vector(23 downto 0) := x"300000";
+  constant prog_mem_high_0         : std_logic_vector(23 downto 0) := x"300fff";
+  constant seq_step_cmd_0          : std_logic_vector(23 downto 0) := x"310000";
+  constant func_stop_cmd_0         : std_logic_vector(23 downto 0) := x"320000";
+  constant enable_conv_shift_cmd_0 : std_logic_vector(23 downto 0) := x"330000";
+  constant init_conv_shift_cmd_0   : std_logic_vector(23 downto 0) := x"330001";
 
-  constant start_add_cmd : std_logic_vector(23 downto 0) := x"340000";
+  constant start_add_cmd_0 : std_logic_vector(23 downto 0) := x"340000";
 
-  constant seq_ind_func_mem_base    : std_logic_vector(23 downto 0) := x"350000";
-  constant seq_ind_func_mem_high    : std_logic_vector(23 downto 0) := x"35000f";
-  constant seq_ind_rep_mem_base     : std_logic_vector(23 downto 0) := x"360000";
-  constant seq_ind_rep_mem_high     : std_logic_vector(23 downto 0) := x"36000f";
-  constant seq_ind_sub_add_mem_base : std_logic_vector(23 downto 0) := x"370000";
-  constant seq_ind_sub_add_mem_high : std_logic_vector(23 downto 0) := x"37000f";
-  constant seq_ind_sub_rep_mem_base : std_logic_vector(23 downto 0) := x"380000";
-  constant seq_ind_sub_rep_mem_high : std_logic_vector(23 downto 0) := x"38000f";
+  constant seq_ind_func_mem_base_0    : std_logic_vector(23 downto 0) := x"350000";
+  constant seq_ind_func_mem_high_0    : std_logic_vector(23 downto 0) := x"35000f";
+  constant seq_ind_rep_mem_base_0     : std_logic_vector(23 downto 0) := x"360000";
+  constant seq_ind_rep_mem_high_0     : std_logic_vector(23 downto 0) := x"36000f";
+  constant seq_ind_sub_add_mem_base_0 : std_logic_vector(23 downto 0) := x"370000";
+  constant seq_ind_sub_add_mem_high_0 : std_logic_vector(23 downto 0) := x"37000f";
+  constant seq_ind_sub_rep_mem_base_0 : std_logic_vector(23 downto 0) := x"380000";
+  constant seq_ind_sub_rep_mem_high_0 : std_logic_vector(23 downto 0) := x"38000f";
 
-  constant seq_op_code_error_rd_cmd    : std_logic_vector(23 downto 0) := x"390000";
-  constant seq_op_code_error_reset_cmd : std_logic_vector(23 downto 0) := x"390001";
+  constant seq_op_code_error_rd_cmd_0    : std_logic_vector(23 downto 0) := x"390000";
+  constant seq_op_code_error_reset_cmd_0 : std_logic_vector(23 downto 0) := x"390001";
+
+   -- sequencer 1
+  constant func_time_set_base_1    : std_logic_vector(23 downto 0) := x"201000";
+  constant func_time_set_high_1    : std_logic_vector(23 downto 0) := x"2010ff";
+  constant func_out_set_base_1     : std_logic_vector(23 downto 0) := x"101000";
+  constant func_out_set_high_1     : std_logic_vector(23 downto 0) := x"1010ff";
+  constant prog_mem_base_1         : std_logic_vector(23 downto 0) := x"301000";
+  constant prog_mem_high_1         : std_logic_vector(23 downto 0) := x"301fff";
+  constant seq_step_cmd_1          : std_logic_vector(23 downto 0) := x"311000";
+  constant func_stop_cmd_1         : std_logic_vector(23 downto 0) := x"321000";
+  constant enable_conv_shift_cmd_1 : std_logic_vector(23 downto 0) := x"331000";
+  constant init_conv_shift_cmd_1   : std_logic_vector(23 downto 0) := x"331001";
+
+  constant start_add_cmd_1 : std_logic_vector(23 downto 0) := x"341000";
+
+  constant seq_ind_func_mem_base_1    : std_logic_vector(23 downto 0) := x"351000";
+  constant seq_ind_func_mem_high_1    : std_logic_vector(23 downto 0) := x"35100f";
+  constant seq_ind_rep_mem_base_1     : std_logic_vector(23 downto 0) := x"361000";
+  constant seq_ind_rep_mem_high_1     : std_logic_vector(23 downto 0) := x"36100f";
+  constant seq_ind_sub_add_mem_base_1 : std_logic_vector(23 downto 0) := x"371000";
+  constant seq_ind_sub_add_mem_high_1 : std_logic_vector(23 downto 0) := x"37100f";
+  constant seq_ind_sub_rep_mem_base_1 : std_logic_vector(23 downto 0) := x"381000";
+  constant seq_ind_sub_rep_mem_high_1 : std_logic_vector(23 downto 0) := x"38100f";
+
+  constant seq_op_code_error_rd_cmd_1    : std_logic_vector(23 downto 0) := x"391000";
+  constant seq_op_code_error_reset_cmd_1 : std_logic_vector(23 downto 0) := x"391001";
+
+   -- sequencer 2
+  constant func_time_set_base_2    : std_logic_vector(23 downto 0) := x"202000";
+  constant func_time_set_high_2    : std_logic_vector(23 downto 0) := x"2020ff";
+  constant func_out_set_base_2     : std_logic_vector(23 downto 0) := x"102000";
+  constant func_out_set_high_2     : std_logic_vector(23 downto 0) := x"1020ff";
+  constant prog_mem_base_2         : std_logic_vector(23 downto 0) := x"302000";
+  constant prog_mem_high_2         : std_logic_vector(23 downto 0) := x"302fff";
+  constant seq_step_cmd_2          : std_logic_vector(23 downto 0) := x"312000";
+  constant func_stop_cmd_2         : std_logic_vector(23 downto 0) := x"322000";
+  constant enable_conv_shift_cmd_2 : std_logic_vector(23 downto 0) := x"332000";
+  constant init_conv_shift_cmd_2   : std_logic_vector(23 downto 0) := x"332001";
+
+  constant start_add_cmd_2 : std_logic_vector(23 downto 0) := x"342000";
+
+  constant seq_ind_func_mem_base_2    : std_logic_vector(23 downto 0) := x"352000";
+  constant seq_ind_func_mem_high_2    : std_logic_vector(23 downto 0) := x"35200f";
+  constant seq_ind_rep_mem_base_2     : std_logic_vector(23 downto 0) := x"362000";
+  constant seq_ind_rep_mem_high_2     : std_logic_vector(23 downto 0) := x"36200f";
+  constant seq_ind_sub_add_mem_base_2 : std_logic_vector(23 downto 0) := x"372000";
+  constant seq_ind_sub_add_mem_high_2 : std_logic_vector(23 downto 0) := x"37200f";
+  constant seq_ind_sub_rep_mem_base_2 : std_logic_vector(23 downto 0) := x"382000";
+  constant seq_ind_sub_rep_mem_high_2 : std_logic_vector(23 downto 0) := x"38200f";
+
+  constant seq_op_code_error_rd_cmd_2    : std_logic_vector(23 downto 0) := x"392000";
+  constant seq_op_code_error_reset_cmd_2 : std_logic_vector(23 downto 0) := x"392001";
 
 
 
@@ -174,6 +227,25 @@ package REB_v5_commands_package is
 
 -- multiboot
   constant start_multiboot_cmd : std_logic_vector(23 downto 0) := x"F00000";
+
+  -----------------------------------------------------------------------------
+  -- Array definition --
+  -----------------------------------------------------------------------------
+  subtype word_32 is std_logic_vector (31 downto 0);
+  type    array332 is array (2 downto 0) of word_32;
+
+  subtype word_24 is std_logic_vector (23 downto 0);
+  type    array324 is array (2 downto 0) of word_24;
+
+  subtype word_16 is std_logic_vector (15 downto 0);
+  type    array316 is array (2 downto 0) of word_16;
+
+  subtype word_10 is std_logic_vector (9 downto 0);
+  type    array310 is array (2 downto 0) of word_10;
+
+  subtype word_4 is std_logic_vector (3 downto 0);
+  type    array34 is array (2 downto 0) of word_4;
+
 
 end REB_v5_commands_package;
 

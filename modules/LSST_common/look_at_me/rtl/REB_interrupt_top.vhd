@@ -32,17 +32,17 @@ use UNISIM.VComponents.all;
 
 entity REB_interrupt_top is
   generic (
-    edge_en : std_logic_vector(13 downto 0) := "00" & x"000"  -- select which edge to pass 1 for rising 0 for falling
-    );
+    interrupt_bus_width : integer := 32);
   port (
     clk               : in  std_logic;
     reset             : in  std_logic;
-    interrupt_bus_in  : in  std_logic_vector(13 downto 0);
+    edge_en           : in  std_logic_vector(interrupt_bus_width-1 downto 0);  -- select which edge to pass 1 for rising 0 for falling
+    interrupt_bus_in  : in  std_logic_vector(interrupt_bus_width-1 downto 0);
     mask_bus_in_en    : in  std_logic;
-    mask_bus_in       : in  std_logic_vector(13 downto 0);
-    mask_bus_out      : out std_logic_vector(13 downto 0);
+    mask_bus_in       : in  std_logic_vector(interrupt_bus_width-1 downto 0);
+    mask_bus_out      : out std_logic_vector(interrupt_bus_width-1 downto 0);
     interrupt_en_out  : out std_logic;
-    interrupt_bus_out : out std_logic_vector(13 downto 0)
+    interrupt_bus_out : out std_logic_vector(interrupt_bus_width-1 downto 0)
     );  
 
 end REB_interrupt_top;
@@ -72,7 +72,7 @@ architecture Behavioral of REB_interrupt_top is
 begin
 
   mask_in_reg : generic_reg_ce_init
-    generic map (width => 13)
+    generic map (width => interrupt_bus_width-1)
     port map (
       reset    => reset,
       clk      => clk,
@@ -88,7 +88,7 @@ begin
 
 -- Positive and negative edge detector enabled with edge_en
   edge_detector_generate :
-  for i in 0 to 13 generate
+  for i in 0 to interrupt_bus_width-1 generate
     edge_detect_ff : FD port map (D => interrupt_bus_in(i), C => clk, Q => edge_in_bus(i));
     posedge_out_bus(i) <= interrupt_bus_in_masked(i) and (not edge_in_bus(i)) and edge_en(i);
     negedge_out_bus(i) <= not(interrupt_bus_in_masked(i)) and edge_in_bus(i) and not edge_en(i);
@@ -102,13 +102,13 @@ begin
 -- OR of all the pos edge and neg edge signals to for the iterrupt enable
   interrupt_en_out_int <= (or_reduce(edge_out_bus));
 
--- delay to allign the itterput enable with the interupt out bus
+-- delay to allign the itterput enable with the interrupt out bus
   interrupt_en_ff : FD port map (D => interrupt_en_out_int, C => clk, Q => interrupt_en_out);
 
 
 
   iterrupt_out_reg : generic_reg_ce_init
-    generic map (width => 13)
+    generic map (width => interrupt_bus_width-1)
     port map (
       reset    => reset,
       clk      => clk,

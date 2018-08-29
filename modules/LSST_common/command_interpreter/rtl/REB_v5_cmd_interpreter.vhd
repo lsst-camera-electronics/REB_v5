@@ -84,37 +84,37 @@ entity REB_v5_cmd_interpreter is
 
 -- Image parameters
         image_size        : in  std_logic_vector(31 downto 0);  -- this register contains the image size
-        image_patter_read : in  std_logic;  -- this register gives the state of image patter gen. 1 is ON
+        image_patter_read : in  std_logic_vector(2 downto 0);  -- this register gives the state of image patter gen. 1 is ON
         ccd_sel_read      : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
         image_size_en     : out std_logic;  -- this line enables the register where the image size is written
         image_patter_en   : out std_logic;  -- this register enable the image patter gen. 1 is ON
         ccd_sel_en        : out std_logic;  -- register enable for CCD acquisition selector
 
 -- Sequencer
-        seq_time_mem_readbk      : in  std_logic_vector(15 downto 0);  -- time memory read bus
-        seq_out_mem_readbk       : in  std_logic_vector(31 downto 0);  -- time memory read bus
-        seq_prog_mem_readbk      : in  std_logic_vector(31 downto 0);  -- sequencer program memory read
-        seq_time_mem_w_en        : out std_logic;  -- this signal enables the time memory write
-        seq_out_mem_w_en         : out std_logic;  -- this signal enables the output memory write
-        seq_prog_mem_w_en        : out std_logic;  -- this signal enables the program memory write
-        seq_step                 : out std_logic;  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
-        seq_stop                 : out std_logic;  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-        enable_conv_shift_in     : in  std_logic;  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-        enable_conv_shift        : out std_logic;  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-        init_conv_shift          : out std_logic;  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-        start_add_prog_mem_en    : out std_logic;
-        start_add_prog_mem_rbk   : in  std_logic_vector(9 downto 0);
-        seq_ind_func_mem_we      : out std_logic;
-        seq_ind_func_mem_rdbk    : in  std_logic_vector(3 downto 0);
-        seq_ind_rep_mem_we       : out std_logic;
-        seq_ind_rep_mem_rdbk     : in  std_logic_vector(23 downto 0);
-        seq_ind_sub_add_mem_we   : out std_logic;
-        seq_ind_sub_add_mem_rdbk : in  std_logic_vector(9 downto 0);
-        seq_ind_sub_rep_mem_we   : out std_logic;
-        seq_ind_sub_rep_mem_rdbk : in  std_logic_vector(15 downto 0);
-        seq_op_code_error        : in  std_logic;
-        seq_op_code_error_add    : in  std_logic_vector(9 downto 0);
-        seq_op_code_error_reset  : out std_logic;
+        seq_time_mem_readbk      : in  array316;  -- time memory read bus
+        seq_out_mem_readbk       : in  array332;  -- time memory read bus
+        seq_prog_mem_readbk      : in  array332;  -- sequencer program memory read
+        seq_time_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the time memory write
+        seq_out_mem_w_en         : out std_logic_vector(2 downto 0);  -- this signal enables the output memory write
+        seq_prog_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the program memory write
+        seq_step                 : out std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
+        seq_stop                 : out std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
+        enable_conv_shift_in     : in  std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+        enable_conv_shift        : out std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+        init_conv_shift          : out std_logic_vector(2 downto 0);  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+        start_add_prog_mem_en    : out std_logic_vector(2 downto 0);
+        start_add_prog_mem_rbk   : in  array310;
+        seq_ind_func_mem_we      : out std_logic_vector(2 downto 0);
+        seq_ind_func_mem_rdbk    : in  array34;
+        seq_ind_rep_mem_we       : out std_logic_vector(2 downto 0);
+        seq_ind_rep_mem_rdbk     : in  array324;
+        seq_ind_sub_add_mem_we   : out std_logic_vector(2 downto 0);
+        seq_ind_sub_add_mem_rdbk : in  array310;
+        seq_ind_sub_rep_mem_we   : out std_logic_vector(2 downto 0);
+        seq_ind_sub_rep_mem_rdbk : in  array316;
+        seq_op_code_error        : in  std_logic_vector(2 downto 0);
+        seq_op_code_error_add    : in  array310;
+        seq_op_code_error_reset  : out std_logic_vector(2 downto 0);
 
 -- ASPIC
         aspic_config_r_ccd_1 : in  std_logic_vector(15 downto 0);
@@ -379,19 +379,19 @@ architecture Behavioral of REB_v5_cmd_interpreter is
   signal next_ccd_sel_en      : std_logic;
 
 -- Sequencer
-  signal next_seq_time_mem_w_en       : std_logic;  -- function outupt register enable flag
-  signal next_seq_out_mem_w_en        : std_logic;  -- function time register enable flag
-  signal next_seq_prog_mem_w_en       : std_logic;  -- sequencer program memory enable flag
-  signal next_seq_step                : std_logic;  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
-  signal next_seq_stop                : std_logic;  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL and stop all function)   
-  signal next_enable_conv_shift       : std_logic;
-  signal next_init_conv_shift         : std_logic;
-  signal next_start_add_prog_mem_en   : std_logic;
-  signal next_seq_ind_func_mem_we     : std_logic;
-  signal next_seq_ind_rep_mem_we      : std_logic;
-  signal next_seq_ind_sub_add_mem_we  : std_logic;
-  signal next_seq_ind_sub_rep_mem_we  : std_logic;
-  signal next_seq_op_code_error_reset : std_logic;
+  signal next_seq_time_mem_w_en       : std_logic_vector(2 downto 0);  -- function outupt register enable flag
+  signal next_seq_out_mem_w_en        : std_logic_vector(2 downto 0);  -- function time register enable flag
+  signal next_seq_prog_mem_w_en       : std_logic_vector(2 downto 0);  -- sequencer program memory enable flag
+  signal next_seq_step                : std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
+  signal next_seq_stop                : std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL and stop all function)   
+  signal next_enable_conv_shift       : std_logic_vector(2 downto 0);
+  signal next_init_conv_shift         : std_logic_vector(2 downto 0);
+  signal next_start_add_prog_mem_en   : std_logic_vector(2 downto 0);
+  signal next_seq_ind_func_mem_we     : std_logic_vector(2 downto 0);
+  signal next_seq_ind_rep_mem_we      : std_logic_vector(2 downto 0);
+  signal next_seq_ind_sub_add_mem_we  : std_logic_vector(2 downto 0);
+  signal next_seq_ind_sub_rep_mem_we  : std_logic_vector(2 downto 0);
+  signal next_seq_op_code_error_reset : std_logic_vector(2 downto 0);
 
 -- ASPIC
   signal next_aspic_start_trans : std_logic;
@@ -473,19 +473,19 @@ begin
         ccd_sel_en      <= '0';
 
         -- Sequencer reset state                                
-        seq_time_mem_w_en       <= '0';
-        seq_out_mem_w_en        <= '0';
-        seq_prog_mem_w_en       <= '0';
-        seq_step                <= '0';
-        seq_stop                <= '0';
-        enable_conv_shift       <= '0';
-        init_conv_shift         <= '0';
-        start_add_prog_mem_en   <= '0';
-        seq_ind_func_mem_we     <= '0';
-        seq_ind_rep_mem_we      <= '0';
-        seq_ind_sub_add_mem_we  <= '0';
-        seq_ind_sub_rep_mem_we  <= '0';
-        seq_op_code_error_reset <= '0';
+        seq_time_mem_w_en       <= (others => '0');
+        seq_out_mem_w_en        <= (others => '0');
+        seq_prog_mem_w_en       <= (others => '0');
+        seq_step                <= (others => '0');
+        seq_stop                <= (others => '0');
+        enable_conv_shift       <= (others => '0');
+        init_conv_shift         <= (others => '0');
+        start_add_prog_mem_en   <= (others => '0');
+        seq_ind_func_mem_we     <= (others => '0');
+        seq_ind_rep_mem_we      <= (others => '0');
+        seq_ind_sub_add_mem_we  <= (others => '0');
+        seq_ind_sub_rep_mem_we  <= (others => '0');
+        seq_op_code_error_reset <= (others => '0');
 
         -- ASPIC
         aspic_start_trans <= '0';
@@ -703,19 +703,19 @@ begin
     next_ccd_sel_en      <= '0';
 
                                         -- Sequencer default state
-    next_seq_time_mem_w_en       <= '0';
-    next_seq_out_mem_w_en        <= '0';
-    next_seq_prog_mem_w_en       <= '0';
-    next_seq_step                <= '0';
-    next_seq_stop                <= '0';
-    next_enable_conv_shift       <= '0';
-    next_init_conv_shift         <= '0';
-    next_start_add_prog_mem_en   <= '0';
-    next_seq_ind_func_mem_we     <= '0';
-    next_seq_ind_rep_mem_we      <= '0';
-    next_seq_ind_sub_add_mem_we  <= '0';
-    next_seq_ind_sub_rep_mem_we  <= '0';
-    next_seq_op_code_error_reset <= '0';
+    next_seq_time_mem_w_en       <= (others => '0');
+    next_seq_out_mem_w_en        <= (others => '0');
+    next_seq_prog_mem_w_en       <= (others => '0');
+    next_seq_step                <= (others => '0');
+    next_seq_stop                <= (others => '0');
+    next_enable_conv_shift       <= (others => '0');
+    next_init_conv_shift         <= (others => '0');
+    next_start_add_prog_mem_en   <= (others => '0');
+    next_seq_ind_func_mem_we     <= (others => '0');
+    next_seq_ind_rep_mem_we      <= (others => '0');
+    next_seq_ind_sub_add_mem_we  <= (others => '0');
+    next_seq_ind_sub_rep_mem_we  <= (others => '0');
+    next_seq_op_code_error_reset <= (others => '0');
 
                                         -- ASPIC
     next_aspic_start_trans <= '0';
@@ -889,43 +889,57 @@ begin
 
               -------- Sequencer parameters read
               -- time memory read
-            elsif (regAddr >= func_time_set_base) and (regAddr <= func_time_set_high) then
-              next_state <= seq_func_time_rd;
+            elsif ((regAddr >= func_time_set_base_0) and (regAddr <= func_time_set_high_0)) or
+              ((regAddr >= func_time_set_base_1) and (regAddr <= func_time_set_high_1)) or
+              ((regAddr >= func_time_set_base_2) and (regAddr <= func_time_set_high_2)) then
+              next_state                                      <= seq_func_time_rd;
 
                                         -- output memory read
-            elsif (regAddr >= func_out_set_base) and (regAddr <= func_out_set_high) then
-              next_state <= seq_func_out_rd;
+            elsif ((regAddr >= func_out_set_base_0) and (regAddr <= func_out_set_high_0)) or
+              ((regAddr >= func_out_set_base_1) and (regAddr <= func_out_set_high_1)) or
+              ((regAddr >= func_out_set_base_2) and (regAddr <= func_out_set_high_2)) then
+              next_state                                     <= seq_func_out_rd;
 
                                         -- program memory read
-            elsif (regAddr >= prog_mem_base) and (regAddr <= prog_mem_high) then
-              next_state <= seq_prog_mem_rd;
+            elsif ((regAddr >= prog_mem_base_0) and (regAddr <= prog_mem_high_0)) or
+              ((regAddr >= prog_mem_base_1) and (regAddr <= prog_mem_high_1)) or
+              ((regAddr >= prog_mem_base_2) and (regAddr <= prog_mem_high_2)) then
+              next_state                                 <= seq_prog_mem_rd;
 
                                         -- read ADC conv shifter configuration
-            elsif regAddr = enable_conv_shift_cmd then
+            elsif regAddr = enable_conv_shift_cmd_0 or regAddr = enable_conv_shift_cmd_1 or regAddr = enable_conv_shift_cmd_2 then
               next_state <= enable_conv_shift_rd;
 
                                         -- read the program mem start address 
-            elsif regAddr = start_add_cmd then
+            elsif regAddr = start_add_cmd_0 or regAddr = start_add_cmd_1 or regAddr = start_add_cmd_2 then
               next_state <= start_add_prog_mem_rd_state;
 
                                         -- reads indirect functions memory  
-            elsif (regAddr >= seq_ind_func_mem_base) and (regAddr <= seq_ind_func_mem_high) then
-              next_state <= seq_ind_func_mem_rdbk_state;
+            elsif ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
+              ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
+              ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2)) then
+              next_state                                         <= seq_ind_func_mem_rdbk_state;
 
                                         -- reads indirect repetitions mem 
-            elsif (regAddr >= seq_ind_rep_mem_base) and (regAddr <= seq_ind_rep_mem_high) then
-              next_state <= seq_ind_rep_mem_rdbk_state;
+            elsif ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
+              ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
+              ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2)) then
+              next_state                                        <= seq_ind_rep_mem_rdbk_state;
 
                                         -- reads indirect subroutines mem 
-            elsif (regAddr >= seq_ind_sub_add_mem_base) and (regAddr <= seq_ind_sub_add_mem_high) then
-              next_state <= seq_ind_sub_add_mem_rdbk_state;
+            elsif ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
+              ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
+              ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2)) then
+              next_state                                            <= seq_ind_sub_add_mem_rdbk_state;
 
                                         -- reads indirect subroutines repetitions mem 
-            elsif (regAddr >= seq_ind_sub_rep_mem_base) and (regAddr <= seq_ind_sub_rep_mem_high) then
-              next_state <= seq_ind_sub_rep_mem_rdbk_state;
+            elsif ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
+              ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
+              ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2)) then
+              next_state                                            <= seq_ind_sub_rep_mem_rdbk_state;
 
                                         -- reads op code error flag 
-            elsif regAddr = seq_op_code_error_rd_cmd then
+            elsif regAddr = seq_op_code_error_rd_cmd_0 or regAddr = seq_op_code_error_rd_cmd_1 or regAddr = seq_op_code_error_rd_cmd_2 then
               next_state <= seq_op_code_error_rd_state;
 
               --------ASPIC parameters read             
@@ -1168,66 +1182,189 @@ begin
 
 ---------- Sequencer Parameters Write
 
-                                        -- function time write          
-            elsif (regAddr >= func_time_set_base) and (regAddr <= func_time_set_high)then
-              next_state             <= func_time_wr;
-              next_seq_time_mem_w_en <= '1';
+              -- function time write          
+            elsif ((regAddr >= func_time_set_base_0) and (regAddr <= func_time_set_high_0)) or
+              ((regAddr >= func_time_set_base_1) and (regAddr <= func_time_set_high_1)) or
+              ((regAddr >= func_time_set_base_2) and (regAddr <= func_time_set_high_2))
+            then
+              next_state <= func_time_wr;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_time_mem_w_en(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_time_mem_w_en(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_time_mem_w_en(2) <= '1';
+              end if;
 
                                         -- function outputs write
-            elsif (regAddr >= func_out_set_base) and (regAddr <= func_out_set_high) then
-              next_state            <= func_output_wr;
-              next_seq_out_mem_w_en <= '1';
+            elsif ((regAddr >= func_out_set_base_0) and (regAddr <= func_out_set_high_0)) or
+              ((regAddr >= func_out_set_base_1) and (regAddr <= func_out_set_high_1)) or
+              ((regAddr >= func_out_set_base_2) and (regAddr <= func_out_set_high_2))
+            then
+              next_state <= func_output_wr;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_out_mem_w_en(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_out_mem_w_en(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_out_mem_w_en(2) <= '1';
+              end if;
+
 
                                         -- program memory write                 
-            elsif (regAddr >= prog_mem_base) and (regAddr <= prog_mem_high) then
-              next_state             <= seq_prog_mem_wr;
-              next_seq_prog_mem_w_en <= '1';
+            elsif ((regAddr >= prog_mem_base_0) and (regAddr <= prog_mem_high_0)) or
+              ((regAddr >= prog_mem_base_1) and (regAddr <= prog_mem_high_1)) or
+              ((regAddr >= prog_mem_base_2) and (regAddr <= prog_mem_high_2))
+            then
+              next_state <= seq_prog_mem_wr;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_prog_mem_w_en(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_prog_mem_w_en(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_prog_mem_w_en(2) <= '1';
+              end if;
+
 
                                         -- sequencer step                       
-            elsif regAddr = seq_step_cmd then
-              next_state    <= seq_step_state;
-              next_seq_step <= '1';
+            elsif regAddr = seq_step_cmd_0 or regAddr = seq_step_cmd_1 or regAddr = seq_step_cmd_2 then
+              next_state <= seq_step_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_step(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_step(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_step(2) <= '1';
+              end if;
+
 
                                         -- sequencer stop
-            elsif regAddr = func_stop_cmd then
-              next_state    <= seq_stop_state;
-              next_seq_stop <= '1';
+            elsif regAddr = func_stop_cmd_0 or regAddr = func_stop_cmd_1 or regAddr = func_stop_cmd_2 then
+              next_state <= seq_stop_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_stop(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_stop(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_stop(2) <= '1';
+              end if;
+
 
                                         -- enable video ADC conv shift
-            elsif regAddr = enable_conv_shift_cmd then
-              next_state             <= enable_conv_shift_state;
-              next_enable_conv_shift <= '1';
+            elsif regAddr = enable_conv_shift_cmd_0 or regAddr = enable_conv_shift_cmd_1 or regAddr = enable_conv_shift_cmd_2 then
+              next_state <= enable_conv_shift_state;
+              if regAddr(13 downto 12) = "00" then
+                next_enable_conv_shift(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_enable_conv_shift(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_enable_conv_shift(2) <= '1';
+              end if;
 
                                         -- initialize video ADC conv shift
-            elsif regAddr = init_conv_shift_cmd then
-              next_state           <= init_conv_shift_state;
-              next_init_conv_shift <= '1';
+            elsif regAddr = init_conv_shift_cmd_0 or regAddr = init_conv_shift_cmd_1 or regAddr = init_conv_shift_cmd_2 then
+              next_state <= init_conv_shift_state;
+              if regAddr(13 downto 12) = "00" then
+                next_init_conv_shift(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_init_conv_shift(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_init_conv_shift(2) <= '1';
+              end if;
+
 
                                         -- indirect memory write                        
-            elsif regAddr = start_add_cmd then
-              next_state                 <= enable_start_add_prog_mem_state;
-              next_start_add_prog_mem_en <= '1';
+            elsif regAddr = start_add_cmd_0 or regAddr = start_add_cmd_1 or regAddr = start_add_cmd_2 then
+              next_state <= enable_start_add_prog_mem_state;
+              if regAddr(13 downto 12) = "00" then
+                next_start_add_prog_mem_en(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_start_add_prog_mem_en(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_start_add_prog_mem_en(2) <= '1';
+              end if;
               
-            elsif (regAddr >= seq_ind_func_mem_base) and (regAddr <= seq_ind_func_mem_high) then
-              next_state               <= seq_ind_func_mem_we_state;
-              next_seq_ind_func_mem_we <= '1';
               
-            elsif (regAddr >= seq_ind_rep_mem_base) and (regAddr <= seq_ind_rep_mem_high) then
-              next_state              <= seq_ind_rep_mem_we_state;
-              next_seq_ind_rep_mem_we <= '1';
+            elsif ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
+              ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
+              ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2))
+            then
+              next_state <= seq_ind_func_mem_we_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_ind_func_mem_we(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_ind_func_mem_we(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_ind_func_mem_we(2) <= '1';
+              end if;
               
-            elsif (regAddr >= seq_ind_sub_add_mem_base) and (regAddr <= seq_ind_sub_add_mem_high) then
-              next_state                  <= seq_ind_sub_add_mem_we_state;
-              next_seq_ind_sub_add_mem_we <= '1';
               
-            elsif (regAddr >= seq_ind_sub_rep_mem_base) and (regAddr <= seq_ind_sub_rep_mem_high) then
-              next_state                  <= seq_ind_sub_rep_mem_we_state;
-              next_seq_ind_sub_rep_mem_we <= '1';
+            elsif ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
+              ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
+              ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2))
+            then
+              next_state <= seq_ind_rep_mem_we_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_ind_rep_mem_we(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_ind_rep_mem_we(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_ind_rep_mem_we(2) <= '1';
+              end if;
+              
+              
+            elsif ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
+              ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
+              ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2))
+            then
+              next_state <= seq_ind_sub_add_mem_we_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_ind_sub_add_mem_we(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_ind_sub_add_mem_we(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_ind_sub_add_mem_we(2) <= '1';
+              end if;
+              
+              
+            elsif ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
+              ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
+              ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2))
+            then
+              next_state <= seq_ind_sub_rep_mem_we_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_ind_sub_rep_mem_we(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_ind_sub_rep_mem_we(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_ind_sub_rep_mem_we(2) <= '1';
+              end if;
+
 
               -- op code error reset
-            elsif regAddr = seq_op_code_error_reset_cmd then
-              next_state                   <= seq_op_code_error_reset_state;
-              next_seq_op_code_error_reset <= '1';
+            elsif regAddr = seq_op_code_error_reset_cmd_0 or regAddr = seq_op_code_error_reset_cmd_1 or regAddr = seq_op_code_error_reset_cmd_2 then
+              next_state <= seq_op_code_error_reset_state;
+              if regAddr(13 downto 12) = "00" then
+                next_seq_op_code_error_reset(0) <= '1';
+              elsif regAddr(13 downto 12) = "01" then
+                next_seq_op_code_error_reset(1) <= '1';
+              else
+                --this condition is met also with "11" but is blocked by the previousstate
+                next_seq_op_code_error_reset(2) <= '1';
+              end if;
+
 
 
 ---------- ASPIC Parameters Write
@@ -1491,7 +1628,7 @@ begin
       when read_image_patter_mode_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
-        next_regDataRd <= x"0000000" & "000" & image_patter_read;
+        next_regDataRd <= x"0000000" & '0' & image_patter_read;
 
         -- CCD selector read (add 400007)       
       when read_ccd_sel_state =>
@@ -1608,64 +1745,134 @@ begin
 
         -- sequencer time memory read           
       when seq_func_time_rd =>
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd(15 downto 0) <= seq_time_mem_readbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd(15 downto 0) <= seq_time_mem_readbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd(15 downto 0) <= seq_time_mem_readbk(2);
+        end if;
         next_state                   <= wait_end_cmd;
         next_regDataRd(31 downto 16) <= x"0000";
-        next_regDataRd(15 downto 0)  <= seq_time_mem_readbk;
         next_regAck                  <= '1';
 
         -- sequencer output memory read         
       when seq_func_out_rd =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= seq_out_mem_readbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= seq_out_mem_readbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= seq_out_mem_readbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= seq_out_mem_readbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- sequencer program memory read                
       when seq_prog_mem_rd =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= seq_prog_mem_readbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= seq_prog_mem_readbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= seq_prog_mem_readbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= seq_prog_mem_readbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- enable video ADC conv shift read             
       when enable_conv_shift_rd =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"0000000" & "000" & enable_conv_shift_in;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"0000000" & "000" & enable_conv_shift_in(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"0000000" & "000" & enable_conv_shift_in(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"0000000" & "000" & enable_conv_shift_in(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- program memory init address read             
       when start_add_prog_mem_rd_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"00000" & "00" & start_add_prog_mem_rbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"00000" & "00" & start_add_prog_mem_rbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"00000" & "00" & start_add_prog_mem_rbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"00000" & "00" & start_add_prog_mem_rbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- indirect functions mem read          
       when seq_ind_func_mem_rdbk_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"0000000" & seq_ind_func_mem_rdbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"0000000" & seq_ind_func_mem_rdbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"0000000" & seq_ind_func_mem_rdbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"0000000" & seq_ind_func_mem_rdbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- indirect function repetitons mem read                
       when seq_ind_rep_mem_rdbk_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"00" & seq_ind_rep_mem_rdbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"00" & seq_ind_rep_mem_rdbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"00" & seq_ind_rep_mem_rdbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"00" & seq_ind_rep_mem_rdbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- indirect subrutine address mem read          
       when seq_ind_sub_add_mem_rdbk_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"00000" & "00" & seq_ind_sub_add_mem_rdbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"00000" & "00" & seq_ind_sub_add_mem_rdbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"00000" & "00" & seq_ind_sub_add_mem_rdbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"00000" & "00" & seq_ind_sub_add_mem_rdbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         -- indirect subrutine repetition mem read               
       when seq_ind_sub_rep_mem_rdbk_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= x"0000" & seq_ind_sub_rep_mem_rdbk;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= x"0000" & seq_ind_sub_rep_mem_rdbk(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= x"0000" & seq_ind_sub_rep_mem_rdbk(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= x"0000" & seq_ind_sub_rep_mem_rdbk(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
         --op code error flag read       
       when seq_op_code_error_rd_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= "000" & seq_op_code_error & x"0000" & "00" & seq_op_code_error_add;
-        next_regAck    <= '1';
+        if regAddr(13 downto 12) = "00" then
+          next_regDataRd <= "000" & seq_op_code_error(0) & x"0000" & "00" & seq_op_code_error_add(0);
+        elsif regAddr(13 downto 12) = "01" then
+          next_regDataRd <= "000" & seq_op_code_error(1) & x"0000" & "00" & seq_op_code_error_add(1);
+        else
+          --this condition is met also with "11" but is blocked by the previousstate
+          next_regDataRd <= "000" & seq_op_code_error(2) & x"0000" & "00" & seq_op_code_error_add(2);
+        end if;
+        next_state  <= wait_end_cmd;
+        next_regAck <= '1';
 
 ---------------------- ASPIC Parameters Write/Read --------------------------
         -- read ASPIC config ccd1
