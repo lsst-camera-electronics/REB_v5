@@ -39,6 +39,7 @@ entity parameter_extractor_fsm_v3 is
     clk                      : in  std_logic;
     reset                    : in  std_logic;
     start_sequence           : in  std_logic;
+    sequencer_busy           : in  std_logic;
     fifo_param_full          : in  std_logic;
     op_code_error_reset      : in  std_logic;
     program_mem_data         : in  std_logic_vector(31 downto 0);
@@ -63,11 +64,13 @@ end parameter_extractor_fsm_v3;
 architecture Behavioral of parameter_extractor_fsm_v3 is
 
   type state_type is (wait_start, op_code_eval, sub_jump, simple_func_op, ind_func_call,
-                        ind_rep_call, all_ind_call, ind_sub_add_jump,
+                      ind_rep_call, all_ind_call, ind_sub_add_jump,
 --                                                              ind_sub_rep_jump, 
-                        ind_sub_all_jump,
-                        write_fifo, wait_fifo,
-                        trailer_op, rep_sub, op_code_error_state);
+                      ind_sub_all_jump,
+                      write_fifo, wait_fifo,
+                      trailer_op, rep_sub, op_code_error_state,
+                      wait_end_sequence);
+
   signal pres_state, next_state : state_type;
   signal next_op_code_error     : std_logic;
   signal next_fifo_param_write  : std_logic;
@@ -121,7 +124,7 @@ begin
     end if;
   end process;
 
-  process (pres_state, start_sequence, op_code, program_mem_data, data_from_stack, fifo_param_full,
+  process (pres_state, start_sequence, sequencer_busy, op_code, program_mem_data, data_from_stack, fifo_param_full,
            program_mem_init_add, sub_stack_add_int, program_mem_add_int, sub_rep_cnt_int, ind_sub_add_mem_data_out,
            op_code_error_reset, ind_rep_mem_data_out, func_call_rep, jump_to_add_rep, ind_sub_rep_mem_data_out)
   begin
@@ -231,7 +234,7 @@ begin
               next_ind_sub_rep_flag <= '1';
             end if;
           elsif op_code = end_sequence_opcode then  -- this opcode is also used in function_executor_v3
-            next_state            <= wait_start;
+            next_state            <= wait_end_sequence;
             next_fifo_param_write <= '1';           -- test return to zero
           else
             next_state         <= op_code_error_state;
@@ -305,10 +308,17 @@ begin
         
       when op_code_error_state =>
         if op_code_error_reset = '1' then
-          next_state <= wait_start;
+          next_state <= wait_end_sequence;
         else
           next_state         <= op_code_error_state;
           next_op_code_error <= '1';
+        end if;
+
+      when wait_end_sequence =>
+        if sequencer_busy = '0' then
+          next_state <= wait_start;
+        else
+          next_state <= wait_end_sequence;
         end if;
         
     end case;

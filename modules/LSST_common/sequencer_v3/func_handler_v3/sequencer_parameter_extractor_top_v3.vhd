@@ -37,6 +37,7 @@ entity sequencer_parameter_extractor_top_v3 is
     clk             : in std_logic;
     reset           : in std_logic;
     start_sequence  : in std_logic;
+    sequencer_busy  : in std_logic;
     program_mem_we  : in std_logic;
     seq_mem_w_add   : in std_logic_vector(9 downto 0);
     seq_mem_data_in : in std_logic_vector(31 downto 0);
@@ -77,6 +78,7 @@ architecture Behavioral of sequencer_parameter_extractor_top_v3 is
       clk                      : in  std_logic;
       reset                    : in  std_logic;
       start_sequence           : in  std_logic;
+      sequencer_busy           : in  std_logic;
       fifo_param_full          : in  std_logic;
       op_code_error_reset      : in  std_logic;
       program_mem_data         : in  std_logic_vector(31 downto 0);
@@ -261,6 +263,7 @@ begin
       clk                      => clk,
       reset                    => reset,
       start_sequence           => start_sequence,
+      sequencer_busy           => sequencer_busy,
       fifo_param_full          => fifo_param_full,
       op_code_error_reset      => op_code_error_reset,
       program_mem_data         => prog_mem_data_out,
