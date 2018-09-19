@@ -42,6 +42,15 @@ package REB_v5_commands_package is
 
   constant interrupt_mask_cmd : std_logic_vector(23 downto 0) := x"000017";
 
+  -- Bitstream Remote Update
+  constant ru_start_cmd              : std_logic_vector(23 downto 0) := x"000100";
+  constant ru_bitstream_we_cmd       : std_logic_vector(23 downto 0) := x"000101";
+  constant ru_bitstream_daq_done_cmd : std_logic_vector(23 downto 0) := x"000102";
+  constant ru_status_read_cmd        : std_logic_vector(23 downto 0) := x"000103";
+
+
+
+
 -- Image parameters
   constant image_size_cmd        : std_logic_vector(23 downto 0) := x"400005";
   constant image_patter_mode_cmd : std_logic_vector(23 downto 0) := x"400006";

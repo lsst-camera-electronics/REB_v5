@@ -399,6 +399,14 @@ set_property PACKAGE_PIN AD18 [get_ports jc_refclk_out_n]
 set_property PACKAGE_PIN AB11 [get_ports jc_refclk_in_p]
 set_property PACKAGE_PIN AC11 [get_ports jc_refclk_in_n]
 
+#### Remote Update 
+#Bank 14
+set_property PACKAGE_PIN C23 [get_ports ru_outSpiCsB] 
+set_property PACKAGE_PIN B24 [get_ports ru_outSpiMosi]
+set_property PACKAGE_PIN A25 [get_ports ru_inSpiMiso]
+set_property PACKAGE_PIN B22 [get_ports ru_outSpiWpB]   
+set_property PACKAGE_PIN A22 [get_ports ru_outSpiHoldB] 
+
 
 #### MISC ####
 #Resistors (Bank 13)
@@ -504,15 +512,34 @@ set_property IOSTANDARD LVCMOS33 [get_ports jc_lol]
 set_property IOSTANDARD LVCMOS33 [get_ports jc_reset]
 #set_property IOSTANDARD LVCMOS33 [get_ports jc_oe]
 
-#### set flash SPI speed ####
+
+set_property IOSTANDARD LVCMOS33  [get_ports ru_*] 
+
+
+#### set Bitstream Config Parameters ####
+
+# set flash SPI speed
 #more command options are in UG908 programming and debugging appendix A
 set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design] 
+
+## set multiboot config
+
+#set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR YES [current_design] 
+
+### there is some sort of incompatibility between 32 bit address setting and .NEXT_CONFIG_ADDR setting
+### when 32 bit address is on the lower 8 bits of the address in .NEXT_CONFIG_ADDR are ignored...
+
+set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design] 
+set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 32'h00800000 [current_design] 
 
 #### set hardware configuration ####
 ## setting to avoid warning CFGBVS in vivado DRC
 
 set_property CFGBVS VCCO         [current_design]
 set_property CONFIG_VOLTAGE 3.3  [current_design]
+
+
+
 
 
 

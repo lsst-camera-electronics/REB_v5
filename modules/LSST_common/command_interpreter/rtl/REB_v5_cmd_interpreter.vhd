@@ -225,6 +225,13 @@ entity REB_v5_cmd_interpreter is
 -- multiboot
         start_multiboot : out std_logic;
 
+-- remote update
+        remote_update_fifo_full  : in  std_logic;
+        remote_update_status_reg : in  std_logic_vector(15 downto 0);
+        start_remote_update      : out std_logic;
+        remote_update_bitstrm_we : out std_logic;
+        remote_update_daq_done   : out std_logic;
+
 -- XADC
         xadc_drdy_out            : in  std_logic;
         xadc_ot_out              : in  std_logic;  -- Over-Temperature alarm output
@@ -334,6 +341,9 @@ architecture Behavioral of REB_v5_cmd_interpreter is
 -- multiboot    
                       start_multiboot_state,
 
+-- remote update
+                      remote_update_rd_status_state,
+                      start_remote_update_state, remote_update_bitstrm_we_state, remote_update_daq_done_state,
 -- XADC
                       read_xadc_param_state, read_xadc_alarms_state,
 
@@ -434,6 +444,11 @@ architecture Behavioral of REB_v5_cmd_interpreter is
 -- multiboot
   signal next_start_multiboot : std_logic;
 
+-- remote update
+  signal next_start_remote_update      : std_logic;
+  signal next_remote_update_bitstrm_we : std_logic;
+  signal next_remote_update_daq_done   : std_logic;
+
 -- XADC
   signal next_xadc_den_in : std_logic;
 
@@ -528,6 +543,12 @@ begin
         -- multiboot
         start_multiboot <= '0';
 
+
+        -- remote update
+        start_remote_update      <= '0';
+        remote_update_bitstrm_we <= '0';
+        remote_update_daq_done   <= '0';
+
         -- XADC
         xadc_den_in <= '0';
 
@@ -614,6 +635,12 @@ begin
         -- multiboot
         start_multiboot <= next_start_multiboot;
 
+        -- remote update
+
+        start_remote_update      <= next_start_remote_update;
+        remote_update_bitstrm_we <= next_remote_update_bitstrm_we;
+        remote_update_daq_done   <= next_remote_update_daq_done;
+
         -- XADC
         xadc_den_in <= next_xadc_den_in;
 
@@ -667,6 +694,9 @@ begin
 
            -- REB serial number
            reb_sn_crc_ok, reb_sn, reb_sn_timeout, reb_sn_dev_error,
+
+           -- Remote Update
+           remote_update_fifo_full, remote_update_status_reg,
 
            -- XADC
            xadc_channel_out, xadc_do_out, xadc_ot_out, xadc_vccaux_alarm_out, xadc_vccint_alarm_out,
@@ -754,6 +784,14 @@ begin
 
                                         -- multiboot
     next_start_multiboot <= '0';
+
+    -- remote update
+
+    next_start_remote_update      <= '0';
+    next_remote_update_bitstrm_we <= '0';
+    next_remote_update_daq_done   <= '0';
+
+
 
                                         -- Jitter Cleaner
     next_jc_start_config <= '0';
@@ -1076,6 +1114,10 @@ begin
             elsif regAddr = dcdc_clk_en_cmd then
               next_state <= dcdc_clk_en_rd;
 
+              ---------- Remote Update read status register
+            elsif regAddr = ru_status_read_cmd then
+              next_state <= remote_update_rd_status_state;
+
               ---------- Jitter Cleaner read config    
             elsif regAddr = jc_start_config_cmd then
               next_state <= jc_read_config_state;
@@ -1343,6 +1385,25 @@ begin
             elsif regAddr = start_multiboot_cmd then
               next_state           <= start_multiboot_state;
               next_start_multiboot <= '1';
+
+---------- remote update                                                   
+            elsif regAddr = ru_start_cmd then
+              next_state               <= start_remote_update_state;
+              next_start_remote_update <= '1';
+
+            elsif regAddr = ru_bitstream_we_cmd then
+              if remote_update_fifo_full = '0' then
+                next_state                    <= remote_update_bitstrm_we_state;
+                next_remote_update_bitstrm_we <= '1';
+              else
+                next_state   <= error_state;
+                next_regFail <= '1';
+                next_regAck  <= '1';
+              end if;
+
+            elsif regAddr = ru_bitstream_daq_done_cmd then
+              next_state                  <= remote_update_daq_done_state;
+              next_remote_update_daq_done <= '1';
 
 ---------- ERROR                                                                                                        
             else
@@ -2023,6 +2084,23 @@ begin
         -- start multiboot
       when start_multiboot_state =>
         next_state <= ack_del_1;
+
+        ---------------------- Remote Update --------------------------                             
+
+        -- start remote update
+      when start_remote_update_state =>
+        next_state <= ack_del_1;
+
+      when remote_update_bitstrm_we_state =>
+        next_state <= ack_del_1;
+
+      when remote_update_daq_done_state =>
+        next_state <= ack_del_1;
+
+      when remote_update_rd_status_state =>
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= X"0000" & remote_update_status_reg;
+        next_regAck    <= '1';
 
 
 ---------------------- XADC --------------------------                          

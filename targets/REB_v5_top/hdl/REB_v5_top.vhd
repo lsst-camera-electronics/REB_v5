@@ -243,6 +243,13 @@ entity REB_v5_top is
     --jc_oe    : out std_logic;
     jc_reset : out std_logic;
 
+    ------ Remote Update ------
+    ru_outSpiCsB   : out std_logic;
+    ru_outSpiMosi  : out std_logic;
+    ru_inSpiMiso   : in  std_logic;
+    ru_outSpiWpB   : out std_logic;     -- SPI flash write protect
+    ru_outSpiHoldB : out std_logic;
+
 
 
     ------ MISC ------
@@ -254,7 +261,7 @@ entity REB_v5_top is
     gpio_p         : out   std_logic;
     gpio_n         : out   std_logic;
 -- Test led
-    TEST_LED       : out   std_logic_vector(6 downto 0);
+    TEST_LED       : out   std_logic_vector(5 downto 0);
 -- Power ON reset
     Pwron_Rst_L    : in    std_logic;
 -- Power down CCD ADC opamp (active low)
@@ -515,6 +522,14 @@ architecture Behavioral of REB_v5_top is
           jc_start_config          : out std_logic;
 -- multiboot
           start_multiboot          : out std_logic;
+
+-- remote update
+          remote_update_fifo_full  : in  std_logic;
+          remote_update_status_reg : in  std_logic_vector(15 downto 0);
+          start_remote_update      : out std_logic;
+          remote_update_bitstrm_we : out std_logic;
+          remote_update_daq_done   : out std_logic;
+
 -- XADC
           xadc_drdy_out            : in  std_logic;
           xadc_ot_out              : in  std_logic;  -- Over-Temperature alarm output
@@ -980,6 +995,29 @@ architecture Behavioral of REB_v5_top is
       );
   end component;
 
+  component multiboot_top
+    port (
+      inBitstreamClk       : in  std_logic;
+      inSpiClk             : in  std_logic;
+      inReset_EnableB      : in  std_logic;
+      inCheckIdOnly        : in  std_logic;
+      inVerifyOnly         : in  std_logic;
+      inStartProg          : in  std_logic;
+      inDaqDone            : in  std_logic;
+      inImageSelWe         : in  std_logic;
+      inImageSel           : in  std_logic_vector(1 downto 0);
+      inBitstreamWe        : in  std_logic;
+      inBitstream32        : in  std_logic_vector(31 downto 0);
+      outBitstreamFifoFull : out std_logic;
+      outStarted           : out std_logic;
+      outStatusReg         : out std_logic_vector(15 downto 0);
+      outSpiCsB            : out std_logic;
+      outSpiMosi           : out std_logic;
+      inSpiMiso            : in  std_logic;
+      outSpiWpB            : out std_logic;
+      outSpiHoldB          : out std_logic);
+  end component;
+
   component mon_xadc
     port (
       DADDR_IN            : in  std_logic_vector (6 downto 0);  -- Address bus for the dynamic reconfiguration port
@@ -1329,6 +1367,16 @@ architecture Behavioral of REB_v5_top is
   signal mb_en           : std_logic;
   signal mb_en_1         : std_logic;
   signal mb_en_2         : std_logic;
+
+-- bitstream Remote Update 
+
+  signal ru_start               : std_logic;
+  signal ru_transfer_done       : std_logic;
+  signal ru_image_ID_we         : std_logic;
+  signal ru_bitstream_we        : std_logic;
+  signal ru_bitstream_fifo_full : std_logic;
+  signal ru_busy                : std_logic;
+  signal ru_satatus_reg         : std_logic_vector(15 downto 0);
 
 -- xadc
 
@@ -1836,6 +1884,13 @@ begin
 
 -- multiboot
       start_multiboot => start_multiboot,
+
+-- remote update
+      remote_update_fifo_full  => ru_bitstream_fifo_full,
+      remote_update_status_reg => ru_satatus_reg,
+      start_remote_update      => ru_start,
+      remote_update_bitstrm_we => ru_bitstream_we,
+      remote_update_daq_done   => ru_transfer_done,
 
 -- XADC
       xadc_drdy_out            => xadc_drdy_out,
@@ -2392,6 +2447,31 @@ begin
 --
   flop1_mb : FD port map (D => start_multiboot, C => clk_50_Mhz, Q => mb_en);
   flop2_mb : FD port map (D => mb_en, C => clk_50_Mhz, Q => mb_en_1);
+
+  ru_image_ID_we <= ru_start;           -- this works because ru_start is
+                                        -- internally delayed for sync.
+
+  Remote_Update_top : multiboot_top
+    port map (
+      inBitstreamClk       => clk_100_Mhz,
+      inSpiClk             => clk_50_Mhz,
+      inReset_EnableB      => sync_res,
+      inCheckIdOnly        => '0',
+      inVerifyOnly         => '0',
+      inStartProg          => ru_start,
+      inDaqDone            => ru_transfer_done,
+      inImageSelWe         => ru_image_ID_we,
+      inImageSel           => regDataWr_masked(1 downto 0),
+      inBitstreamWe        => ru_bitstream_we,
+      inBitstream32        => regDataWr_masked,
+      outBitstreamFifoFull => ru_bitstream_fifo_full,
+      outStarted           => ru_busy,
+      outStatusReg         => ru_satatus_reg,
+      outSpiCsB            => ru_outSpiCsB,
+      outSpiMosi           => ru_outSpiMosi,
+      inSpiMiso            => ru_inSpiMiso,
+      outSpiWpB            => ru_outSpiWpB,
+      outSpiHoldB          => ru_outSpiHoldB);
 
   mb_en_2 <= mb_en or mb_en_1;
 
