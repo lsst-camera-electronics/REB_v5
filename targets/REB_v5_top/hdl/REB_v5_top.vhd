@@ -254,7 +254,7 @@ entity REB_v5_top is
     gpio_p         : out   std_logic;
     gpio_n         : out   std_logic;
 -- Test led
-    TEST_LED       : out   std_logic_vector(6 downto 0);
+    TEST_LED       : out   std_logic_vector(5 downto 0);
 -- Power ON reset
     Pwron_Rst_L    : in    std_logic;
 -- Power down CCD ADC opamp (active low)

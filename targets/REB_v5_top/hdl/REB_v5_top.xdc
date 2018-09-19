@@ -508,6 +508,16 @@ set_property IOSTANDARD LVCMOS33 [get_ports jc_reset]
 #more command options are in UG908 programming and debugging appendix A
 set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design] 
 
+## set multiboot config
+
+#set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR YES [current_design] 
+
+### there is some sort of incompatibility between 32 bit address setting and .NEXT_CONFIG_ADDR setting
+### when 32 bit address is on the lower 8 bits of the address in .NEXT_CONFIG_ADDR are ignored...
+
+set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design] 
+#set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 32'h00800000 [current_design] 
+
 #### set hardware configuration ####
 ## setting to avoid warning CFGBVS in vivado DRC
 
