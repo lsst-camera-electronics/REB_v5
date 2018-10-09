@@ -40,8 +40,9 @@ entity multiboot_top is
     inVerifyOnly    : in std_logic;
 
     -- DAQ signals
-    inStartProg : in std_logic;
-    inDaqDone   : in std_logic;
+    inStartProg   : in std_logic;
+    inDaqDone     : in std_logic;
+    inStartReboot : in std_logic;
 
     -- Image selector
     inImageSelWe         : in  std_logic;
@@ -53,6 +54,8 @@ entity multiboot_top is
 
     outStarted   : out std_logic;
     outStatusReg : out std_logic_vector(15 downto 0);
+
+    outRebootStatus : out std_logic_vector(31 downto 0);
 
     -- SPI flash ports
     -- outSpiClk is output through STARTUPE2.USRCCLKO
@@ -141,6 +144,17 @@ architecture Behaviotal of multiboot_top is
       data_out : out std_logic_vector(width downto 0));
   end component;
 
+  component multiboot_fsm_read
+    port (
+      SYSCLK         : in  std_logic;
+      RESET          : in  std_logic;
+      TRIGGER        : in  std_logic;
+      IMAGESEL       : in  std_logic_vector(1 downto 0);
+      ICAP_OUT_VALID : out std_logic;
+      ICAP_OUT       : out std_logic_vector(31 downto 0)
+      );
+  end component;
+
   signal bitstream_fifo_empty : std_logic;
   signal DataWriteEnable      : std_logic;
   signal Ready_BusyB          : std_logic;  -- fifo write enable
@@ -148,10 +162,16 @@ architecture Behaviotal of multiboot_top is
   signal ImageSel             : std_logic_vector(1 downto 0);
 
   signal StartProg      : std_logic;
-  signal StartProg_sync : std_logic;
+  signal StartProg_str  : std_logic;
+  signal StartProg_str1 : std_logic;
+  signal StartProg_str2 : std_logic;
+  signal StartProg_str3 : std_logic;
 
   signal DaqDone      : std_logic;
-  signal DaqDone_sync : std_logic;
+  signal DaqDone_str  : std_logic;
+  signal DaqDone_str1 : std_logic;
+  signal DaqDone_str2 : std_logic;
+  signal DaqDone_str3 : std_logic;
 
 
   -- Status signals
@@ -170,6 +190,7 @@ architecture Behaviotal of multiboot_top is
   signal ProgramOK       : std_logic;
   signal VerifyOK        : std_logic;
   signal status_int      : std_logic_vector(15 downto 0);
+  signal status_or       : std_logic_vector(15 downto 0);
   signal status_reg      : std_logic_vector(15 downto 0);
 
   -- Signals for SpiSerDes - Connect to instance of SpiSerDes
@@ -180,6 +201,18 @@ architecture Behaviotal of multiboot_top is
   signal SSDData8Send     : std_logic_vector(7 downto 0);
   signal SSDData8Receive  : std_logic_vector(7 downto 0);
 
+  -- multiboot fsm signals
+  signal StartReboot      : std_logic;
+  signal StartReboot_str  : std_logic;
+  signal StartReboot_str1 : std_logic;
+  signal StartReboot_str2 : std_logic;
+  signal StartReboot_str3 : std_logic;
+
+  signal ImageSel_reboot : std_logic_vector(1 downto 0);
+  signal icap_out_we     : std_logic;
+  signal icap_out        : std_logic_vector(31 downto 0);
+  signal Icap_out_reg    : std_logic_vector(31 downto 0);
+
   
 begin  -- Behaviotal
 
@@ -188,16 +221,29 @@ begin  -- Behaviotal
   status_int <= "0000" & '0' & Done & ErrorIdcode & ErrorErase & ErrorProgram & ErrorTimeOut & ErrorAddSel &
                 ErrorBitstmSize & InitializeOK & CheckIdOK & EraseOK & ProgramOK;
 
-  outSpiWpB   <= CheckIdOK;             -- SPI flash write protect
+  outSpiWpB   <= '1';             -- SPI flash write protect
   outSpiHoldB <= '1';
 
   -- sync stages from inBitstreamClk to inSpiClk
 
-  start_sync1 : FD port map (D => inStartProg, C => inSpiClk, Q => StartProg_sync);
-  start_sync2 : FD port map (D => StartProg_sync, C => inSpiClk, Q => StartProg);
+  -- pulse streatcher to cross clock domanin
+  flop1_mbs : FD port map (D => inStartProg, C => inBitstreamClk, Q => StartProg_str);
+  flop2_mbs : FD port map (D => StartProg_str, C => inBitstreamClk, Q => StartProg_str1);
+  flop3_mbs : FD port map (D => StartProg_str1, C => inBitstreamClk, Q => StartProg_str2);
+  flop4_mbs : FD port map (D => StartProg_str2, C => inBitstreamClk, Q => StartProg_str3);
 
-  done_sync1 : FD port map (D => inDaqDone, C => inSpiClk, Q => DaqDone_sync);
-  done_sync2 : FD port map (D => DaqDone_sync, C => inSpiClk, Q => DaqDone);
+  StartProg <= StartProg_str or StartProg_str1 or StartProg_str2 or StartProg_str3;
+
+  --flop1_mbd : FD port map (D => inDaqDone, C => inBitstreamClk, Q => DaqDone_str);
+  --flop2_mbd : FD port map (D => DaqDone_str, C => inBitstreamClk, Q => DaqDone_str1);
+  --flop3_mbd : FD port map (D => DaqDone_str1, C => inBitstreamClk, Q => DaqDone_str2);
+  --flop4_mbd : FD port map (D => DaqDone_str2, C => inBitstreamClk, Q => DaqDone_str3);
+
+  --DaqDone <= DaqDone_str or DaqDone_str1 or DaqDone_str2 or DaqDone_str3;
+
+  DaqDone_latch : FDCE port map (D => '1', C => inBitstreamClk, Q => DaqDone, CE => inDaqDone, CLR => Done);
+
+
 
   bitstream_fifo : bitfile_fifo_in
     port map (
@@ -221,8 +267,10 @@ begin  -- Behaviotal
       ce       => inImageSelWe,
       init     => '0',
       data_in  => inImageSel,
-      data_out => Imagesel
+      data_out => ImageSel
       );
+
+  status_or <= status_int or status_reg;
 
   status_register : generic_reg_ce_init
     generic map (
@@ -232,7 +280,7 @@ begin  -- Behaviotal
       clk      => inSpiClk,
       ce       => '1',
       init     => StartProg,
-      data_in  => status_int,
+      data_in  => status_or,
       data_out => status_reg
       );
 
@@ -311,5 +359,47 @@ begin  -- Behaviotal
       USRDONETS => '1'
       );
 
+  slot_ID_reboot_reg : generic_reg_ce_init
+    generic map (
+      width => 1)
+    port map (
+      reset    => inReset_EnableB,
+      clk      => inBitstreamClk,
+      ce       => inStartReboot,
+      init     => '0',
+      data_in  => inImageSel,
+      data_out => ImageSel_reboot
+      );
+
+-- pulse streatcher to cross clock domanin
+  flop1_rb : FD port map (D => inStartReboot, C => inBitstreamClk, Q => StartReboot_str);
+  flop2_rb : FD port map (D => StartReboot_str, C => inBitstreamClk, Q => StartReboot_str1);
+  flop3_rb : FD port map (D => StartReboot_str1, C => inBitstreamClk, Q => StartReboot_str2);
+  flop4_rb : FD port map (D => StartReboot_str2, C => inBitstreamClk, Q => StartReboot_str3);
+
+  StartReboot <= StartReboot_str or StartReboot_str1 or StartReboot_str2 or StartReboot_str3;
+
+
+  multiboot_fsm_1 : multiboot_fsm_read
+    port map (
+      SYSCLK         => inSpiClk,
+      TRIGGER        => StartReboot,
+      RESET          => inReset_EnableB,
+      IMAGESEL       => ImageSel_reboot,
+      ICAP_OUT_VALID => icap_out_we,
+      ICAP_OUT       => icap_out);
+
+  Icap_out_reg1 : generic_reg_ce_init
+    generic map (
+      width => 31)
+    port map (
+      reset    => inReset_EnableB,
+      clk      => inSpiClk,
+      ce       => icap_out_we,
+      init     => '0',
+      data_in  => icap_out,
+      data_out => icap_out_reg
+      );
+  outRebootStatus <= icap_out_reg;
 
 end Behaviotal;

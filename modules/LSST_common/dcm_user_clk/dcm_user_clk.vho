@@ -55,7 +55,7 @@
 --   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 ------------------------------------------------------------------------------
 -- CLK_OUT1___100.000______0.000______50.0______199.286____204.239
--- CLK_OUT2____50.000______0.000______50.0______233.549____204.239
+-- CLK_OUT2____25.000______0.000______50.0______284.037____204.239
 --
 ------------------------------------------------------------------------------
 -- Input Clock   Freq (MHz)    Input Jitter (UI)
@@ -76,13 +76,6 @@ port
   LOCKED            : out    std_logic
  );
 end component;
-
-ATTRIBUTE SYN_BLACK_BOX : BOOLEAN;
-ATTRIBUTE SYN_BLACK_BOX OF dcm_user_clk : COMPONENT IS TRUE;
-
-
-ATTRIBUTE BLACK_BOX_PAD_PIN : STRING;
-ATTRIBUTE BLACK_BOX_PAD_PIN OF dcm_user_clk : COMPONENT IS "CLK_IN1,CLK_OUT1,CLK_OUT2,LOCKED";
 
 -- COMP_TAG_END ------ End COMPONENT Declaration ------------
 -- The following code must appear in the VHDL architecture

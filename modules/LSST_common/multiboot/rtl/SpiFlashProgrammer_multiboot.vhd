@@ -144,7 +144,7 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   constant cAddrImage3Start : std_logic_vector(31 downto 0) := X"01800000";  -- 3ed update image start at 384 sector
   -- UPDATE IMAGE END+1 (BYTE) ADDRESS
 --  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"00810000";  -- just for test REMOVE 
-  constant  cAddrImage1End    : std_logic_vector(31 downto 0) := X"01000000";
+  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"01000000";
   constant cAddrImage2End   : std_logic_vector(31 downto 0) := X"01800000";
   constant cAddrImage3End   : std_logic_vector(31 downto 0) := X"02000000";
 
@@ -159,27 +159,35 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   -- SPI flash information
   -- Customize these constants per the target SPI flash device
   -- Device ID from RDID.  Set cIdcode24 to the valid IDCODE for the target SPI flash
-  constant cIdcode24N25Q       : std_logic_vector(23 downto 0) := X"20BA18";
-  constant cIdcode24NP5Q       : std_logic_vector(23 downto 0) := X"20DA18";
-  constant cIdcode24Atmel      : std_logic_vector(23 downto 0) := X"1F2000";
-  constant cIdcode24W25Q       : std_logic_vector(23 downto 0) := X"EF4018";
-  constant cIdcode24S25FS      : std_logic_vector(23 downto 0) := X"012018";
+  constant cIdcode24N25Q   : std_logic_vector(23 downto 0) := X"20BA18";
+  constant cIdcode24NP5Q   : std_logic_vector(23 downto 0) := X"20DA18";
+  --constant cIdcodeN25Q256A     : std_logic_vector(23 downto 0) := X"905D0C";
+  constant cIdcodeN25Q256A : std_logic_vector(23 downto 0) := X"20BA19";
+  constant cIdcode24Atmel  : std_logic_vector(23 downto 0) := X"1F2000";
+  constant cIdcode24W25Q   : std_logic_vector(23 downto 0) := X"EF4018";
+  constant cIdcode24S25FS  : std_logic_vector(23 downto 0) := X"012018";
   -- Device command opcodes
-  constant cCmdREAD24          : std_logic_vector(7 downto 0)  := X"03";
-  constant cCmdREAD32          : std_logic_vector(7 downto 0)  := X"13";
-  constant cCmdRDID            : std_logic_vector(7 downto 0)  := X"9F";
-  constant cCmdWE              : std_logic_vector(7 downto 0)  := X"06";
-  constant cCmdSE24            : std_logic_vector(7 downto 0)  := X"D8";
-  constant cCmdSE32            : std_logic_vector(7 downto 0)  := X"DC";
-  constant cCmdSSE24           : std_logic_vector(7 downto 0)  := X"20";
-  constant cCmdSSE32           : std_logic_vector(7 downto 0)  := X"21";
-  constant cCmdPP24            : std_logic_vector(7 downto 0)  := X"02";
-  constant cCmdPP32            : std_logic_vector(7 downto 0)  := X"12";
-  constant cCmdPP24NP5Q        : std_logic_vector(7 downto 0)  := X"22";  -- Micron NP5Q page program, bit-alterable write
-  constant cCmdPP24Atmel       : std_logic_vector(7 downto 0)  := X"82";  -- Atmel page program with built-in erase
-  constant cCmdRFSR            : std_logic_vector(7 downto 0)  := X"70";  -- N25Q-only flag status register
-  constant cCmdRDSR            : std_logic_vector(7 downto 0)  := X"05";  -- Legacy read status register: Micron=X"05"
-  constant cCmdRDSRAtmel       : std_logic_vector(7 downto 0)  := X"D7";
+  constant cCmdREAD24      : std_logic_vector(7 downto 0)  := X"03";
+  constant cCmdREAD32      : std_logic_vector(7 downto 0)  := X"13";
+  constant cCmdRDID        : std_logic_vector(7 downto 0)  := X"9F";
+  constant cCmdWE          : std_logic_vector(7 downto 0)  := X"06";
+  constant cCmdSE24        : std_logic_vector(7 downto 0)  := X"D8";
+  -- constant cCmdSE32        : std_logic_vector(7 downto 0)  := X"DC";
+  constant cCmdSE32        : std_logic_vector(7 downto 0)  := X"D8";
+  constant cCmdSSE24       : std_logic_vector(7 downto 0)  := X"20";
+  constant cCmdSSE32       : std_logic_vector(7 downto 0)  := X"20";
+--   constant cCmdSSE32       : std_logic_vector(7 downto 0)  := X"21";
+  constant cCmdPP24        : std_logic_vector(7 downto 0)  := X"02";
+  constant cCmdPP32        : std_logic_vector(7 downto 0)  := X"02";
+--    constant cCmdPP32        : std_logic_vector(7 downto 0)  := X"12";
+  constant cCmdPP24NP5Q    : std_logic_vector(7 downto 0)  := X"22";  -- Micron NP5Q page program, bit-alterable write
+  constant cCmdPP24Atmel   : std_logic_vector(7 downto 0)  := X"82";  -- Atmel page program with built-in erase
+  constant cCmdRFSR        : std_logic_vector(7 downto 0)  := X"70";  -- N25Q-only flag status register
+  constant cCmdRDSR        : std_logic_vector(7 downto 0)  := X"05";  -- Legacy read status register: Micron=X"05"
+  constant cCmdRDSRAtmel   : std_logic_vector(7 downto 0)  := X"D7";
+  constant cCmdEn32        : std_logic_vector(7 downto 0)  := X"B7";
+  constant cCmdExtAdd      : std_logic_vector(7 downto 0)  := X"C5";
+
   -- Device timeouts. timeout = max_time (s) X inClk (Hz) / 22 or X"00000000" = ultimate MAX count
   -- where 22 is polling loop cycle count.
   constant cClkFrequencyHz     : integer                       := 20000000;  -- Not used; Keep for reference
@@ -231,14 +239,8 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   signal regAddrUpdateEnd   : std_logic_vector(31 downto 0) := X"00000000";
 
 
-  -- Internal signals
-  signal intSSDTransferDone : std_logic;
-
   -- Signals for CRC
 
-  -- Attributes
-  attribute clock_signal          : string;
-  attribute clock_signal of inClk : signal is "yes";
 
   -- State definitions
   type sProgrammer is
@@ -265,6 +267,19 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   signal stateAfterPollStatus : sProgrammer;
   signal stateErrorTimeOut    : sProgrammer;
 
+
+  signal state_cnt : std_logic_vector(7 downto 0);
+
+  -- Attributes
+  --attribute clock_signal          : string;
+  --attribute clock_signal of inClk : signal is "yes";
+
+  --attribute mark_debug              : string;
+  --attribute mark_debug of regData40 : signal is "true";
+  --attribute mark_debug of state_cnt : signal is "true";
+  --attribute mark_debug of inDaqDone : signal is "true";
+
+
 begin
   -- Main state machine
   processProgram : process (inClk)
@@ -276,7 +291,7 @@ begin
         regVerifyOnly       <= '0';
         -- Reset module output signals
         regReady_BusyB      <= '1';
-        regDone             <= '0';
+        regDone             <= '1';
         regError            <= cErrorNone;
         regStarted          <= '0';
         regInitializeOK     <= '0';
@@ -292,19 +307,23 @@ begin
         regData40           <= X"0000000000";
 --        stateProgrammer     <= sProgrammerInitialize;
         stateProgrammer     <= sProgrammerWaitStart;
+
+        state_cnt <= x"00";
       else
         case (stateProgrammer) is
           --------------------------------------------------------------------
           -- PROGRAMMER START/INITIALIZE
           when sProgrammerWaitStart =>
+            state_cnt <= x"00";
             if inStartProg = '1' then
               stateProgrammer <= sProgrammerInitialize;
+               regDone             <= '0';
             else
               regCheckIdOnly      <= '0';
               regVerifyOnly       <= '0';
                                         -- Reset module output signals
               regReady_BusyB      <= '1';
-              regDone             <= '0';
+              regDone             <= '1';
               regError            <= cErrorNone;
               regStarted          <= '0';
               regInitializeOK     <= '0';
@@ -313,7 +332,7 @@ begin
               regProgramOK        <= '0';
               regVerifyOK         <= '0';
                                         -- Reset SpiSerDes control signals
-              regSSDReset_EnableB <= '1';
+              --   regSSDReset_EnableB <= '1';
               regSSDStartTransfer <= '0';
               regSSDData8Send     <= X"00";
                                         -- Setup for next state
@@ -326,17 +345,26 @@ begin
             -- Initialize the SPI bus: Output one word of all zeros to the SPI bus
             -- because STARTUP.USRCCLKO MUX needs a few clock cycles to switch.
           when sProgrammerInitialize =>
+            state_cnt <= x"01";
             if inImageSel = "01" then
               regAddrUpdateStart <= cAddrImage1Start;
               regAddrUpdateEnd   <= cAddrImage1End;
+              stateProgrammer    <= sProgrammerSendWord;
+              stateAfterSendWord <= sProgrammerCheckId;
             elsif inImageSel = "10" then
               regAddrUpdateStart <= cAddrImage2Start;
               regAddrUpdateEnd   <= cAddrImage2End;
+              stateProgrammer    <= sProgrammerSendWord;
+              stateAfterSendWord <= sProgrammerCheckId;
             elsif inImageSel = "11" then
               regAddrUpdateStart <= cAddrImage3Start;
               regAddrUpdateEnd   <= cAddrImage3End;
+              stateProgrammer    <= sProgrammerSendWord;
+              stateAfterSendWord <= sProgrammerCheckId;
             else
-              stateProgrammer <= sProgrammerErrorAddSel;
+              regAddrUpdateStart <= cAddrImage3Start;
+              regAddrUpdateEnd   <= cAddrImage3End;
+              stateProgrammer    <= sProgrammerErrorAddSel;
             end if;
             regStarted               <= '1';
             regReady_BusyB           <= '0';
@@ -344,8 +372,6 @@ begin
             regVerifyOnly            <= inVerifyOnly;
             regData40                <= X"0000000000";
             regCounter3              <= "100";
-            stateProgrammer          <= sProgrammerSendWord;
-            stateAfterSendWord       <= sProgrammerCheckId;
             regSSDResetAfterSendWord <= '1';
 
             --------------------------------------------------------------------
@@ -355,6 +381,7 @@ begin
             -- device type (ID[23:8]; Ignore device size (ID[7:0]).
             -- Note: Special case for Atmel DataFlash, device size in ID[12:8].
           when sProgrammerCheckId =>
+            state_cnt                <= x"02";
             regInitializeOK          <= '1';
             regData40                <= cCmdRDID & X"00000000";
             regCounter3              <= "100";
@@ -363,11 +390,13 @@ begin
             regSSDResetAfterSendWord <= '1';
 
           when sProgrammerCheckId1 =>
+            state_cnt <= x"03";
             if ((cMicronNP5Q = '1') and (regData40(23 downto 8) /= cIdcode24NP5Q(23 downto 8))) then
               stateProgrammer <= sProgrammerErrorIdcode;
             elsif ((cAtmelDataFlash = '1') and (regData40(23 downto 13) /= cIdcode24Atmel(23 downto 13))) then
               stateProgrammer <= sProgrammerErrorIdcode;
-            elsif ((cMicronN25Q = '1') and (regData40(23 downto 8) /= cIdcode24N25Q(23 downto 8))) then
+              --      elsif ((cMicronN25Q = '1') and (regData40(23 downto 8) /= cIdcode24N25Q(23 downto 8))) then
+            elsif ((cMicronN25Q = '1') and (regData40(23 downto 8) /= cIdcodeN25Q256A(23 downto 8))) then
               stateProgrammer <= sProgrammerErrorIdcode;
             elsif ((cWinbondW25Q = '1') and (regData40(23 downto 8) /= cIdcode24W25Q(23 downto 8))) then
               stateProgrammer <= sProgrammerErrorIdcode;
@@ -380,7 +409,27 @@ begin
               elsif (regVerifyOnly = '1') then
                 stateProgrammer <= sProgrammerVerifyUpdateArea;  -- Skip to Verify ONLY
               else
-                stateProgrammer <= sProgrammerEraseUpdateArea;  -- Default for update: erase only update area
+                if (cAddrWidth = 32) and (cMicronN25Q = '1') then  -- enable4-byte address
+                  regData40                <= cCmdEn32 & X"00000000";
+                  regCounter3              <= "001";
+                  stateProgrammer          <= sProgrammerSendWEAndWord;
+                  stateAfterSendWord       <= sProgrammerEraseUpdateArea;
+                  regSSDResetAfterSendWord <= '1';
+                elsif (cAddrWidth = 24) and (cMicronN25Q = '1') and (inImageSel(1) = '1') then
+                  regData40                <= cCmdExtAdd & X"01000000";
+                  regCounter3              <= "010";
+                  stateProgrammer          <= sProgrammerSendWEAndWord;
+                  stateAfterSendWord       <= sProgrammerEraseUpdateArea;
+                  regSSDResetAfterSendWord <= '1';
+                elsif (cAddrWidth = 24) and (cMicronN25Q = '1') and (inImageSel(1) = '0') then
+                  regData40                <= cCmdExtAdd & X"00000000";
+                  regCounter3              <= "010";
+                  stateProgrammer          <= sProgrammerSendWEAndWord;
+                  stateAfterSendWord       <= sProgrammerEraseUpdateArea;
+                  regSSDResetAfterSendWord <= '1';
+                else
+                  stateProgrammer <= sProgrammerEraseUpdateArea;  -- Default for update: erase only update area
+                end if;
               end if;
             end if;
 
@@ -392,6 +441,7 @@ begin
             --   Atmel DataFlash:  Skip separate erase, and instead use Page Program with built-in erase
             -- For each sector, poll the SPI flash status for completion of the command.
           when sProgrammerEraseUpdateArea =>
+            state_cnt <= x"04";
             if ((cMicronNP5Q = '1') or (cAtmelDataFlash = '1')) then
               stateProgrammer <= sProgrammerProgramUpdateArea;
             else
@@ -401,6 +451,7 @@ begin
             end if;
 
           when sProgrammerEraseUpdateArea1 =>
+            state_cnt <= x"05";
             if (cAddrWidth = 32) then
               regData40   <= cCmdSE32 & regCounter32;
               regCounter3 <= "101";
@@ -416,10 +467,12 @@ begin
             stateErrorTimeOut        <= sProgrammerErrorEraseTO;
 
           when sProgrammerEraseUpdateArea2 =>
+            state_cnt       <= x"06";
             regCounter32    <= regCounter32 + cSizeSector;
             stateProgrammer <= sProgrammerEraseUpdateArea3;
 
           when sProgrammerEraseUpdateArea3 =>
+            state_cnt <= x"07";
             if (regCounter32 = regAddrUpdateEnd) then
               stateProgrammer <= sProgrammerProgramUpdateArea;
             else
@@ -436,11 +489,13 @@ begin
             -- time to progam the data into the page.
             -- For each page, poll the SPI flash status for completion of each command.
           when sProgrammerProgramUpdateArea =>
+            state_cnt       <= x"08";
             regEraseOK      <= '1';
             regCounter32    <= regAddrUpdateStart;
             stateProgrammer <= sProgrammerProgramUpdateArea1;
 
           when sProgrammerProgramUpdateArea1 =>
+            state_cnt <= x"09";
             -- Send PP
             if (cAddrWidth = 32) then
               regData40   <= cCmdPP32 & regCounter32;
@@ -467,32 +522,61 @@ begin
             end if;
 
           when sProgrammerProgramUpdateArea2 =>
+            state_cnt       <= x"0A";
             regReady_BusyB  <= '1';
             stateProgrammer <= sProgrammerProgramUpdateArea3;
 
           when sProgrammerProgramUpdateArea3 =>
-            if (inDataWriteEnable = '1') then
-              regReady_BusyB <= '0';
-              if (cDataWordWidth = 1) then
-                regData40   <= inData32(7 downto 0) & X"00000000";
-                regCounter3 <= "001";
-              elsif (cDataWordWidth = 2) then
-                regData40   <= inData32(15 downto 0) & X"000000";
-                regCounter3 <= "010";
-              else
-                regData40   <= inData32 & X"00";
-                regCounter3 <= "100";
+            state_cnt <= x"0B";
+            if inDaqDone = '1' and inDataWriteEnable = '0' then  --check if there is not enough data from DAQ
+              --   stateProgrammer <= sProgrammerEnd;
+              stateProgrammer <= sProgrammerVerifyUpdateArea;    --debug
+              regProgramOK    <= '1';
+            else
+              if (inDataWriteEnable = '1') then
+                regReady_BusyB <= '0';
+                if (cDataWordWidth = 1) then
+                  regData40   <= inData32(7 downto 0) & X"00000000";
+                  regCounter3 <= "001";
+                elsif (cDataWordWidth = 2) then
+                  regData40   <= inData32(15 downto 0) & X"000000";
+                  regCounter3 <= "010";
+                else
+                  regData40   <= inData32 & X"00";
+                  regCounter3 <= "100";
+                end if;
+                regCounter10       <= regCounter10 - cDataWordWidth;
+                stateProgrammer    <= sProgrammerSendWord;
+                stateAfterSendWord <= sProgrammerProgramUpdateArea4;
               end if;
-              regCounter10       <= regCounter10 - cDataWordWidth;
-              stateProgrammer    <= sProgrammerSendWord;
-              stateAfterSendWord <= sProgrammerProgramUpdateArea4;
             end if;
 
+            -- orig
+            --when sProgrammerProgramUpdateArea4 =>
+            --  state_cnt <= x"0C";
+            --  if (regCounter10 = 0)  then
+            --    regSSDReset_EnableB <= '1';
+            --    regTimer            <= cCmdPPTimeOut;
+            --    stateErrorTimeOut   <= sProgrammerErrorProgramTO;
+            --    stateProgrammer     <= sProgrammerPollStatus;
+            --    if (regCounter32 = regAddrUpdateEnd) then
+            --      regProgramOK         <= '1';
+            --      stateAfterPollStatus <= sProgrammerVerifyUpdateArea;
+            --    else
+            --      stateAfterPollStatus <= sProgrammerProgramUpdateArea1;
+            --    end if;
+            --  else
+            --    stateProgrammer <= sProgrammerProgramUpdateArea2;
+            --  end if;
+
           when sProgrammerProgramUpdateArea4 =>
+            state_cnt <= x"0C";
             if inDaqDone = '1' and inDataWriteEnable = '0' then  --check if there is not enough data from DAQ
+              regSSDReset_EnableB  <= '1';
               stateProgrammer      <= sProgrammerPollStatus;
-              stateAfterPollStatus <= sProgrammerEnd;
-              regError             <= cErrorProgDAQ;
+              --stateAfterPollStatus <= sProgrammerEnd;
+              stateAfterPollStatus <= sProgrammerVerifyUpdateArea;  --debug
+              regProgramOK         <= '1';
             else
               if (regCounter10 = 0) then
                 regSSDReset_EnableB <= '1';
@@ -500,7 +584,7 @@ begin
                 stateErrorTimeOut   <= sProgrammerErrorProgramTO;
                 stateProgrammer     <= sProgrammerPollStatus;
                 if (regCounter32 = regAddrUpdateEnd) then
-                  regProgramOK         <= '1';
+                  --          regProgramOK         <= '1';
 --                stateAfterPollStatus    <= sProgrammerEnd;
                   stateAfterPollStatus <= sProgrammerCheckDaqDone;
                 else
@@ -516,10 +600,12 @@ begin
             -- Read the entire update image from regAddrUpdateStart to regAddrUpdateEnd.
             -- This procedure is done only to debug the code and validate the writing.
           when sProgrammerVerifyUpdateArea =>
+            state_cnt       <= x"0D";
             regCounter32    <= regAddrUpdateStart;
             stateProgrammer <= sProgrammerVerifyUpdateArea1;
 
           when sProgrammerVerifyUpdateArea1 =>
+            state_cnt <= x"0E";
             if (cAddrWidth = 32) then
               regData40   <= cCmdREAD32 & regCounter32;
               regCounter3 <= "101";
@@ -532,16 +618,19 @@ begin
             regSSDResetAfterSendWord <= '0';
 
           when sProgrammerVerifyUpdateArea2 =>
+            state_cnt           <= x"0F";
             regSSDReset_EnableB <= '0';
             regSSDData8Send     <= X"00";
             regSSDStartTransfer <= '1';
             stateProgrammer     <= sProgrammerVerifyUpdateArea3;
 
           when sProgrammerVerifyUpdateArea3 =>
+            state_cnt       <= x"10";
             regCounter32    <= regCounter32 + 1;
             stateProgrammer <= sProgrammerVerifyUpdateArea4;
 
           when sProgrammerVerifyUpdateArea4 =>
+            state_cnt           <= x"11";
             regSSDStartTransfer <= '0';
             if (inSSDTransferDone = '1') then
               if (regCounter32 = regAddrUpdateEnd) then
@@ -552,6 +641,7 @@ begin
             end if;
 
           when sProgrammerVerifyUpdateArea5 =>
+            state_cnt           <= x"12";
             regSSDReset_EnableB <= '1';
             regVerifyOK         <= '1';
             stateProgrammer     <= sProgrammerEnd;
@@ -560,6 +650,7 @@ begin
             -- SEND WRITE ENABLE and COMMAND (subroutine)
             -- Before jumping to this state, see SEND WORD for requirements
           when sProgrammerSendWEAndWord =>
+            state_cnt <= x"13";
             if (cAtmelDataFlash = '1') then
               stateProgrammer <= sProgrammerSendWord;  -- Atmel does not have a WE
             else
@@ -570,9 +661,11 @@ begin
             end if;
 
           when sProgrammerSendWE =>
+            state_cnt       <= x"14";
             stateProgrammer <= sProgrammerSendWE1;
 
           when sProgrammerSendWE1 =>
+            state_cnt           <= x"15";
             regSSDStartTransfer <= '0';
             if (inSSDTransferDone = '1') then
               regSSDReset_EnableB <= '1';
@@ -586,17 +679,20 @@ begin
             --   regCounter3 = the number of bytes in the word to send to the SPI flash
             --   stateAfterSendWord = the state to which to return after sending the word
           when sProgrammerSendWord =>
+            state_cnt           <= x"16";
             regSSDReset_EnableB <= '0';
             regSSDData8Send     <= regData40(39 downto 32);
             regSSDStartTransfer <= '1';
             stateProgrammer     <= sProgrammerSendWord1;
 
           when sProgrammerSendWord1 =>
+            state_cnt       <= x"17";
             regCounter3     <= regCounter3 - 1;
             regSSDData8Send <= regData40(31 downto 24);
             stateProgrammer <= sProgrammerSendWord2;
 
           when sProgrammerSendWord2 =>
+            state_cnt <= x"18";
             if (regCounter3 = "000") then
               regSSDStartTransfer <= '0';
             end if;
@@ -617,7 +713,8 @@ begin
             --  Set stateErrorTimeOut = The timeout error state to which to jump when a timeout error is triggered
             --  Set stateAfterPollStatus  = The state to which to return when the polling reaches a READY status.
           when sProgrammerPollStatus =>
-            regTimer <= regTimer - 1;
+            state_cnt <= x"19";
+            regTimer  <= regTimer - 1;
             if (cAtmelDataFlash = '1') then
               regData40 <= cCmdRDSRAtmel & X"00000000";
               --elsif (cMicronN25Q = '1') then
@@ -631,6 +728,7 @@ begin
             stateProgrammer          <= sProgrammerSendWord;
 
           when sProgrammerPollStatus1 =>
+            state_cnt <= x"1A";
             if (regTimer = 0) then
               stateProgrammer <= stateErrorTimeOut;
             elsif (cAtmelDataFlash = '1') then
@@ -665,26 +763,32 @@ begin
             --------------------------------------------------------------------
             -- ERROR STATES
           when sProgrammerErrorIdcode =>
+            state_cnt       <= x"1B";
             regError        <= cErrorIdcode;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
           when sProgrammerErrorErase =>
+            state_cnt       <= x"1C";
             regError        <= cErrorErase;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
           when sProgrammerErrorEraseTO =>
+            state_cnt       <= x"1D";
             regError        <= cErrorEraseTO;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
           when sProgrammerErrorProgram =>
+            state_cnt       <= x"1E";
             regError        <= cErrorProgram;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
           when sProgrammerErrorProgramTO =>
+            state_cnt       <= x"1F";
             regError        <= cErrorProgramTO;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
           when sProgrammerErrorAddSel =>
+            state_cnt       <= x"20";
             regError        <= cErrorAddSel;
 --            stateProgrammer <= sProgrammerEnd;
             stateProgrammer <= sProgrammerCheckDaqDone;
@@ -692,9 +796,11 @@ begin
             --------------------------------------------------------------------
             -- Wait and Check DAQ done
           when sProgrammerCheckDaqDone =>
+            state_cnt <= x"21";
             if inDataWriteEnable = '0' then  -- fifo empty
               if inDaqDone = '1' then
                 stateProgrammer <= sProgrammerEnd;
+                regProgramOK    <= '1';
               else
                 stateProgrammer <= sProgrammerCheckDaqDone;
                 regError        <= cErrorProgDAQ;
@@ -708,6 +814,7 @@ begin
             --------------------------------------------------------------------
             -- END/DONE STATE
           when sProgrammerEnd =>
+            state_cnt           <= x"22";
             stateProgrammer     <= sProgrammerWaitStart;
             regReady_BusyB      <= '1';
             regDone             <= '1';

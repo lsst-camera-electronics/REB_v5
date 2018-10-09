@@ -48,6 +48,9 @@ package REB_v5_commands_package is
   constant ru_bitstream_daq_done_cmd : std_logic_vector(23 downto 0) := x"000102";
   constant ru_status_read_cmd        : std_logic_vector(23 downto 0) := x"000103";
 
+  -- multiboot
+  constant start_multiboot_cmd : std_logic_vector(23 downto 0) := x"000200";
+
 
 
 
@@ -181,8 +184,7 @@ package REB_v5_commands_package is
 -- back bias switch 
   constant back_bias_sw_cmd : std_logic_vector(23 downto 0) := x"D00000";
 
--- multiboot
-  constant start_multiboot_cmd : std_logic_vector(23 downto 0) := x"F00000";
+
 
 end REB_v5_commands_package;
 

@@ -26,8 +26,8 @@ create_clock -period 6.400 -name TXOUTCLK_0 -waveform {0.000 3.200} [get_pins Ls
 # local clock for front end (100 MHz from RX reconstructed clock)
 create_generated_clock -name clk_100_Mhz_local -master_clock RXOUTCLK_0 [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT0]
 
-# local clock for front end (50 MHz from RX reconstructed clock)
-create_generated_clock -name clk_50_Mhz -master_clock RXOUTCLK_0 [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT1]
+# local clock for front end (25 MHz from RX reconstructed clock)
+create_generated_clock -name clk_25_Mhz -master_clock RXOUTCLK_0 [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT1]
 
 #clocks for 1 wire block genretated from local 100 MHz
 #create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 104 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
@@ -44,19 +44,13 @@ set_clock_groups -logically_exclusive -group jc_100mhz_clk -group clk_100_Mhz_lo
 
 #set asynchronous clocks
 
-set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] \
-		 	       -group {aux_100mhz_clk} \
-			       -group {jc_100mhz_clk} \
-			       -group {RXOUTCLK_0} \
-			       -group {TXOUTCLK_0} \
-			       -group {clk_100_Mhz_local clk_50_Mhz} \
-			       -group {REB_onewire_1Mhz REB_onewire_50khz} 
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_0 -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz} -group {REB_onewire_1Mhz REB_onewire_50khz}
 
 
 ### Pin Assignment ###
 
 
-## pgp reference clock 
+## pgp reference clock
 
 set_property PACKAGE_PIN F6 [get_ports PgpRefClk_P]
 set_property PACKAGE_PIN F5 [get_ports PgpRefClk_M]
@@ -67,10 +61,10 @@ set_property PACKAGE_PIN F5 [get_ports PgpRefClk_M]
 ## PGP serial com lines (Bank 116)
 
 #pgp link 0
-set_property PACKAGE_PIN E4 [get_ports PgpRx_P]
 set_property PACKAGE_PIN E3 [get_ports PgpRx_M]
-set_property PACKAGE_PIN D2 [get_ports PgpTx_P]
+set_property PACKAGE_PIN E4 [get_ports PgpRx_P]
 set_property PACKAGE_PIN D1 [get_ports PgpTx_M]
+set_property PACKAGE_PIN D2 [get_ports PgpTx_P]
 
 #pgp link 1
 #set_property PACKAGE_PIN B5 [get_ports PgpRx_m]
@@ -78,7 +72,7 @@ set_property PACKAGE_PIN D1 [get_ports PgpTx_M]
 #set_property PACKAGE_PIN A3 [get_ports PgpTx_m]
 #set_property PACKAGE_PIN A4 [get_ports PgpTx_p]
 
-#Aux clk 
+#Aux clk
 set_property PACKAGE_PIN F17 [get_ports aux_100mhz_clk_in]
 #set_property PACKAGE_PIN E17 [get_ports aux_100mhz_clk_in]
 
@@ -137,25 +131,25 @@ set_property PACKAGE_PIN AD14 [get_ports {par_clk_ccd_1_n[0]}]
 set_property PACKAGE_PIN AC14 [get_ports {par_clk_ccd_1_p[0]}]
 set_property PACKAGE_PIN AA15 [get_ports {par_clk_ccd_1_n[1]}]
 set_property PACKAGE_PIN AA14 [get_ports {par_clk_ccd_1_p[1]}]
-set_property PACKAGE_PIN AE16 [get_ports {par_clk_ccd_1_n[2]}]
 set_property PACKAGE_PIN AD16 [get_ports {par_clk_ccd_1_p[2]}]
-set_property PACKAGE_PIN AF20 [get_ports {par_clk_ccd_1_n[3]}]
+set_property PACKAGE_PIN AE16 [get_ports {par_clk_ccd_1_n[2]}]
 set_property PACKAGE_PIN AF19 [get_ports {par_clk_ccd_1_p[3]}]
+set_property PACKAGE_PIN AF20 [get_ports {par_clk_ccd_1_n[3]}]
 
 
 set_property PACKAGE_PIN AE15 [get_ports {ser_clk_ccd_1_n[0]}]
 set_property PACKAGE_PIN AD15 [get_ports {ser_clk_ccd_1_p[0]}]
 set_property PACKAGE_PIN AF18 [get_ports {ser_clk_ccd_1_n[1]}]
 set_property PACKAGE_PIN AE18 [get_ports {ser_clk_ccd_1_p[1]}]
-set_property PACKAGE_PIN AF15 [get_ports {ser_clk_ccd_1_n[2]}]
 set_property PACKAGE_PIN AF14 [get_ports {ser_clk_ccd_1_p[2]}]
+set_property PACKAGE_PIN AF15 [get_ports {ser_clk_ccd_1_n[2]}]
 
 
 set_property PACKAGE_PIN AF17 [get_ports reset_gate_ccd_1_n]
 set_property PACKAGE_PIN AE17 [get_ports reset_gate_ccd_1_p]
 
 
-## bias DAC ccd1 (bank 12) 
+## bias DAC ccd1 (bank 12)
 set_property PACKAGE_PIN AB24 [get_ports ldac_C_BIAS_ccd_1]
 set_property PACKAGE_PIN AA23 [get_ports din_C_BIAS_ccd_1]
 set_property PACKAGE_PIN Y23 [get_ports sync_C_BIAS_ccd_1]
@@ -212,23 +206,23 @@ set_property PACKAGE_PIN E15 [get_ports ASPIC_sclk_ccd_2]
 set_property PACKAGE_PIN E16 [get_ports ASPIC_mosi_ccd_2]
 
 ##CCD Clocks signals (Bank 33)
-set_property PACKAGE_PIN AE8 [get_ports {par_clk_ccd_2_p[0]}]
 set_property PACKAGE_PIN AF8 [get_ports {par_clk_ccd_2_n[0]}]
-set_property PACKAGE_PIN AE7 [get_ports {par_clk_ccd_2_p[1]}]
+set_property PACKAGE_PIN AE8 [get_ports {par_clk_ccd_2_p[0]}]
 set_property PACKAGE_PIN AF7 [get_ports {par_clk_ccd_2_n[1]}]
+set_property PACKAGE_PIN AE7 [get_ports {par_clk_ccd_2_p[1]}]
 set_property PACKAGE_PIN AF10 [get_ports {par_clk_ccd_2_p[2]}]
 set_property PACKAGE_PIN AF9 [get_ports {par_clk_ccd_2_n[2]}]
 set_property PACKAGE_PIN Y11 [get_ports {par_clk_ccd_2_p[3]}]
 set_property PACKAGE_PIN Y10 [get_ports {par_clk_ccd_2_n[3]}]
 
-set_property PACKAGE_PIN Y8  [get_ports {ser_clk_ccd_2_p[0]}]
-set_property PACKAGE_PIN Y7  [get_ports {ser_clk_ccd_2_n[0]}]
+set_property PACKAGE_PIN Y7 [get_ports {ser_clk_ccd_2_n[0]}]
+set_property PACKAGE_PIN Y8 [get_ports {ser_clk_ccd_2_p[0]}]
+set_property PACKAGE_PIN W9 [get_ports {ser_clk_ccd_2_n[1]}]
 set_property PACKAGE_PIN W10 [get_ports {ser_clk_ccd_2_p[1]}]
-set_property PACKAGE_PIN W9  [get_ports {ser_clk_ccd_2_n[1]}]
-set_property PACKAGE_PIN V8  [get_ports {ser_clk_ccd_2_p[2]}]
-set_property PACKAGE_PIN V7  [get_ports {ser_clk_ccd_2_n[2]}]
-set_property PACKAGE_PIN V11 [get_ports reset_gate_ccd_2_p]
+set_property PACKAGE_PIN V8 [get_ports {ser_clk_ccd_2_p[2]}]
+set_property PACKAGE_PIN V7 [get_ports {ser_clk_ccd_2_n[2]}]
 set_property PACKAGE_PIN W11 [get_ports reset_gate_ccd_2_n]
+set_property PACKAGE_PIN V11 [get_ports reset_gate_ccd_2_p]
 
 ## bias DAC ccd2 (bank 12)
 
@@ -264,14 +258,14 @@ set_property PACKAGE_PIN J10 [get_ports {adc_data_b_ccd_3[7]}]
 
 ##ASPIC signals (Bank 18)
 
-set_property PACKAGE_PIN W1 [get_ports ASPIC_r_up_ccd_3_p]
 set_property PACKAGE_PIN Y1 [get_ports ASPIC_r_up_ccd_3_n]
-set_property PACKAGE_PIN AB2 [get_ports ASPIC_r_down_ccd_3_p]
+set_property PACKAGE_PIN W1 [get_ports ASPIC_r_up_ccd_3_p]
 set_property PACKAGE_PIN AC2 [get_ports ASPIC_r_down_ccd_3_n]
-set_property PACKAGE_PIN AA3 [get_ports ASPIC_clamp_ccd_3_p]
+set_property PACKAGE_PIN AB2 [get_ports ASPIC_r_down_ccd_3_p]
 set_property PACKAGE_PIN AA2 [get_ports ASPIC_clamp_ccd_3_n]
-set_property PACKAGE_PIN AB1 [get_ports ASPIC_reset_ccd_3_p]
+set_property PACKAGE_PIN AA3 [get_ports ASPIC_clamp_ccd_3_p]
 set_property PACKAGE_PIN AC1 [get_ports ASPIC_reset_ccd_3_n]
+set_property PACKAGE_PIN AB1 [get_ports ASPIC_reset_ccd_3_p]
 
 ##(Bank 16)
 set_property PACKAGE_PIN E11 [get_ports ASPIC_nap_ccd_3]
@@ -289,23 +283,23 @@ set_property PACKAGE_PIN B9 [get_ports ASPIC_mosi_ccd_3]
 
 
 ##CCD Clocks signals (Bank 34)
-set_property PACKAGE_PIN V2 [get_ports {par_clk_ccd_3_p[0]}]
 set_property PACKAGE_PIN V1 [get_ports {par_clk_ccd_3_n[0]}]
-set_property PACKAGE_PIN Y3 [get_ports {par_clk_ccd_3_p[1]}]
+set_property PACKAGE_PIN V2 [get_ports {par_clk_ccd_3_p[0]}]
 set_property PACKAGE_PIN Y2 [get_ports {par_clk_ccd_3_n[1]}]
+set_property PACKAGE_PIN Y3 [get_ports {par_clk_ccd_3_p[1]}]
 set_property PACKAGE_PIN V4 [get_ports {par_clk_ccd_3_p[2]}]
 set_property PACKAGE_PIN W4 [get_ports {par_clk_ccd_3_n[2]}]
 set_property PACKAGE_PIN AD1 [get_ports {par_clk_ccd_3_p[3]}]
 set_property PACKAGE_PIN AE1 [get_ports {par_clk_ccd_3_n[3]}]
 
-set_property PACKAGE_PIN AF5 [get_ports {ser_clk_ccd_3_p[0]}]
 set_property PACKAGE_PIN AF4 [get_ports {ser_clk_ccd_3_n[0]}]
-set_property PACKAGE_PIN AE3 [get_ports {ser_clk_ccd_3_p[1]}]
+set_property PACKAGE_PIN AF5 [get_ports {ser_clk_ccd_3_p[0]}]
 set_property PACKAGE_PIN AE2 [get_ports {ser_clk_ccd_3_n[1]}]
-set_property PACKAGE_PIN U2  [get_ports {ser_clk_ccd_3_p[2]}]
-set_property PACKAGE_PIN U1  [get_ports {ser_clk_ccd_3_n[2]}]
-set_property PACKAGE_PIN AF3 [get_ports reset_gate_ccd_3_p]
+set_property PACKAGE_PIN AE3 [get_ports {ser_clk_ccd_3_p[1]}]
+set_property PACKAGE_PIN U2 [get_ports {ser_clk_ccd_3_p[2]}]
+set_property PACKAGE_PIN U1 [get_ports {ser_clk_ccd_3_n[2]}]
 set_property PACKAGE_PIN AF2 [get_ports reset_gate_ccd_3_n]
+set_property PACKAGE_PIN AF3 [get_ports reset_gate_ccd_3_p]
 
 ## bias DAC ccd3 (bank 12)
 set_property PACKAGE_PIN AD24 [get_ports ldac_C_BIAS_ccd_3]
@@ -317,9 +311,9 @@ set_property PACKAGE_PIN AC22 [get_ports sclk_C_BIAS_ccd_3]
 set_property PACKAGE_PIN G24 [get_ports LTC2945_SCL]
 set_property PACKAGE_PIN F24 [get_ports LTC2945_SDA]
 #assigned to unconnected pin
-set_property PACKAGE_PIN E25 [get_ports LTC2945n15_SCL] 
+set_property PACKAGE_PIN E25 [get_ports LTC2945n15_SCL]
 #assigned to unconnected pin
-set_property PACKAGE_PIN D25 [get_ports LTC2945n15_SDA] 
+set_property PACKAGE_PIN D25 [get_ports LTC2945n15_SDA]
 
 
 #####Temperature ####
@@ -328,7 +322,7 @@ set_property PACKAGE_PIN G26 [get_ports sda_temp0]
 set_property PACKAGE_PIN G25 [get_ports scl_temp0]
 
 
-##REB PCB temperature (Bank 16) 
+##REB PCB temperature (Bank 16)
 set_property PACKAGE_PIN B11 [get_ports sda_temp1]
 set_property PACKAGE_PIN B12 [get_ports scl_temp1]
 set_property PACKAGE_PIN A14 [get_ports sda_temp2]
@@ -359,7 +353,7 @@ set_property PACKAGE_PIN A24 [get_ports sclk_24ADC]
 set_property PACKAGE_PIN A23 [get_ports din_24ADC]
 set_property PACKAGE_PIN B26 [get_ports dout_24ADC]
 
-##### DAC #### 
+##### DAC ####
 ##clock rails DAC (Bank 12)
 set_property PACKAGE_PIN AA25 [get_ports ldac_RAILS]
 set_property PACKAGE_PIN AB25 [get_ports din_RAILS]
@@ -399,13 +393,13 @@ set_property PACKAGE_PIN AD18 [get_ports jc_refclk_out_n]
 set_property PACKAGE_PIN AB11 [get_ports jc_refclk_in_p]
 set_property PACKAGE_PIN AC11 [get_ports jc_refclk_in_n]
 
-#### Remote Update 
+#### Remote Update
 #Bank 14
-set_property PACKAGE_PIN C23 [get_ports ru_outSpiCsB] 
+set_property PACKAGE_PIN C23 [get_ports ru_outSpiCsB]
 set_property PACKAGE_PIN B24 [get_ports ru_outSpiMosi]
 set_property PACKAGE_PIN A25 [get_ports ru_inSpiMiso]
-set_property PACKAGE_PIN B22 [get_ports ru_outSpiWpB]   
-set_property PACKAGE_PIN A22 [get_ports ru_outSpiHoldB] 
+set_property PACKAGE_PIN B22 [get_ports ru_outSpiWpB]
+set_property PACKAGE_PIN A22 [get_ports ru_outSpiHoldB]
 
 
 #### MISC ####
@@ -462,8 +456,8 @@ set_property PACKAGE_PIN AC6 [get_ports PWR_SYNC1]
 #REB serial number (Bank 12)
 set_property PACKAGE_PIN A12 [get_ports reb_sn_onewire]
 
-set_property PACKAGE_PIN AA4 [get_ports gpio_p]
 set_property PACKAGE_PIN AB4 [get_ports gpio_n]
+set_property PACKAGE_PIN AA4 [get_ports gpio_p]
 
 
 #### set voltages ####
@@ -513,30 +507,43 @@ set_property IOSTANDARD LVCMOS33 [get_ports jc_reset]
 #set_property IOSTANDARD LVCMOS33 [get_ports jc_oe]
 
 
-set_property IOSTANDARD LVCMOS33  [get_ports ru_*] 
+set_property IOSTANDARD LVCMOS33 [get_ports ru_*]
 
 
 #### set Bitstream Config Parameters ####
 
-# set flash SPI speed
+## set flash SPI speed
 #more command options are in UG908 programming and debugging appendix A
-set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design] 
+# set SPI clk speed during boot 
+set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
+# set SPI bus width during boot 
+set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design]
+
+## watchdog for triggeringring the fallback reboot in  case of error 
+set_property BITSTREAM.CONFIG.TIMER_CFG 0x4007A120 [current_design]
+
+## set Flash SPI address width
+set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR YES [current_design]
 
 ## set multiboot config
+#enalble fallback
+set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design]
 
-#set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR YES [current_design] 
-
-### there is some sort of incompatibility between 32 bit address setting and .NEXT_CONFIG_ADDR setting
-### when 32 bit address is on the lower 8 bits of the address in .NEXT_CONFIG_ADDR are ignored...
-
-set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design] 
-set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 32'h00800000 [current_design] 
+# set jump address at boot time. The FPGA duirng boot will jup to this address
+#and load the image that starts form there 
+#set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 32'h00800000 [current_design]
 
 #### set hardware configuration ####
 ## setting to avoid warning CFGBVS in vivado DRC
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
 
-set_property CFGBVS VCCO         [current_design]
-set_property CONFIG_VOLTAGE 3.3  [current_design]
+
+
+
+
+
+
 
 
 

@@ -3,8 +3,9 @@
 # Refer to UG835 write_cfgmem for options
 
 set format     "mcs"
-set inteface   "spix1"
-#set inteface   "spix4"
+#set inteface   "spix1"
+# this command only works if in the xdc file there is the directive to set SPIx4
+set inteface   "spix4"
 set size       "256"
 
 ## test generating a .mcs file with two .bit files 

@@ -223,7 +223,8 @@ entity REB_v5_cmd_interpreter is
         jc_start_config : out std_logic;
 
 -- multiboot
-        start_multiboot : out std_logic;
+        remote_update_reboot_status : in  std_logic_vector(31 downto 0);
+        start_multiboot             : out std_logic;
 
 -- remote update
         remote_update_fifo_full  : in  std_logic;
@@ -339,7 +340,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       jc_start_config_state, jc_read_config_state,
 
 -- multiboot    
-                      start_multiboot_state,
+                      start_multiboot_state, reboot_status_rd_state,
 
 -- remote update
                       remote_update_rd_status_state,
@@ -696,7 +697,7 @@ begin
            reb_sn_crc_ok, reb_sn, reb_sn_timeout, reb_sn_dev_error,
 
            -- Remote Update
-           remote_update_fifo_full, remote_update_status_reg,
+           remote_update_fifo_full, remote_update_status_reg, remote_update_reboot_status,
 
            -- XADC
            xadc_channel_out, xadc_do_out, xadc_ot_out, xadc_vccaux_alarm_out, xadc_vccint_alarm_out,
@@ -1117,6 +1118,9 @@ begin
               ---------- Remote Update read status register
             elsif regAddr = ru_status_read_cmd then
               next_state <= remote_update_rd_status_state;
+
+            elsif regAddr = start_multiboot_cmd then
+              next_state <= reboot_status_rd_state;
 
               ---------- Jitter Cleaner read config    
             elsif regAddr = jc_start_config_cmd then
@@ -2100,6 +2104,11 @@ begin
       when remote_update_rd_status_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= X"0000" & remote_update_status_reg;
+        next_regAck    <= '1';
+
+      when reboot_status_rd_state =>
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= remote_update_reboot_status;
         next_regAck    <= '1';
 
 

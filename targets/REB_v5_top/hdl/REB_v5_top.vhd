@@ -524,11 +524,12 @@ architecture Behavioral of REB_v5_top is
           start_multiboot          : out std_logic;
 
 -- remote update
-          remote_update_fifo_full  : in  std_logic;
-          remote_update_status_reg : in  std_logic_vector(15 downto 0);
-          start_remote_update      : out std_logic;
-          remote_update_bitstrm_we : out std_logic;
-          remote_update_daq_done   : out std_logic;
+          remote_update_fifo_full     : in  std_logic;
+          remote_update_status_reg    : in  std_logic_vector(15 downto 0);
+          remote_update_reboot_status : in  std_logic_vector(31 downto 0);
+          start_remote_update         : out std_logic;
+          remote_update_bitstrm_we    : out std_logic;
+          remote_update_daq_done      : out std_logic;
 
 -- XADC
           xadc_drdy_out            : in  std_logic;
@@ -988,12 +989,12 @@ architecture Behavioral of REB_v5_top is
       led_out : out std_logic);
   end component;
 
-  component multiboot_fsm is
-    port (
-      TRIGGER : in std_logic;
-      SYSCLK  : in std_logic
-      );
-  end component;
+  --component multiboot_fsm is
+  --  port (
+  --    TRIGGER : in std_logic;
+  --    SYSCLK  : in std_logic
+  --    );
+  --end component;
 
   component multiboot_top
     port (
@@ -1004,6 +1005,7 @@ architecture Behavioral of REB_v5_top is
       inVerifyOnly         : in  std_logic;
       inStartProg          : in  std_logic;
       inDaqDone            : in  std_logic;
+      inStartReboot        : in  std_logic;
       inImageSelWe         : in  std_logic;
       inImageSel           : in  std_logic_vector(1 downto 0);
       inBitstreamWe        : in  std_logic;
@@ -1011,6 +1013,7 @@ architecture Behavioral of REB_v5_top is
       outBitstreamFifoFull : out std_logic;
       outStarted           : out std_logic;
       outStatusReg         : out std_logic_vector(15 downto 0);
+      outRebootStatus      : out std_logic_vector(31 downto 0);
       outSpiCsB            : out std_logic;
       outSpiMosi           : out std_logic;
       inSpiMiso            : in  std_logic;
@@ -1067,7 +1070,7 @@ architecture Behavioral of REB_v5_top is
   signal usrClk            : std_logic;
   signal clk_100_Mhz_local : std_logic;
   signal clk_100_Mhz       : std_logic;
-  signal clk_50_Mhz        : std_logic;
+  signal clk_25_Mhz        : std_logic;
 
   signal aux_100mhz_clk : std_logic;
 
@@ -1364,9 +1367,9 @@ architecture Behavioral of REB_v5_top is
 
 -- multiboot
   signal start_multiboot : std_logic;
-  signal mb_en           : std_logic;
-  signal mb_en_1         : std_logic;
-  signal mb_en_2         : std_logic;
+  --signal mb_en           : std_logic;
+  --signal mb_en_1         : std_logic;
+  --signal mb_en_2         : std_logic;
 
 -- bitstream Remote Update 
 
@@ -1377,6 +1380,7 @@ architecture Behavioral of REB_v5_top is
   signal ru_bitstream_fifo_full : std_logic;
   signal ru_busy                : std_logic;
   signal ru_satatus_reg         : std_logic_vector(15 downto 0);
+  signal ru_reboot_status       : std_logic_vector(31 downto 0);
 
 -- xadc
 
@@ -1883,7 +1887,8 @@ begin
       jc_start_config => jc_start_config,
 
 -- multiboot
-      start_multiboot => start_multiboot,
+      remote_update_reboot_status => ru_reboot_status,
+      start_multiboot             => start_multiboot,
 
 -- remote update
       remote_update_fifo_full  => ru_bitstream_fifo_full,
@@ -2439,14 +2444,15 @@ begin
       clk_2MHz_out    => PWR_SYNC1
       );
 
-  multiboot_fsm_0 : multiboot_fsm
-    port map (
-      TRIGGER => mb_en_2,
-      SYSCLK  => clk_50_Mhz
-      );
+  --multiboot_fsm_0 : multiboot_fsm
+  --  port map (
+  --    TRIGGER => mb_en_2,
+  --    SYSCLK  => clk_50_Mhz
+  --    );
 --
-  flop1_mb : FD port map (D => start_multiboot, C => clk_50_Mhz, Q => mb_en);
-  flop2_mb : FD port map (D => mb_en, C => clk_50_Mhz, Q => mb_en_1);
+  --flop1_mb : FD port map (D => start_multiboot, C => clk_50_Mhz, Q => mb_en);
+  --flop2_mb : FD port map (D => mb_en, C => clk_50_Mhz, Q => mb_en_1);
+  -- mb_en_2 <= mb_en or mb_en_1;
 
   ru_image_ID_we <= ru_start;           -- this works because ru_start is
                                         -- internally delayed for sync.
@@ -2454,12 +2460,13 @@ begin
   Remote_Update_top : multiboot_top
     port map (
       inBitstreamClk       => clk_100_Mhz,
-      inSpiClk             => clk_50_Mhz,
+      inSpiClk             => clk_25_Mhz,
       inReset_EnableB      => sync_res,
       inCheckIdOnly        => '0',
       inVerifyOnly         => '0',
       inStartProg          => ru_start,
       inDaqDone            => ru_transfer_done,
+      inStartReboot        => start_multiboot,
       inImageSelWe         => ru_image_ID_we,
       inImageSel           => regDataWr_masked(1 downto 0),
       inBitstreamWe        => ru_bitstream_we,
@@ -2467,13 +2474,14 @@ begin
       outBitstreamFifoFull => ru_bitstream_fifo_full,
       outStarted           => ru_busy,
       outStatusReg         => ru_satatus_reg,
+      outRebootStatus      => ru_reboot_status,
       outSpiCsB            => ru_outSpiCsB,
       outSpiMosi           => ru_outSpiMosi,
       inSpiMiso            => ru_inSpiMiso,
       outSpiWpB            => ru_outSpiWpB,
       outSpiHoldB          => ru_outSpiHoldB);
 
-  mb_en_2 <= mb_en or mb_en_1;
+  
 
   led_blink_0 : led_blink
     port map (
@@ -2496,7 +2504,7 @@ begin
       CLK_IN1  => usrClk,
       -- Clock out ports
       CLK_OUT1 => clk_100_Mhz_local,
-      CLK_OUT2 => clk_50_Mhz,
+      CLK_OUT2 => clk_25_Mhz,
       -- Status and control signals
       LOCKED   => dcm_locked);
 

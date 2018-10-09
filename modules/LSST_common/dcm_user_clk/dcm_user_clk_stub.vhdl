@@ -1,10 +1,10 @@
 -- Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
--- Tool Version: Vivado v.2015.2 (lin64) Build 1266856 Fri Jun 26 16:35:25 MDT 2015
--- Date        : Fri Nov  6 14:59:48 2015
--- Host        : lpnws5166 running 64-bit Scientific Linux release 6.7 (Carbon)
+-- Tool Version: Vivado v.2015.3 (lin64) Build 1368829 Mon Sep 28 20:06:39 MDT 2015
+-- Date        : Thu Sep 27 13:58:35 2018
+-- Host        : lsst-daq03 running 64-bit Red Hat Enterprise Linux Server release 6.10 (Santiago)
 -- Command     : write_vhdl -force -mode synth_stub
---               /home/srusso/Xilinx_prj/LSST_prj/DREB_prj/REB_v3_vivado_15_2/src/ipcore_dir/dcm_user_clk/dcm_user_clk_stub.vhdl
+--               /u1/srusso/build/REB_v5_top/REB_v5_top_project.srcs/sources_1/ip/dcm_user_clk/dcm_user_clk_stub.vhdl
 -- Design      : dcm_user_clk
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7k160tffg676-1

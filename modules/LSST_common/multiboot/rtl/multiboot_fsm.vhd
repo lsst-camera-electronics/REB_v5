@@ -7,8 +7,9 @@ use UNISIM.vcomponents.all;
 
 entity multiboot_fsm is
   port (
-    TRIGGER : in std_logic;
-    SYSCLK  : in std_logic
+    SYSCLK   : in std_logic;
+    TRIGGER  : in std_logic;
+    IMAGESEL : in std_logic_vector(1 downto 0)
     );
 end multiboot_fsm;
 
@@ -17,10 +18,16 @@ architecture Behavioral of multiboot_fsm is
 
   type FSM_STATE is (STATE_00, STATE_01, STATE_02, STATE_03, STATE_04, STATE_05,
                      STATE_06, STATE_07, STATE_08, STATE_09, STATE_10, STATE_11);
-  signal NEXT_STATE : FSM_STATE                     := STATE_00;
-  signal CE         : std_logic                     := '1';
-  signal I          : std_logic_vector(31 downto 0) := "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
-  signal ICAP_WRITE : std_logic                     := '1';
+  signal   NEXT_STATE  : FSM_STATE                     := STATE_00;
+  signal   CE          : std_logic                     := '1';
+  signal   I           : std_logic_vector(31 downto 0) := "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+  signal   ICAP_WRITE  : std_logic                     := '1';
+  constant cAddrImage0 : std_logic_vector(31 downto 0) := X"00000000";  --1st image address x"00000000"
+  constant cAddrImage1 : std_logic_vector(31 downto 0) := X"00010000";  --2nd image address X"00800000" swapped
+  constant cAddrImage2 : std_logic_vector(31 downto 0) := X"80000000";  --3ed image address X"01000000" swapped 
+  constant cAddrImage3 : std_logic_vector(31 downto 0) := X"80010000";  --4th image address X"01800000" swapped
+
+
 begin
   
   ICAPE2_inst : ICAPE2
@@ -74,43 +81,52 @@ begin
         when STATE_04 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"5599AA66";    -- sync word (x"AA995566" non-bit-swapped)
+          I          <= x"5599AA66";  -- sync word (x"AA995566" non-bit-swapped)
           NEXT_STATE <= STATE_05;
         when STATE_05 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
 --            I          <= ;  -- Type 1 NO OP
-          I          <= x"04000000";    -- Type 1 NO OP (x"20000000" non-bit-swapped)
+          I          <= x"04000000";  -- Type 1 NO OP (x"20000000" non-bit-swapped)
           NEXT_STATE <= STATE_06;
         when STATE_06 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"0C400080";    -- Type 1 Write 1 word to WBSTAR (x"30020001" non-bit-swapped)
+          I          <= x"0C400080";  -- Type 1 Write 1 word to WBSTAR (x"30020001" non-bit-swapped)
           NEXT_STATE <= STATE_07;
         when STATE_07 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"000E0000";    -- Warm boot start address  (x"00700000" non-bit-swapped)
+          -- I          <= x"000E0000";  -- Warm boot start address  (x"00700000" non-bit-swapped)
+          if IMAGESEL = "00" then
+            I <= cAddrImage0;
+          elsif IMAGESEL = "01" then
+            I <= cAddrImage1;
+          elsif IMAGESEL = "10" then
+            I <= cAddrImage2;
+          else
+            I <= cAddrImage3;
+          end if;
           NEXT_STATE <= STATE_08;
         when STATE_08 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"0C000180";    -- Type 1 write 1 word to CMD (x"30008001" non-bit-swapped)
+          I          <= x"0C000180";  -- Type 1 write 1 word to CMD (x"30008001" non-bit-swapped)
           NEXT_STATE <= STATE_09;
         when STATE_09 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"000000F0";    -- IPROG command (x"0000000F" non-bit-swapped)
+          I          <= x"000000F0";  -- IPROG command (x"0000000F" non-bit-swapped)
           NEXT_STATE <= STATE_10;
         when STATE_10 =>
           ICAP_WRITE <= '0';
           CE         <= '0';
-          I          <= x"04000000";    -- Type 1 NO OP (x"20000000" non-bit-swapped)
+          I          <= x"04000000";  -- Type 1 NO OP (x"20000000" non-bit-swapped)
           NEXT_STATE <= STATE_11;
         when STATE_11 =>
           ICAP_WRITE <= '0';
           CE         <= '1';            -- deassert CE
-          I          <= x"04000000";-- Type 1 NO OP (x"20000000" non-bit-swapped)
+          I          <= x"04000000";  -- Type 1 NO OP (x"20000000" non-bit-swapped)
           NEXT_STATE <= STATE_00;
         when others =>
           ICAP_WRITE <= '1';
