@@ -151,9 +151,9 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
 
 
 -- Addresses with 1 sectors wide watchdog barriers at the end of each image slot
-  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"00FF0000";
-  constant cAddrImage2End   : std_logic_vector(31 downto 0) := X"017F0000";
-  constant cAddrImage3End   : std_logic_vector(31 downto 0) := X"01FF0000";
+  constant cAddrImage1End : std_logic_vector(31 downto 0) := X"00FF0000";
+  constant cAddrImage2End : std_logic_vector(31 downto 0) := X"017F0000";
+  constant cAddrImage3End : std_logic_vector(31 downto 0) := X"01FF0000";
 
   ----------------------------------------------------------------------------
   -- DATA WORD WIDTH (IN BYTES) FOR INPUT APPLIED TO THE MODULE'S 32-BIT inData32 BUS
@@ -168,7 +168,6 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   -- Device ID from RDID.  Set cIdcode24 to the valid IDCODE for the target SPI flash
   constant cIdcode24N25Q   : std_logic_vector(23 downto 0) := X"20BA18";
   constant cIdcode24NP5Q   : std_logic_vector(23 downto 0) := X"20DA18";
-  --constant cIdcodeN25Q256A     : std_logic_vector(23 downto 0) := X"905D0C";
   constant cIdcodeN25Q256A : std_logic_vector(23 downto 0) := X"20BA19";
   constant cIdcode24Atmel  : std_logic_vector(23 downto 0) := X"1F2000";
   constant cIdcode24W25Q   : std_logic_vector(23 downto 0) := X"EF4018";
@@ -179,14 +178,11 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   constant cCmdRDID        : std_logic_vector(7 downto 0)  := X"9F";
   constant cCmdWE          : std_logic_vector(7 downto 0)  := X"06";
   constant cCmdSE24        : std_logic_vector(7 downto 0)  := X"D8";
-  -- constant cCmdSE32        : std_logic_vector(7 downto 0)  := X"DC";
-  constant cCmdSE32        : std_logic_vector(7 downto 0)  := X"D8";
+  constant cCmdSE32        : std_logic_vector(7 downto 0)  := X"DC";
   constant cCmdSSE24       : std_logic_vector(7 downto 0)  := X"20";
-  constant cCmdSSE32       : std_logic_vector(7 downto 0)  := X"20";
---   constant cCmdSSE32       : std_logic_vector(7 downto 0)  := X"21";
+  constant cCmdSSE32       : std_logic_vector(7 downto 0)  := X"21";
   constant cCmdPP24        : std_logic_vector(7 downto 0)  := X"02";
-  constant cCmdPP32        : std_logic_vector(7 downto 0)  := X"02";
---    constant cCmdPP32        : std_logic_vector(7 downto 0)  := X"12";
+  constant cCmdPP32        : std_logic_vector(7 downto 0)  := X"12";
   constant cCmdPP24NP5Q    : std_logic_vector(7 downto 0)  := X"22";  -- Micron NP5Q page program, bit-alterable write
   constant cCmdPP24Atmel   : std_logic_vector(7 downto 0)  := X"82";  -- Atmel page program with built-in erase
   constant cCmdRFSR        : std_logic_vector(7 downto 0)  := X"70";  -- N25Q-only flag status register
@@ -324,7 +320,7 @@ begin
             state_cnt <= x"00";
             if inStartProg = '1' then
               stateProgrammer <= sProgrammerInitialize;
-               regDone             <= '0';
+              regDone         <= '0';
             else
               regCheckIdOnly      <= '0';
               regVerifyOnly       <= '0';
@@ -402,7 +398,6 @@ begin
               stateProgrammer <= sProgrammerErrorIdcode;
             elsif ((cAtmelDataFlash = '1') and (regData40(23 downto 13) /= cIdcode24Atmel(23 downto 13))) then
               stateProgrammer <= sProgrammerErrorIdcode;
-              --      elsif ((cMicronN25Q = '1') and (regData40(23 downto 8) /= cIdcode24N25Q(23 downto 8))) then
             elsif ((cMicronN25Q = '1') and (regData40(23 downto 8) /= cIdcodeN25Q256A(23 downto 8))) then
               stateProgrammer <= sProgrammerErrorIdcode;
             elsif ((cWinbondW25Q = '1') and (regData40(23 downto 8) /= cIdcode24W25Q(23 downto 8))) then
@@ -460,8 +455,13 @@ begin
           when sProgrammerEraseUpdateArea1 =>
             state_cnt <= x"05";
             if (cAddrWidth = 32) then
-              regData40   <= cCmdSE32 & regCounter32;
-              regCounter3 <= "101";
+              if (cMicronN25Q = '1') then  -- this memory uses the same commandfor 24 and 32 bit addressing
+                regData40   <= cCmdSE24 & regCounter32;
+                regCounter3 <= "101";
+              else
+                regData40   <= cCmdSE32 & regCounter32;
+                regCounter3 <= "101";
+              end if;
             else
               regData40   <= cCmdSE24 & regCounter32(23 downto 0) & X"00";
               regCounter3 <= "100";
@@ -505,8 +505,13 @@ begin
             state_cnt <= x"09";
             -- Send PP
             if (cAddrWidth = 32) then
-              regData40   <= cCmdPP32 & regCounter32;
-              regCounter3 <= "101";
+              if (cMicronN25Q = '1') then  -- this memory uses the same commandfor 24 and 32 bit addressing
+                regData40   <= cCmdPP24 & regCounter32;
+                regCounter3 <= "101";
+              else
+                regData40   <= cCmdPP32 & regCounter32;
+                regCounter3 <= "101";
+              end if;
             elsif (cMicronNP5Q = '1') then
               regData40   <= cCmdPP24NP5Q & regCounter32(23 downto 0) & X"00";
               regCounter3 <= "100";
