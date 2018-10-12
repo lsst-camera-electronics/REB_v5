@@ -144,9 +144,16 @@ architecture behavioral of SpiFlashProgrammer_multiboot is
   constant cAddrImage3Start : std_logic_vector(31 downto 0) := X"01800000";  -- 3ed update image start at 384 sector
   -- UPDATE IMAGE END+1 (BYTE) ADDRESS
 --  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"00810000";  -- just for test REMOVE 
-  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"01000000";
-  constant cAddrImage2End   : std_logic_vector(31 downto 0) := X"01800000";
-  constant cAddrImage3End   : std_logic_vector(31 downto 0) := X"02000000";
+-- Addresses without watchdog barriers 
+  --constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"01000000";
+  --constant cAddrImage2End   : std_logic_vector(31 downto 0) := X"01800000";
+  --constant cAddrImage3End   : std_logic_vector(31 downto 0) := X"02000000";
+
+
+-- Addresses with 1 sectors wide watchdog barriers at the end of each image slot
+  constant cAddrImage1End   : std_logic_vector(31 downto 0) := X"00FF0000";
+  constant cAddrImage2End   : std_logic_vector(31 downto 0) := X"017F0000";
+  constant cAddrImage3End   : std_logic_vector(31 downto 0) := X"01FF0000";
 
   ----------------------------------------------------------------------------
   -- DATA WORD WIDTH (IN BYTES) FOR INPUT APPLIED TO THE MODULE'S 32-BIT inData32 BUS

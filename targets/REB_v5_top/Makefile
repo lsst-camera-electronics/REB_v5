@@ -1,6 +1,6 @@
 
 # Define target output
-target: bit prom
+target: bit prom multiboot
 
 # Define target part
 export PRJ_PART = XC7K160TFFG676-1
@@ -74,4 +74,15 @@ export MODULE_DIRS = $(PROJ_DIR)/../../modules/LSST_common/ADC_data_handler_v4 \
 # Use top level makefile
 include ../../modules/StdLib/build/system_vivado_v1.mk
 
+###############################################################
+#### multiboot #####################################################
+###############################################################
+$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_multiboot.mcs: $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs
+	$(call ACTION_HEADER,"PROM Multiboot Generate")
+	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_DIR)/mcs_jump_maker.tcl
+	@echo ""
+	@echo "Multiboot Prom file copied to $@"
+	@echo "Don't forget to 'svn commit' when the image is stable!"
 
+.PHONY      : multiboot
+multiboot   : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_multiboot.mcs
