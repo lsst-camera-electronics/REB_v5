@@ -544,7 +544,6 @@ begin
         -- multiboot
         start_multiboot <= '0';
 
-
         -- remote update
         start_remote_update      <= '0';
         remote_update_bitstrm_we <= '0';
@@ -1437,7 +1436,7 @@ begin
       when hdl_version =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
-        next_regDataRd <= version_dev_level & LSST_SCI_VERSION & REB_vhdl_version;
+        next_regDataRd <= version_dev_level & x"1" & LSST_SCI_VERSION(7 downto 0) & REB_vhdl_version;
         -- SCI ID (add 2)
       when SCI_ID =>
         next_state     <= wait_end_cmd;
@@ -1599,8 +1598,6 @@ begin
 
       when status_block_rst_state =>
         next_state <= ack_del_1;
-
-
 
 ---------------------- Image Parameters Write --------------------------
 
@@ -2084,7 +2081,6 @@ begin
         next_state <= ack_del_1;
 
 ---------------------- Multiboot --------------------------                             
-
         -- start multiboot
       when start_multiboot_state =>
         next_state <= ack_del_1;
@@ -2110,7 +2106,6 @@ begin
         next_state     <= wait_end_cmd;
         next_regDataRd <= remote_update_reboot_status;
         next_regAck    <= '1';
-
 
 ---------------------- XADC --------------------------                          
 

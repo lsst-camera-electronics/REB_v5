@@ -282,8 +282,6 @@ architecture Behavioral of REB_v5_top is
       -------------------------------------------------------------------------
       -- FPGA Interface
       -------------------------------------------------------------------------
-
-
       StableClk : in std_logic;
       StableRst : in std_logic;
 
@@ -318,18 +316,22 @@ architecture Behavioral of REB_v5_top is
       -------------------------------------------------------------------------
       -- Data Encoder Interface
       -------------------------------------------------------------------------
+-- up to v32
       --DataWrEn : in std_logic;
       --DataSOT  : in std_logic;
       --DataEOT  : in std_logic;
       --DataIn   : in std_logic_vector(17 downto 0);
+      -- version 34 
       DataIn : in LsstSciImageDataArray(1 downto 0);
 
       -------------------------------------------------------------------------
       -- Notification Interface
       -------------------------------------------------------------------------
       NoticeEn : in std_logic;
+      --  up to v32
+      -- Notice   : in std_logic_vector(15 downto 0);
+      -- version 34
       Notice   : in std_logic_vector(13 downto 0);
-      --       Notice   : in std_logic_vector(15 downto 0);
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -1677,19 +1679,22 @@ begin
       -------------------------------------------------------------------------
       -- Data Encoder Interface
       -------------------------------------------------------------------------
+-- version 32
       --DataWrEn  => dataWrEn,
       --DataSOT   => dataSOT,
       --DataEOT   => dataEOT,
       --DataIn    => image_in,
-
-      DataIn => SCI_DataIn,
+-- version 34
+      DataIn    => SCI_DataIn,
 
       -------------------------------------------------------------------------
       -- Notification Interface
       -------------------------------------------------------------------------
       NoticeEn => interrupt_en_out,
+      -- version 32
+      -- Notice   => x"0000",
+-- version 34
       Notice   => interrupt_bus_out,
-      --   Notice   => x"0000",
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -2374,6 +2379,7 @@ begin
       ADD_PULLUP => false,
       CLK_DIV    => 12)
     port map(
+      --sys_clk     => clk_25_Mhz,
       sys_clk     => clk_100_Mhz,
       --  latch_reset => sync_res,
       latch_reset => reb_onewire_reset_lock,
