@@ -1,1 +1,9 @@
+# reboot machine 
 vhdl work rtl/multiboot_fsm.vhd
+vhdl work rtl/multiboot_fsm_read.vhd
+
+# SPI remote upload
+vhdl work rtl/multiboot_top.vhd
+vhdl work rtl/SpiFlashProgrammer_multiboot.vhd
+vhdl work rtl/SpiFlashProgrammer.vhd
+vhdl work rtl/SpiSerDes.vhd

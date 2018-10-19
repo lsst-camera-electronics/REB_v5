@@ -1,0 +1,1 @@
+ip_cores/bitfile_fifo_in/bitfile_fifo_in.xci

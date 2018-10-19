@@ -1,1 +1,2 @@
 hdl/REB_v5_top.xdc
+#hdl/REB_v5_top_chipscope.xdc
