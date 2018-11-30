@@ -322,16 +322,20 @@ architecture Behavioral of REB_v5_top is
       --DataEOT  : in std_logic;
       --DataIn   : in std_logic_vector(17 downto 0);
       -- version 34 
-      DataIn : in LsstSciImageDataArray(1 downto 0);
+      --DataIn : in LsstSciImageDataArray(1 downto 0);
+      -- version 36
+      DataIn : in LsstSciImageDataArray(2 downto 0);
 
       -------------------------------------------------------------------------
       -- Notification Interface
       -------------------------------------------------------------------------
       NoticeEn : in std_logic;
       --  up to v32
-      -- Notice   : in std_logic_vector(15 downto 0);
+      --Notice   : in std_logic_vector(15 downto 0);
       -- version 34
-      Notice   : in std_logic_vector(13 downto 0);
+      --Notice   : in std_logic_vector(13 downto 0);
+      -- version 36
+      Notice   : in std_logic_vector(83 downto 0);
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -788,7 +792,6 @@ architecture Behavioral of REB_v5_top is
       );
   end component;
 
-
   component ltc2945_multi_read_top is
     port (
       clk               : in    std_logic;
@@ -865,7 +868,6 @@ architecture Behavioral of REB_v5_top is
       );
   end component;
 
-
   component ads8634_and_mux_top
     port (
       clk                  : in  std_logic;
@@ -887,9 +889,6 @@ architecture Behavioral of REB_v5_top is
       mux_bias_address_out : out std_logic_vector(2 downto 0);
       data_out             : out array716);
   end component;
-
-
-
 
   component ad7794_top is
     port (
@@ -1095,12 +1094,15 @@ architecture Behavioral of REB_v5_top is
   signal regFail         : std_logic;
   signal RegDataRd       : std_logic_vector(31 downto 0);
   signal RegWrEn         : std_logic_vector(31 downto 0);
+-- DAQ v32
   --signal dataWrEn        : std_logic;
   --signal dataSOT         : std_logic;
   --signal dataEOT         : std_logic;
   --signal image_in        : std_logic_vector(17 downto 0);
-
-  signal SCI_DataIn : LsstSciImageDataArray(1 downto 0);
+-- DAQ v34
+--  signal SCI_DataIn : LsstSciImageDataArray(1 downto 0);
+-- DAQ v36
+  signal SCI_DataIn      : LsstSciImageDataArray(2 downto 0);
 
   signal StatusAddr : std_logic_vector(23 downto 0);
   signal StatusReg  : std_logic_vector(31 downto 0);
@@ -1460,9 +1462,14 @@ begin
 --  edge_en is "00" &  x"0" & "10011011";
 
   -- signals appears 2 times when both rising and falling edge notice has to be
-  -- sent 
-  --interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & dataEOT & dataSOT & sequencer_busy & sequencer_busy & fe_reset_notice;
+  -- sent
+  -- DAQ v32
+--  interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & dataEOT & dataSOT & sequencer_busy & sequencer_busy & fe_reset_notice;
 
+  -- DAQ v34
+  -- interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
+
+  -- DAQ v36
   interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
 
 ------------ Sequencer's signals assignment ------------
@@ -1608,9 +1615,6 @@ begin
   --    I => PgpRefClk,
   --    O => stable_clk);
 
-
-
-
   ClockManager_local_100MHz : entity work.ClockManager7
     generic map (
       TPD_G              => TPD_C,
@@ -1634,7 +1638,6 @@ begin
       rstOut(0) => open);
 
   --stable_reset <= not stable_clk_lock;
-
 
   LsstSci_0 : LsstSci
     port map (
@@ -1685,16 +1688,22 @@ begin
       --DataEOT   => dataEOT,
       --DataIn    => image_in,
 -- version 34
+      -- DataIn    => SCI_DataIn,
+-- version 36
       DataIn    => SCI_DataIn,
 
       -------------------------------------------------------------------------
       -- Notification Interface
       -------------------------------------------------------------------------
-      NoticeEn => interrupt_en_out,
+      NoticeEn             => interrupt_en_out,
       -- version 32
-      -- Notice   => x"0000",
+      --Notice   => x"0000",
 -- version 34
-      Notice   => interrupt_bus_out,
+      --Notice   => interrupt_bus_out,
+-- version 36
+      Notice(83 downto 14) => (others => '0'),
+      Notice(13 downto 0)  => interrupt_bus_out,
+
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -2008,18 +2017,25 @@ begin
       ccd_sel_in      => regDataWr_masked(2 downto 0),  -- register to select which CCD acquire (1, 2 or 3) 
       ccd_sel_out     => CCD_sel,  -- register to select which CCD acquire (1, 2 or 3) 
 
+      -- DAQ v32 
       --SOT          => dataSOT,          -- Start of Image
       --EOT          => dataEOT,          -- End of Image
       --write_enable => dataWrEn,         -- signal to write the image in the PGP
+      --data_out     => image_in,         -- 18 bits ADC word
 
+      -- DAQ v34
+      --SOT          => SCI_DataIn(0).sot,   -- Start of Image
+      --EOT          => SCI_DataIn(0).eot,   -- End of Image
+      --write_enable => SCI_DataIn(0).wrEn,  -- signal to write the image in the PGP
+      --data_out     => SCI_DataIn(0).data,
+
+      -- DAQ v36
       SOT          => SCI_DataIn(0).sot,   -- Start of Image
       EOT          => SCI_DataIn(0).eot,   -- End of Image
       write_enable => SCI_DataIn(0).wrEn,  -- signal to write the image in the PGP
+      data_out     => SCI_DataIn(0).data,
 
       test_mode_enb_out => image_patter_read,
-      --data_out          => image_in,    -- 18 bits ADC word
-
-      data_out => SCI_DataIn(0).data,
 
       adc_data_ccd_1 => adc_data_ccd_1,  -- CCD ADC data 
       adc_cnv_ccd_1  => adc_cnv_ccd_1,   -- ADC conv

@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31345004"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31365004"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Fri Oct 19 09:57:26 PDT 2018 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Fri Nov 30 12:21:32 PST 2018 by srusso";
 
 end Version;
 
@@ -38,6 +38,7 @@ end Version;
 -- 30335003 Look at me added, Temp busy and error fixed.
 -- 31325004 multiboot remote update added
 -- 31345004 new SCI version added and multiboot remote update added
+-- 31365004 new SCI version added with a 84 LAM bits port
 -- 30345005
 -- 30345006
 
