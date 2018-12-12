@@ -43,7 +43,8 @@ end sync_cmd_decoder;
 
 architecture Behavioral of sync_cmd_decoder is
 
-  constant start_sequencer : std_logic_vector(7 downto 0) := x"01";
+  constant sync_cmd_step    : std_logic_vector(7 downto 0) := x"1F";
+  signal   sync_cmd_out_int : std_logic_vector(7 downto 0);
 
 begin
 
@@ -51,19 +52,21 @@ begin
   begin
     if (clk'event and clk = '1') then
       if (reset = '1') then
-        sync_cmd_out <= x"00";
+        sync_cmd_out_int <= x"00";
       else
         if sync_cmd_en = '1' then
           case sync_cmd is
-            when start_sequencer => sync_cmd_out <= x"01";
-            when others          => sync_cmd_out <= x"00";
+            when sync_cmd_step => sync_cmd_out_int <= x"02";
+            when others        => sync_cmd_out_int <= sync_cmd(5 downto 0) & "01";
           end case;
         else
-          sync_cmd_out <= x"00";
+          sync_cmd_out_int <= sync_cmd_out_int(7 downto 1) & '0';
         end if;
       end if;
     end if;
   end process;
+
+  sync_cmd_out <= sync_cmd_out_int;
 
 end Behavioral;
 

@@ -1,3 +1,4 @@
 vhdl work rtl/sync_cmd_decoder_top.vhd
 vhdl work rtl/sync_cmd_decoder.vhd
 vhdl work rtl/pulse_stretcher.vhd
+vhdl work rtl/programmable_delay.vhd

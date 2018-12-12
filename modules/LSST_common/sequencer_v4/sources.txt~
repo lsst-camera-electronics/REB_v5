@@ -1,0 +1,10 @@
+vhdl work sequencer_v3_package.vhd
+vhdl work sequencer_v3_top.vhd
+vhdl work func_handler_v3/sequencer_parameter_extractor_top_v3.vhd
+vhdl work func_handler_v3/parameter_extractor_fsm_v3.vhd
+vhdl work function_v3/function_v3_top.vhd
+vhdl work function_v3/func_core_v3/function_fsm_v3.vhd
+vhdl work function_v3/func_core_v3/mux_2_1_bus_noclk.vhd
+vhdl work function_v3/function_executor_v3.vhd
+vhdl work function_v3/function_v3.vhd
+

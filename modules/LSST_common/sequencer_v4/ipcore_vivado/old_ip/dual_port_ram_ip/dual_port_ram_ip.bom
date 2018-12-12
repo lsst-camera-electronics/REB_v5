@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<BillOfMaterials Version="1" Minor="2">
+	<IPInstance name="dual_port_ram_ip">
+		<FileSets>
+			<FileSet generator="xmdf_to_bom">
+				<File name="dual_port_ram_ip/dist_mem_gen_v7_2_readme.txt" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/doc/dist_mem_gen_v7_2_vinfo.html" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/doc/pg063-dist-mem-gen.pdf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/example_design/dual_port_ram_ip_exdes.ucf" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/example_design/dual_port_ram_ip_exdes.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/example_design/dual_port_ram_ip_exdes.xdc" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/example_design/dual_port_ram_ip_prod_exdes.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/implement.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/implement.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/implement_synplify.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/implement_synplify.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/planAhead_ise.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/planAhead_ise.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/planAhead_ise.tcl" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/xst.prj" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/implement/xst.scr" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_agen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_checker.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_dgen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_pkg.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_rng.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_stim_gen.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/dual_port_ram_ip_tb_synth.vhd" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/functional/simulate_mti.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/functional/simulate_mti.do" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/functional/simulate_mti.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/timing/simulate_mti.bat" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/timing/simulate_mti.do" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip/simulation/timing/simulate_mti.sh" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.asy" type="asy" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.ngc" type="ngc" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.sym" type="asy" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.vhd" type="vhdl" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.vho" type="vho" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip.xco" type="xco" timestamp="Tue Nov 03 16:45:33 2015" checksum="0">
+				</File>
+				<File name="dual_port_ram_ip_xmdf.tcl" type="ignore" timestamp="Tue Nov 03 16:45:32 2015" checksum="0">
+				</File>
+			</FileSet>
+		</FileSets>
+	</IPInstance>
+</BillOfMaterials>
+
