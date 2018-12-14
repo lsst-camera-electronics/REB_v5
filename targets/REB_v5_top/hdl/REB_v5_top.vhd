@@ -335,7 +335,9 @@ architecture Behavioral of REB_v5_top is
       -- version 34
       --Notice   : in std_logic_vector(13 downto 0);
       -- version 36
-      Notice   : in std_logic_vector(83 downto 0);
+      -- Notice   : in std_logic_vector(83 downto 0);
+      -- version 36
+      Notice   : in std_logic_vector(59 downto 0);
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -639,7 +641,7 @@ architecture Behavioral of REB_v5_top is
       seq_mem_data_in          : in  std_logic_vector(31 downto 0);
       prog_mem_redbk           : out std_logic_vector(31 downto 0);
       program_mem_init_add_in  : in  std_logic_vector(9 downto 0);
-   --    program_mem_init_en      : in  std_logic;
+      --    program_mem_init_en      : in  std_logic;
       program_mem_init_add_rbk : out std_logic_vector(9 downto 0);
       ind_func_mem_we          : in  std_logic;
       ind_func_mem_redbk       : out std_logic_vector(3 downto 0);
@@ -1484,7 +1486,7 @@ begin
   -- interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
 
   -- DAQ v36
-  interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
+  interrupt_bus_in <= "00" & x"0" & temp_busy & V_I_busy & fe_reset_notice & sequencer_outputs(31) & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy;
 
 ------------ Sequencer's signals assignment ------------
 -- CCD 1
@@ -1715,8 +1717,13 @@ begin
 -- version 34
       --Notice   => interrupt_bus_out,
 -- version 36
-      Notice(83 downto 14) => (others => '0'),
-      Notice(13 downto 0)  => interrupt_bus_out,
+      --Notice(83 downto 14) => (others => '0'),
+      --Notice(13 downto 0)  => interrupt_bus_out,
+      -- version 37
+      Notice(59 downto 39) => (others => '0'),
+      Notice(38 downto 36) => interrupt_bus_out(7 downto 5),
+      Notice(35 downto 5)  => (others => '0'),
+      Notice(4 downto 0)   => interrupt_bus_out(4 downto 0),
 
 
       -------------------------------------------------------------------------
@@ -2003,9 +2010,8 @@ begin
   
   REB_interrupt_top_1 : REB_interrupt_top
     generic map (
-      edge_en => "00" & x"0" & "10011011")
+     edge_en => "00" & x"0" & "00111101")
     port map (
---      clk               => usrClk,
       clk               => clk_100_Mhz,
       reset             => usrRst,
       interrupt_bus_in  => interrupt_bus_in,
