@@ -1,0 +1,2 @@
+hdl/REB_v5_top_3_seq.xdc
+#hdl/REB_v5_top_chipscope.xdc
