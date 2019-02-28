@@ -33,8 +33,8 @@ create_generated_clock -name clk_25_Mhz -master_clock RXOUTCLK_0 [get_pins dcm_u
 #clocks for 1 wire block genretated from local 100 MHz
 #create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 104 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
 #create_generated_clock -name REB_onewire_50khz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 20 [get_pins REB_1wire_sn/ow_master_i/jcnt2/pro2.qi_reg[9]/Q]
-create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 52 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
-create_generated_clock -name REB_onewire_50khz -source [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q] -divide_by 20 [get_pins {REB_1wire_sn/ow_master_i/jcnt2/pro2.qi_reg[9]/Q}]
+#create_generated_clock -name REB_onewire_1Mhz -source [get_pins dcm_user_clk_0/CLK_OUT1] -divide_by 52 [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q]
+#create_generated_clock -name REB_onewire_50khz -source [get_pins REB_1wire_sn/clkdivider/clk_gen_reg/Q] -divide_by 20 [get_pins {REB_1wire_sn/ow_master_i/jcnt2/pro2.qi_reg[9]/Q}]
 
 
 
@@ -46,8 +46,7 @@ set_clock_groups -logically_exclusive -group jc_100mhz_clk -group clk_100_Mhz_lo
 
 #set asynchronous clocks
 
-set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_0 -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz} -group {REB_onewire_1Mhz} -group {REB_onewire_50khz}
-
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_0 -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz}
 
 ### Pin Assignment ###
 

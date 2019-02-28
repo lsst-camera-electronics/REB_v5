@@ -21,7 +21,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
 use work.REB_v5_commands_package_3_seq.all;
-use work.Base_register_Set_package.all;
+use work.Base_register_Set_package_3_seq.all;
 use work.LsstSciPackage.all;
 use work.ads8634_and_mux_top_package.all;
 
@@ -1656,7 +1656,7 @@ begin
       when interrupt_mask_rd_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
-       -- next_regDataRd <= x"0000" & "00" & interrupt_mask_read;
+        -- next_regDataRd <= x"0000" & "00" & interrupt_mask_read;
         next_regDataRd <= interrupt_mask_read;
 
         -- TRIGGER TIME READ V_I lsw  (add10)

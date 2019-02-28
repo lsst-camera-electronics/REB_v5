@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31375105"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31375106"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2015.3 (x86_64) Built Mon Dec 17 12:39:22 PST 2018 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2015.3 (x86_64) Built Thu Feb 28 14:31:56 CET 2019 by srusso";
 
 end Version;
 
@@ -38,8 +38,9 @@ end Version;
 -- 30335003 Look at me added, Temp busy and error fixed.
 -- 31325004 multiboot remote update added
 -- 31345004 new SCI version added and multiboot remote update added
--- 31375005 new SCI version added with a 60 LAM bits port and sync cmd set start address
--- 30345005
--- 30345006
+-- 31375105 new SCI version added with a 60 LAM bits port and sync cmd set start
+--          address and 3 sequencers 
+-- 30345106 new onewire interface
+
 
 -------------------------------------------------------------------------------

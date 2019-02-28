@@ -917,23 +917,37 @@ architecture Behavioral of REB_v5_top is
       );
   end component;
 
-  component onewire_iface
+  component onewire_master
     generic (
-      CheckCRC   : boolean;
-      ADD_PULLUP : boolean;
-      CLK_DIV    : integer range 0 to 12);
+      main_clk_freq : integer;
+      word_2_write  : std_logic_vector(7 downto 0));
     port (
-      sys_clk     : in    std_logic;    -- system clock (50Mhz)
-      latch_reset : in    std_logic;
-      sys_reset   : in    std_logic;    -- active high syn. reset 
-      dq          : inout std_logic;    -- connect to the 1-wire bus
-      dev_error   : out   std_logic;
-      data        : out   std_logic_vector(7 downto 0);    -- data output
-      data_valid  : out   std_logic;    -- data output valid (20us strobe)
-      crc_ok      : out   std_logic;    -- crc ok signal (active high)
-      timeout     : out   std_logic;    -- timeout signal ~10ms
-      sn_data     : out   std_logic_vector(47 downto 0));  -- parallel out
+      clk         : in    std_logic;
+      reset       : in    std_logic;
+      start_acq   : in    std_logic;
+      dq          : inout std_logic;
+      done        : out   std_logic;
+      d_from_chip : out   std_logic_vector(63 downto 0);
+      error_bus   : out   std_logic_vector(1 downto 0));
   end component;
+
+  --component onewire_iface
+  --  generic (
+  --    CheckCRC   : boolean;
+  --    ADD_PULLUP : boolean;
+  --    CLK_DIV    : integer range 0 to 12);
+  --  port (
+  --    sys_clk     : in    std_logic;    -- system clock (50Mhz)
+  --    latch_reset : in    std_logic;
+  --    sys_reset   : in    std_logic;    -- active high syn. reset 
+  --    dq          : inout std_logic;    -- connect to the 1-wire bus
+  --    dev_error   : out   std_logic;
+  --    data        : out   std_logic_vector(7 downto 0);    -- data output
+  --    data_valid  : out   std_logic;    -- data output valid (20us strobe)
+  --    crc_ok      : out   std_logic;    -- crc ok signal (active high)
+  --    timeout     : out   std_logic;    -- timeout signal ~10ms
+  --    sn_data     : out   std_logic_vector(47 downto 0));  -- parallel out
+  --end component;
 
   component si5342_jitter_cleaner_top
     port (
@@ -1359,12 +1373,23 @@ architecture Behavioral of REB_v5_top is
   signal gpio_int  : std_logic;
 
 -- REB 1wire serial number
-  signal reb_onewire_reset      : std_logic;
-  signal reb_onewire_reset_lock : std_logic;
-  signal reb_sn_crc_ok          : std_logic;
-  signal reb_sn_dev_error       : std_logic;
-  signal reb_sn                 : std_logic_vector(47 downto 0);
-  signal reb_sn_timeout         : std_logic;
+  --signal reb_onewire_reset      : std_logic;
+  --signal reb_onewire_reset_lock : std_logic;
+  --signal reb_sn_crc_ok          : std_logic;
+  --signal reb_sn_dev_error       : std_logic;
+  --signal reb_sn                 : std_logic_vector(47 downto 0);
+  --signal reb_sn_timeout         : std_logic;
+
+  signal reb_onewire_reset : std_logic;
+   signal sn_start_dcm_int : std_logic;
+  signal sn_start_dcm      : std_logic;
+  signal sn_start          : std_logic;
+  signal reb_sn_crc_ok     : std_logic;
+  signal reb_sn_dev_error  : std_logic;
+  signal sn_error_bus      : std_logic_vector(1 downto 0);
+  signal reb_sn            : std_logic_vector(47 downto 0);
+  signal reb_sn_long       : std_logic_vector(63 downto 0);
+
 
 -- Jitter Cleaner
   signal jc_start_config  : std_logic;
@@ -2010,7 +2035,7 @@ begin
   
   REB_interrupt_top_1 : REB_interrupt_top
     generic map (
-     edge_en => "00" & x"0" & "00111101")
+      edge_en => "00" & x"0" & "00111101")
     port map (
       clk               => clk_100_Mhz,
       reset             => usrRst,
@@ -2418,27 +2443,48 @@ begin
       d_from_slave    => ccd_temp
       );
 
-  REB_1wire_sn : onewire_iface
-    generic map (
-      CheckCRC   => true,
-      ADD_PULLUP => false,
-      CLK_DIV    => 12)
-    port map(
-      --sys_clk     => clk_25_Mhz,
-      sys_clk     => clk_100_Mhz,
-      --  latch_reset => sync_res,
-      latch_reset => reb_onewire_reset_lock,
-      -- sys_reset   => reb_onewire_reset,
-      sys_reset   => reb_onewire_reset_lock,
-      crc_ok      => reb_sn_crc_ok,
-      dev_error   => reb_sn_dev_error,
-      data        => open,
-      data_valid  => open,
-      sn_data     => reb_sn,
-      timeout     => reb_sn_timeout,
-      dq          => reb_sn_onewire);
+  sn_edge_detect : FD port map (D => dcm_locked, C => clk_100_Mhz, Q => sn_start_dcm_int);
+  sn_start_dcm <= dcm_locked and not sn_start_dcm_int;
+  sn_start     <= sn_start_dcm or reb_onewire_reset;
+  reb_sn       <= reb_sn_long(55 downto 8);
 
-  reb_onewire_reset_lock <= sync_res or (not dcm_locked);
+  onewire_master_1 : onewire_master
+    generic map (
+      main_clk_freq => 100,
+      word_2_write  => "00110011")
+    port map (
+      clk         => clk_100_Mhz,
+      reset       => '0',
+      start_acq   => sn_start,
+      dq          => reb_sn_onewire,
+      done        => open,
+      d_from_chip => reb_sn_long,
+      error_bus   => sn_error_bus);
+
+  reb_sn_dev_error <= sn_error_bus(0);
+  reb_sn_crc_ok    <= not sn_error_bus(1);
+
+  --REB_1wire_sn : onewire_iface
+  --  generic map (
+  --    CheckCRC   => true,
+  --    ADD_PULLUP => false,
+  --    CLK_DIV    => 12)
+  --  port map(
+  --    --sys_clk     => clk_25_Mhz,
+  --    sys_clk     => clk_100_Mhz,
+  --    --  latch_reset => sync_res,
+  --    latch_reset => reb_onewire_reset_lock,
+  --    -- sys_reset   => reb_onewire_reset,
+  --    sys_reset   => reb_onewire_reset_lock,
+  --    crc_ok      => reb_sn_crc_ok,
+  --    dev_error   => reb_sn_dev_error,
+  --    data        => open,
+  --    data_valid  => open,
+  --    sn_data     => reb_sn,
+  --    timeout     => reb_sn_timeout,
+  --    dq          => reb_sn_onewire);
+
+  --reb_onewire_reset_lock <= sync_res or (not dcm_locked);
 
   ------------------------------------------------------------------------------
   -- Back Bias switch 
