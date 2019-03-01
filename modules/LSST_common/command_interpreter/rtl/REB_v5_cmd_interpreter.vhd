@@ -80,7 +80,7 @@ entity REB_v5_cmd_interpreter is
 
 -- interrupt commands
         interrupt_mask_wr_en : out std_logic;
-        interrupt_mask_read  : in  std_logic_vector(13 downto 0);
+        interrupt_mask_read  : in  std_logic_vector(31 downto 0);
 
 -- Image parameters
         image_size        : in  std_logic_vector(31 downto 0);  -- this register contains the image size
@@ -1519,7 +1519,7 @@ begin
       when interrupt_mask_rd_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
-        next_regDataRd <= x"0000" & "00" & interrupt_mask_read;
+        next_regDataRd <= interrupt_mask_read;
 
         -- TRIGGER TIME READ V_I lsw  (add10)
       when trigger_time_V_I_lsw =>
