@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31375006"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31385006"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Fri Mar  1 11:19:40 CET 2019 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Tue Oct 22 16:20:51 PDT 2019 by srusso";
 
 end Version;
 
@@ -40,6 +40,7 @@ end Version;
 -- 31345004 new SCI version added and multiboot remote update added
 -- 31375005 new SCI version added with a 60 LAM bits port and sync cmd set start address
 -- 31375006 new onewire interface
+-- 31385006 new SCI with new gtx configuration 
 -- 30345005
 -- 30345006
 

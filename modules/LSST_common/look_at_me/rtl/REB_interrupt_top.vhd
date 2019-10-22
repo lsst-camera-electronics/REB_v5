@@ -60,6 +60,17 @@ architecture Behavioral of REB_interrupt_top is
       data_out : out std_logic_vector(width downto 0));  -- data out
   end component;
 
+   component generic_reg_ce_init_1
+    generic (width : integer := 15);
+    port (
+      reset    : in  std_logic;         -- syncronus reset
+      clk      : in  std_logic;         -- clock
+      ce       : in  std_logic;         -- clock enable
+      init     : in  std_logic;  -- signal to reset the reg (active high)
+      data_in  : in  std_logic_vector(width downto 0);   -- data in
+      data_out : out std_logic_vector(width downto 0));  -- data out
+  end component;
+
   signal mask_bus_int         : std_logic_vector(interrupt_bus_width-1 downto 0);
   signal edge_in_bus          : std_logic_vector(interrupt_bus_width-1 downto 0);
   signal posedge_out_bus      : std_logic_vector(interrupt_bus_width-1 downto 0);
@@ -71,7 +82,7 @@ architecture Behavioral of REB_interrupt_top is
 
 begin
 
-  mask_in_reg : generic_reg_ce_init
+  mask_in_reg : generic_reg_ce_init_1
     generic map (width => interrupt_bus_width-1)
     port map (
       reset    => reset,
