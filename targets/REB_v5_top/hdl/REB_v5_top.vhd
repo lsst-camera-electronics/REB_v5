@@ -322,7 +322,9 @@ architecture Behavioral of REB_v5_top is
       --DataEOT  : in std_logic;
       --DataIn   : in std_logic_vector(17 downto 0);
       -- version 34 
-      DataIn : in LsstSciImageDataArray(1 downto 0);
+      -- DataIn : in LsstSciImageDataArray(1 downto 0);
+      -- version 38 
+      DataIn : in LsstSciImageDataArray(2 downto 0);
 
       -------------------------------------------------------------------------
       -- Notification Interface
@@ -331,7 +333,9 @@ architecture Behavioral of REB_v5_top is
       --  up to v32
       -- Notice   : in std_logic_vector(15 downto 0);
       -- version 34
-      Notice   : in std_logic_vector(13 downto 0);
+      -- Notice   : in std_logic_vector(13 downto 0);
+      -- version 38
+      Notice   : in std_logic_vector(59 downto 0);
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
@@ -1100,7 +1104,7 @@ architecture Behavioral of REB_v5_top is
   --signal dataEOT         : std_logic;
   --signal image_in        : std_logic_vector(17 downto 0);
 
-  signal SCI_DataIn : LsstSciImageDataArray(1 downto 0);
+  signal SCI_DataIn : LsstSciImageDataArray(2 downto 0);
 
   signal StatusAddr : std_logic_vector(23 downto 0);
   signal StatusReg  : std_logic_vector(31 downto 0);
@@ -1463,7 +1467,9 @@ begin
   -- sent 
   --interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & dataEOT & dataSOT & sequencer_busy & sequencer_busy & fe_reset_notice;
 
-  interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
+  --version 38 is different so I'm not using interrupt
+--  interrupt_bus_in <= "00" & x"0" & sequencer_outputs(31) & temp_busy & V_I_busy & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy & fe_reset_notice;
+
 
 ------------ Sequencer's signals assignment ------------
 -- CCD 1
@@ -1684,17 +1690,21 @@ begin
       --DataSOT   => dataSOT,
       --DataEOT   => dataEOT,
       --DataIn    => image_in,
--- version 34
-      DataIn    => SCI_DataIn,
+-- version 34 and beyoind 
+     DataIn    => SCI_DataIn,
 
       -------------------------------------------------------------------------
       -- Notification Interface
       -------------------------------------------------------------------------
-      NoticeEn => interrupt_en_out,
+      --     NoticeEn => interrupt_en_out,
       -- version 32
       -- Notice   => x"0000",
 -- version 34
-      Notice   => interrupt_bus_out,
+      --    Notice   => interrupt_bus_out,
+      --version 38 is different so I'm not using interrupt
+      NoticeEn => '0',
+      Notice   => (others => '0'),
+
 
       -------------------------------------------------------------------------
       -- Synchronous Command Interface
