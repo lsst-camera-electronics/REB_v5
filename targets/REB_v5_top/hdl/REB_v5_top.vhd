@@ -1752,7 +1752,7 @@ begin
       --Notice(13 downto 0)  => interrupt_bus_out,
       -- version 37
       Notice(59 downto 39) => (others => '0'),
-      Notice(38 downto 36) => interrupt_bus_out(7 downto 5),
+      Notice(38 downto 36) => interrupt_bus_out(17 downto 15),
       Notice(35 downto 5)  => (others => '0'),
       Notice(4 downto 0)   => interrupt_bus_out(4 downto 0),
 

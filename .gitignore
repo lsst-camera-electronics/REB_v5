@@ -1,11 +1,25 @@
+
+
+
+
 # temporary emacs files
 *.vhd~
 *.xdc~
 .gitignore~
-
+.do~
 #vivado files
 *.jou
 *.log
 
 #build directory
 ./build
+
+#ip directoryes 
+./modules/LSST_common/dcm_user_clk/doc
+
+#old dir
+./modules/LSST_common/dcm_user_clk_old/
+./modules/LSST_common/look_at_me_old/
+#tgz bitfiles 
+*.mcs.gz
+*.bit.gz
