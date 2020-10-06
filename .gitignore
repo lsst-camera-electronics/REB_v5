@@ -8,4 +8,4 @@
 *.log
 
 #build directory
-build
+./build

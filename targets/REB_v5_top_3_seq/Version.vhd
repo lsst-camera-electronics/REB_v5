@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31385106"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31385107"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2015.3 (x86_64) Built Tue Oct 22 16:09:05 PDT 2019 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2015.3 (x86_64) Built Tue Oct  6 15:01:44 CEST 2020 by srusso";
 
 end Version;
 
@@ -41,6 +41,6 @@ end Version;
 -- 31375105 new SCI version added with a 60 LAM bits port and sync cmd set start
 --          address and 3 sequencers 
 -- 30345106 new onewire interface
-
-
+-- 30345107 look at me various fixes (masked at start and other errors). Now the
+-- version shuld be identical to GREB 2007 and following 
 -------------------------------------------------------------------------------

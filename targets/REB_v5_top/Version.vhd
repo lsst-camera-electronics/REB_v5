@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31385006"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31385007"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Tue Oct 22 16:20:51 PDT 2019 by srusso";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2015.3 (x86_64) Built Tue Oct  6 12:53:29 CEST 2020 by srusso";
 
 end Version;
 
@@ -43,5 +43,6 @@ end Version;
 -- 31385006 new SCI with new gtx configuration 
 -- 30345005
 -- 30345006
-
+-- 30345007 look at me various fixes (masked at start and other errors). Now the
+-- version shuld be identical to GREB 2007 and following 
 -------------------------------------------------------------------------------

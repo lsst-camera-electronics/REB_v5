@@ -60,7 +60,7 @@ architecture Behavioral of REB_interrupt_top is
       data_out : out std_logic_vector(width downto 0));  -- data out
   end component;
 
-   component generic_reg_ce_init_1
+  component generic_reg_ce_init_1
     generic (width : integer := 15);
     port (
       reset    : in  std_logic;         -- syncronus reset
@@ -100,10 +100,10 @@ begin
 -- Positive and negative edge detector enabled with edge_en
   edge_detector_generate :
   for i in 0 to interrupt_bus_width-1 generate
-    edge_detect_ff : FD port map (D => interrupt_bus_in(i), C => clk, Q => edge_in_bus(i));
-    posedge_out_bus(i) <= interrupt_bus_in_masked(i) and (not edge_in_bus(i)) and edge_en(i);
-    negedge_out_bus(i) <= not(interrupt_bus_in_masked(i)) and edge_in_bus(i) and not edge_en(i);
-    edge_out_bus(i)    <= posedge_out_bus(i) or negedge_out_bus(i);
+  edge_detect_ff : FD port map (D => interrupt_bus_in_masked(i), C => clk, Q => edge_in_bus(i));
+  posedge_out_bus(i) <= (interrupt_bus_in_masked(i) and not edge_in_bus(i)) and edge_en(i);
+  negedge_out_bus(i) <= (not interrupt_bus_in_masked(i) and edge_in_bus(i)) and not edge_en(i);
+  edge_out_bus(i)    <= posedge_out_bus(i) or negedge_out_bus(i);
   end generate;
 
 -- or bit by bit VHDL-2008
@@ -113,12 +113,12 @@ begin
 -- OR of all the pos edge and neg edge signals to for the iterrupt enable
   interrupt_en_out_int <= (or_reduce(edge_out_bus));
 
--- delay to allign the itterput enable with the interrupt out bus
+-- delay to allign the interput enable with the interrupt out bus
   interrupt_en_ff : FD port map (D => interrupt_en_out_int, C => clk, Q => interrupt_en_out);
 
 
 
-  iterrupt_out_reg : generic_reg_ce_init
+  interrupt_out_reg : generic_reg_ce_init
     generic map (width => interrupt_bus_width-1)
     port map (
       reset    => reset,

@@ -23,7 +23,7 @@ use ieee.std_logic_misc.all;            -- for or_reduce
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -2105,7 +2105,8 @@ begin
         test_mode_in => regDataWr_masked(i),  -- test mode in 
 
         en_load_ccd_sel => '1',         -- register enable for CCD enable
-        ccd_sel_in      => "001",  -- register to select which CCD acquire (1, 2 or 3) 
+     --   ccd_sel_in      => "001",  -- register to select which CCD acquire (1, 2 or 3)
+        ccd_sel_in      => std_logic_vector(to_unsigned(2**i,3)),
         ccd_sel_out     => open,  -- register to select which CCD acquire (1, 2 or 3) 
 
         -- DAQ v32 
