@@ -23,7 +23,7 @@ use ieee.std_logic_misc.all;            -- for or_reduce
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -43,10 +43,10 @@ entity REB_v5_top_3_seq is
     PgpRefClk_M : in std_logic;
 
     ------ PGP signals ------
-    PgpRx_P : in  std_logic;
-    PgpRx_M : in  std_logic;
-    PgpTx_P : out std_logic;
-    PgpTx_M : out std_logic;
+    PgpRx_P : in  std_logic_vector(1 downto 0);
+    PgpRx_M : in  std_logic_vector(1 downto 0);
+    PgpTx_P : out std_logic_vector(1 downto 0);
+    PgpTx_M : out std_logic_vector(1 downto 0);
 
     ------ Aux 100MHz Clk ------
     --aux_100mhz_clk_p : in std_logic;
@@ -289,10 +289,10 @@ architecture Behavioral of REB_v5_top_3_seq is
       FpgaRstL : in std_logic;
 
       PgpRefClk : in  std_logic;
-      PgpRxP    : in  std_logic;
-      PgpRxM    : in  std_logic;
-      PgpTxP    : out std_logic;
-      PgpTxM    : out std_logic;
+      PgpRxP    : in  std_logic_vector(1 downto 0);
+      PgpRxM    : in  std_logic_vector(1 downto 0);
+      PgpTxP    : out std_logic_vector(1 downto 0);
+      PgpTxM    : out std_logic_vector(1 downto 0);
 
       -------------------------------------------------------------------------
       -- Clock/Reset Generator Interface
@@ -1729,10 +1729,10 @@ begin
       PgpRefClk => PgpRefClk,
 
 
-      PgpRxP => PgpRx_p,
-      PgpRxM => PgpRx_m,
-      PgpTxP => PgpTx_p,
-      PgpTxM => PgpTx_m,
+      PgpRxP => PgpRx_P,
+      PgpRxM => PgpRx_M,
+      PgpTxP => PgpTx_P,
+      PgpTxM => PgpTx_M,
       -------------------------------------------------------------------------
       -- Clock/Reset Generator Interface
       -------------------------------------------------------------------------
@@ -2105,8 +2105,8 @@ begin
         test_mode_in => regDataWr_masked(i),  -- test mode in 
 
         en_load_ccd_sel => '1',         -- register enable for CCD enable
-     --   ccd_sel_in      => "001",  -- register to select which CCD acquire (1, 2 or 3)
-        ccd_sel_in      => std_logic_vector(to_unsigned(2**i,3)),
+        --   ccd_sel_in      => "001",  -- register to select which CCD acquire (1, 2 or 3)
+        ccd_sel_in      => std_logic_vector(to_unsigned(2**i, 3)),
         ccd_sel_out     => open,  -- register to select which CCD acquire (1, 2 or 3) 
 
         -- DAQ v32 

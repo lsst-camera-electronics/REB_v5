@@ -77,9 +77,7 @@ module dcm_user_clk_clk_wiz
 
   // Input buffering
   //------------------------------------
-  BUFG clkin1_bufg
-   (.O (CLK_IN1_dcm_user_clk),
-    .I (CLK_IN1));
+  assign CLK_IN1_dcm_user_clk = CLK_IN1;
 
 
 

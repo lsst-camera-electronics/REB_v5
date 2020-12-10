@@ -1,10 +1,10 @@
 // Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2015.3 (lin64) Build 1368829 Mon Sep 28 20:06:39 MDT 2015
-// Date        : Thu Sep 27 13:58:35 2018
-// Host        : lsst-daq03 running 64-bit Red Hat Enterprise Linux Server release 6.10 (Santiago)
+// Date        : Thu Dec 10 18:23:52 2020
+// Host        : lpnws4225 running 64-bit unknown
 // Command     : write_verilog -force -mode funcsim
-//               /u1/srusso/build/REB_v5_top/REB_v5_top_project.srcs/sources_1/ip/dcm_user_clk/dcm_user_clk_sim_netlist.v
+//               /home/srusso/Xilinx_prj/build/REB_v5_top/REB_v5_top_project.srcs/sources_1/ip/dcm_user_clk/dcm_user_clk_sim_netlist.v
 // Design      : dcm_user_clk
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -48,7 +48,6 @@ module dcm_user_clk_dcm_user_clk_clk_wiz
   output LOCKED;
 
   wire CLK_IN1;
-  wire CLK_IN1_dcm_user_clk;
   wire CLK_OUT1;
   wire CLK_OUT1_dcm_user_clk;
   wire CLK_OUT2;
@@ -76,10 +75,6 @@ module dcm_user_clk_dcm_user_clk_clk_wiz
   BUFG clkf_buf
        (.I(clkfbout_dcm_user_clk),
         .O(clkfbout_buf_dcm_user_clk));
-  (* BOX_TYPE = "PRIMITIVE" *) 
-  BUFG clkin1_bufg
-       (.I(CLK_IN1),
-        .O(CLK_IN1_dcm_user_clk));
   (* BOX_TYPE = "PRIMITIVE" *) 
   BUFG clkout1_buf
        (.I(CLK_OUT1_dcm_user_clk),
@@ -125,7 +120,7 @@ module dcm_user_clk_dcm_user_clk_clk_wiz
     .CLKOUT6_DUTY_CYCLE(0.500000),
     .CLKOUT6_PHASE(0.000000),
     .CLKOUT6_USE_FINE_PS("FALSE"),
-    .COMPENSATION("BUF_IN"),
+    .COMPENSATION("ZHOLD"),
     .DIVCLK_DIVIDE(5),
     .IS_CLKINSEL_INVERTED(1'b0),
     .IS_PSEN_INVERTED(1'b0),
@@ -143,7 +138,7 @@ module dcm_user_clk_dcm_user_clk_clk_wiz
         .CLKFBOUT(clkfbout_dcm_user_clk),
         .CLKFBOUTB(NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED),
         .CLKFBSTOPPED(NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED),
-        .CLKIN1(CLK_IN1_dcm_user_clk),
+        .CLKIN1(CLK_IN1),
         .CLKIN2(1'b0),
         .CLKINSEL(1'b1),
         .CLKINSTOPPED(NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED),

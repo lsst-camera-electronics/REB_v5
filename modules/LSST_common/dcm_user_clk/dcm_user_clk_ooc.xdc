@@ -54,3 +54,4 @@
 # Clock Period Constraints                                 #
 ############################################################
 create_clock -period 6.4 [get_ports CLK_IN1]
+#set_property HD.CLK_SRC BUFGCTRL_X0Y0 [get_ports CLK_IN1]

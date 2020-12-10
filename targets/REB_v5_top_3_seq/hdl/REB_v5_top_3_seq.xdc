@@ -11,11 +11,31 @@ create_clock -period 10.000 -name aux_100mhz_clk -waveform {0.000 5.000} [get_po
 # clock from the external PLL (configurable. Now is 100 MHz)
 create_clock -period 10.000 -name jc_100mhz_clk -waveform {0.000 5.000} [get_ports jc_refclk_in_p]
 
+###### old! Up to SCI version 38.######
 # GTX RX reconstructed clock (156.25 MHz)
-create_clock -period 6.400 -name RXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/RXOUTCLK]
+#create_clock -period 6.400 -name RXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/RXOUTCLK]
 
 # GTX TX reconstructed clock (156.25 MHz)
-create_clock -period 6.400 -name TXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
+#create_clock -period 6.400 -name TXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
+
+###### For SCI version 39 with the A and B link switching ###### 
+# GTX RX A reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name RXOUTCLK_A -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/PgpCore[0].Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/RXOUTCLK]
+
+# GTX RX B reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name RXOUTCLK_B -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/PgpCore[1].Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/RXOUTCLK]
+
+# GTX RX reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name RXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/RXOUTCLK_BUFG/O]
+
+# GTX TX A reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name TXOUTCLK_A -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/PgpCore[0].Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
+
+# GTX TX B reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name TXOUTCLK_B -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/PgpCore[1].Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
+
+# GTX TX reconstructed clock (156.25 MHz)
+create_clock -period 6.400 -name TXOUTCLK_0 -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/TXOUTCLK_BUFG/O]
 
 
 #### Renaming Generated clocks (report clock network to see unconstrained clk) ####
@@ -42,11 +62,15 @@ create_generated_clock -name clk_25_Mhz -master_clock RXOUTCLK_0 [get_pins dcm_u
 
 # set the input clk for the clk mux as mutually exclusive
 set_clock_groups -logically_exclusive -group jc_100mhz_clk -group clk_100_Mhz_local
-
+set_clock_groups -logically_exclusive -group RXOUTCLK_A -group RXOUTCLK_B
+set_clock_groups -logically_exclusive -group TXOUTCLK_A -group TXOUTCLK_B
 
 #set asynchronous clocks
+# for SCI version 38
+#set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_0 -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz}
 
-set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_0 -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz}
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group RXOUTCLK_0 -group TXOUTCLK_A -group TXOUTCLK_B -group TXOUTCLK_0 -group {clk_100_Mhz_local clk_25_Mhz}
+
 
 ### Pin Assignment ###
 
@@ -62,16 +86,16 @@ set_property PACKAGE_PIN F5 [get_ports PgpRefClk_M]
 ## PGP serial com lines (Bank 116)
 
 #pgp link 0
-set_property PACKAGE_PIN E3 [get_ports PgpRx_M]
-set_property PACKAGE_PIN E4 [get_ports PgpRx_P]
-set_property PACKAGE_PIN D1 [get_ports PgpTx_M]
-set_property PACKAGE_PIN D2 [get_ports PgpTx_P]
+set_property PACKAGE_PIN E3 [get_ports {PgpRx_M[0]}]
+set_property PACKAGE_PIN E4 [get_ports {PgpRx_P[0]}]
+set_property PACKAGE_PIN D1 [get_ports {PgpTx_M[0]}]
+set_property PACKAGE_PIN D2 [get_ports {PgpTx_P[0]}]
 
 #pgp link 1
-#set_property PACKAGE_PIN B5 [get_ports PgpRx_m]
-#set_property PACKAGE_PIN B6 [get_ports PgpRx_p]
-#set_property PACKAGE_PIN A3 [get_ports PgpTx_m]
-#set_property PACKAGE_PIN A4 [get_ports PgpTx_p]
+set_property PACKAGE_PIN B5 [get_ports {PgpRx_M[1]}]
+set_property PACKAGE_PIN B6 [get_ports {PgpRx_P[1]}]
+set_property PACKAGE_PIN A3 [get_ports {PgpTx_M[1]}]
+set_property PACKAGE_PIN A4 [get_ports {PgpTx_P[1]}]
 
 #Aux clk
 set_property PACKAGE_PIN F17 [get_ports aux_100mhz_clk_in]

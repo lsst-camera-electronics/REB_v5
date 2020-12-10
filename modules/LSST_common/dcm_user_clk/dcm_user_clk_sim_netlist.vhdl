@@ -1,10 +1,10 @@
 -- Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2015.3 (lin64) Build 1368829 Mon Sep 28 20:06:39 MDT 2015
--- Date        : Thu Sep 27 13:58:35 2018
--- Host        : lsst-daq03 running 64-bit Red Hat Enterprise Linux Server release 6.10 (Santiago)
+-- Date        : Thu Dec 10 18:23:52 2020
+-- Host        : lpnws4225 running 64-bit unknown
 -- Command     : write_vhdl -force -mode funcsim
---               /u1/srusso/build/REB_v5_top/REB_v5_top_project.srcs/sources_1/ip/dcm_user_clk/dcm_user_clk_sim_netlist.vhdl
+--               /home/srusso/Xilinx_prj/build/REB_v5_top/REB_v5_top_project.srcs/sources_1/ip/dcm_user_clk/dcm_user_clk_sim_netlist.vhdl
 -- Design      : dcm_user_clk
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -26,7 +26,6 @@ entity dcm_user_clk_dcm_user_clk_clk_wiz is
 end dcm_user_clk_dcm_user_clk_clk_wiz;
 
 architecture STRUCTURE of dcm_user_clk_dcm_user_clk_clk_wiz is
-  signal CLK_IN1_dcm_user_clk : STD_LOGIC;
   signal CLK_OUT1_dcm_user_clk : STD_LOGIC;
   signal CLK_OUT2_dcm_user_clk : STD_LOGIC;
   signal clkfbout_buf_dcm_user_clk : STD_LOGIC;
@@ -48,7 +47,6 @@ architecture STRUCTURE of dcm_user_clk_dcm_user_clk_clk_wiz is
   signal NLW_mmcm_adv_inst_DO_UNCONNECTED : STD_LOGIC_VECTOR ( 15 downto 0 );
   attribute BOX_TYPE : string;
   attribute BOX_TYPE of clkf_buf : label is "PRIMITIVE";
-  attribute BOX_TYPE of clkin1_bufg : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout1_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of clkout2_buf : label is "PRIMITIVE";
   attribute BOX_TYPE of mmcm_adv_inst : label is "PRIMITIVE";
@@ -57,11 +55,6 @@ clkf_buf: unisim.vcomponents.BUFG
      port map (
       I => clkfbout_dcm_user_clk,
       O => clkfbout_buf_dcm_user_clk
-    );
-clkin1_bufg: unisim.vcomponents.BUFG
-     port map (
-      I => CLK_IN1,
-      O => CLK_IN1_dcm_user_clk
     );
 clkout1_buf: unisim.vcomponents.BUFG
      port map (
@@ -110,7 +103,7 @@ mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
       CLKOUT6_DUTY_CYCLE => 0.500000,
       CLKOUT6_PHASE => 0.000000,
       CLKOUT6_USE_FINE_PS => false,
-      COMPENSATION => "BUF_IN",
+      COMPENSATION => "ZHOLD",
       DIVCLK_DIVIDE => 5,
       IS_CLKINSEL_INVERTED => '0',
       IS_PSEN_INVERTED => '0',
@@ -129,7 +122,7 @@ mmcm_adv_inst: unisim.vcomponents.MMCME2_ADV
       CLKFBOUT => clkfbout_dcm_user_clk,
       CLKFBOUTB => NLW_mmcm_adv_inst_CLKFBOUTB_UNCONNECTED,
       CLKFBSTOPPED => NLW_mmcm_adv_inst_CLKFBSTOPPED_UNCONNECTED,
-      CLKIN1 => CLK_IN1_dcm_user_clk,
+      CLKIN1 => CLK_IN1,
       CLKIN2 => '0',
       CLKINSEL => '1',
       CLKINSTOPPED => NLW_mmcm_adv_inst_CLKINSTOPPED_UNCONNECTED,
