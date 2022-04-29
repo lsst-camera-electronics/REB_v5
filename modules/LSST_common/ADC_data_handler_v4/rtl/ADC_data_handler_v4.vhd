@@ -293,7 +293,7 @@ begin
 
   readadcs_v5_0_ccd1 : readadcs_v5
     generic map (
-      conv_time        => 80,
+      conv_time        => 70,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
@@ -315,7 +315,7 @@ begin
 
   readadcs_v5_0_ccd2 : readadcs_v5
     generic map (
-      conv_time        => 80,
+      conv_time        => 70,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
@@ -337,7 +337,7 @@ begin
 
   readadcs_v5_0_ccd3 : readadcs_v5
     generic map (
-      conv_time        => 80,
+      conv_time        => 70,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
