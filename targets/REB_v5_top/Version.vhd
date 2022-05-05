@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395009"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139500A"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Fri Apr 29 11:08:15 PDT 2022 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Wed May  4 17:44:56 PDT 2022 by jgt";
 
 end Version;
 
@@ -48,4 +48,5 @@ end Version;
 -- 31395007 SCI module updated with the A and B link switch capability
 -- 31395008 Changed ADC conversion time from 750ns to 800ns
 -- 31395009 Changed ADC conversion time from 750ns to 700ns
+-- 3139500A Changed ADC conversion time from 750ns to 500ns
 -------------------------------------------------------------------------------
