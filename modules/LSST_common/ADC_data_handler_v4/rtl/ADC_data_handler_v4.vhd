@@ -143,7 +143,7 @@ architecture Behavioral of ADC_data_handler_v4 is
 
   component readadcs_v5 is
     generic (
-      conv_time        : integer := 50;
+      conv_time        : integer := 75;
       sclk_half_period : integer := 1;
       test_time        : integer := 500;
       col_incr_val     : integer := 10;
@@ -293,7 +293,7 @@ begin
 
   readadcs_v5_0_ccd1 : readadcs_v5
     generic map (
-      conv_time        => 50,
+      conv_time        => 75,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
@@ -315,7 +315,7 @@ begin
 
   readadcs_v5_0_ccd2 : readadcs_v5
     generic map (
-      conv_time        => 50,
+      conv_time        => 75,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
@@ -337,7 +337,7 @@ begin
 
   readadcs_v5_0_ccd3 : readadcs_v5
     generic map (
-      conv_time        => 50,
+      conv_time        => 75,
       sclk_half_period => 2,
       test_time        => 150,
       col_incr_val     => 10,
