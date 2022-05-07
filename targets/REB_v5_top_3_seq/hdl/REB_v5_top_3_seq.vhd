@@ -589,6 +589,8 @@ architecture Behavioral of REB_v5_top_3_seq is
                                            -- 1 clk with respect to sync_cmd_main_add
       sync_cmd_step_seq  : out std_logic;  -- this signal is delayed buy at least
                                            -- 1 clk with respect to sync_cmd_main_add
+      sync_cmd_stop_seq  : out std_logic;  -- this signal is delayed buy at least
+                                           -- 1 clk with respect to sync_cmd_main_add
       sync_cmd_main_add  : out std_logic_vector(4 downto 0)
       );
   end component;
@@ -1148,6 +1150,7 @@ architecture Behavioral of REB_v5_top_3_seq is
 --  signal sync_cmd_out        : std_logic_vector(7 downto 0);
   signal sync_cmd_start_seq  : std_logic;
   signal sync_cmd_step_seq   : std_logic;
+  signal sync_cmd_stop_seq   : std_logic;
   signal sync_cmd_main_add   : std_logic_vector(4 downto 0);
   signal sync_cmd_delay_en   : std_logic;
 --  signal sync_cmd_mask_en    : std_logic;
@@ -1186,6 +1189,7 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal seq_step                 : std_logic_vector(2 downto 0);
   signal seq_stop                 : std_logic_vector(2 downto 0);
   signal seq_step_cmd             : std_logic_vector(2 downto 0);
+  signal seq_stop_cmd             : std_logic_vector(2 downto 0);
   signal sequencer_outputs        : array332;
   signal sequencer_outputs_int    : array332;
   signal enable_conv_shift        : std_logic_vector(2 downto 0);
@@ -1511,6 +1515,10 @@ begin
   seq_step(0) <= seq_step_cmd(0) or sync_cmd_step_seq;
   seq_step(1) <= seq_step_cmd(1) or sync_cmd_step_seq;
   seq_step(2) <= seq_step_cmd(2) or sync_cmd_step_seq;
+
+  seq_stop(0) <= seq_stop_cmd(0) or sync_cmd_stop_seq;
+  seq_stop(1) <= seq_stop_cmd(1) or sync_cmd_stop_seq;
+  seq_stop(2) <= seq_stop_cmd(2) or sync_cmd_stop_seq;
 
 -- Voltage and current sensors busy
   V_I_busy_or <= V_I_n15_busy or V_I_busy;
@@ -1866,7 +1874,7 @@ begin
       seq_out_mem_w_en         => seq_out_mem_w_en,  -- this signal enables the output memory write
       seq_prog_mem_w_en        => seq_prog_mem_w_en,  -- this signal enables the program memory write
       seq_step                 => seq_step_cmd,  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
-      seq_stop                 => seq_stop,  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
+      seq_stop                 => seq_stop_cmd,  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
       enable_conv_shift_in     => enable_conv_shift_out,  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
       enable_conv_shift        => enable_conv_shift,  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
       init_conv_shift          => init_conv_shift,  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
@@ -2062,6 +2070,7 @@ begin
       sync_cmd           => sync_cmd_in,
       sync_cmd_start_seq => sync_cmd_start_seq,
       sync_cmd_step_seq  => sync_cmd_step_seq,
+      sync_cmd_stop_seq  => sync_cmd_stop_seq,
       sync_cmd_main_add  => sync_cmd_main_add
       );
 

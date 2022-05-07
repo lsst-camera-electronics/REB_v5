@@ -23,7 +23,7 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395109"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139510B"; -- MAKE_VERSION
 
 constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Fri Apr 29 11:22:48 PDT 2022 by jgt";
 
@@ -46,4 +46,8 @@ end Version;
 -- 31395107 new SCI block with A and B link switch
 -- 31395008 Changed ADC conversion time from 750ns to 800ns
 -- 31395009 Changed ADC conversion time from 750ns to 700ns
+-- 3139500B Retured ADC conversion time to 750ns
+--          Added STOP Synchronous command 0x30
+--          Fixed bug that caused 160ns of 0 on output when
+--           entering default state
 -------------------------------------------------------------------------------
