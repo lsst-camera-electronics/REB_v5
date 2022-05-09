@@ -64,7 +64,6 @@ architecture Behavioral of parameter_extractor_fsm_v3 is
 
   type state_type is (wait_start, op_code_eval, sub_jump, simple_func_op, ind_func_call,
                         ind_rep_call, all_ind_call, ind_sub_add_jump,
---                                                              ind_sub_rep_jump, 
                         ind_sub_all_jump,
                         write_fifo, wait_fifo,
                         trailer_op, rep_sub, op_code_error_state);
@@ -139,177 +138,172 @@ begin
 
     case pres_state is
       
-      when wait_start =>
-        if start_sequence = '0' then
-          next_state           <= wait_start;
-          next_sub_stack_add   <= (others => '0');
-          --next_program_mem_add <= (others => '0');
-          next_program_mem_add <= program_mem_init_add;
+       when wait_start =>
+          if start_sequence = '0' then
+             next_state           <= wait_start;
+             next_sub_stack_add   <= (others => '0');
+             next_program_mem_add <= program_mem_init_add;
+             next_sub_rep_cnt     <= (others => '0');
+          else
+             next_state <= op_code_eval;
+          end if;
+        
+       when op_code_eval =>
+          if fifo_param_full = '1' then
+             next_state <= op_code_eval;
+          else
+             if op_code = func_call_opcode then
+                if func_call_rep = x"000000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state <= simple_func_op;
+                end if;
+             elsif op_code = ind_func_call_opcode then
+                if func_call_rep = x"000000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state        <= ind_func_call;
+                   next_fifo_mux_sel <= "01";
+                end if;
+             elsif op_code = ind_rep_call_opcode then
+                if ind_rep_mem_data_out = x"000000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state        <= ind_rep_call;
+                   next_fifo_mux_sel <= "10";
+                end if;
+             elsif op_code = ind_all_call_opcode then
+                if ind_rep_mem_data_out = x"000000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state        <= all_ind_call;
+                   next_fifo_mux_sel <= "11";
+                end if;
+             elsif op_code = jump_to_add_opcode then
+                if jump_to_add_rep = x"0000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state          <= sub_jump;
+                   next_sub_rep_cnt    <= sub_rep_cnt_int + 1;
+                   next_sub_stack_w_en <= '1';
+                end if;
+             elsif op_code = sub_trailer_opcode then
+                next_state         <= trailer_op;
+                next_sub_stack_add <= sub_stack_add_int - 1;
+             elsif op_code = ind_add_jump_opcode then
+                if jump_to_add_rep = x"0000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state          <= ind_sub_add_jump;
+                   next_sub_rep_cnt    <= sub_rep_cnt_int + 1;
+                   next_sub_stack_w_en <= '1';
+                end if;
+             elsif op_code = ind_rep_jump_opcode then
+                if ind_sub_rep_mem_data_out = x"0000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state            <= sub_jump;
+                   next_sub_rep_cnt      <= sub_rep_cnt_int + 1;
+                   next_sub_stack_w_en   <= '1';
+                   next_ind_sub_rep_flag <= '1';
+                end if;
+             elsif op_code = ind_all_jump_opcode then
+                if ind_sub_rep_mem_data_out = x"0000" then
+                   next_state           <= op_code_eval;
+                   next_program_mem_add <= program_mem_add_int + 1;
+                else
+                   next_state            <= ind_sub_all_jump;
+                   next_sub_rep_cnt      <= sub_rep_cnt_int + 1;
+                   next_sub_stack_w_en   <= '1';
+                   next_ind_sub_rep_flag <= '1';
+                end if;
+             elsif op_code = end_sequence_opcode then  -- this opcode is also used in function_executor_v3
+                next_state            <= wait_start;
+                next_fifo_param_write <= '1';           -- test return to zero
+             else
+                next_state         <= op_code_error_state;
+                next_op_code_error <= '1';
+             end if;
+          end if;
+        
+       when simple_func_op =>
+          next_state            <= write_fifo;
+          next_fifo_param_write <= '1';
+        
+       when write_fifo =>
+          next_state           <= wait_fifo;
+          next_program_mem_add <= program_mem_add_int + 1;
+        
+       when wait_fifo =>
+          next_state <= op_code_eval;
+        
+       when sub_jump =>
+          next_state           <= op_code_eval;
+          next_program_mem_add <= program_mem_data(25 downto 16);
+          next_sub_stack_add   <= sub_stack_add_int + 1;
           next_sub_rep_cnt     <= (others => '0');
-        else
-          next_state <= op_code_eval;
-        end if;
+
+       when ind_sub_add_jump =>
+          next_state           <= op_code_eval;
+          next_program_mem_add <= ind_sub_add_mem_data_out;
+          next_sub_stack_add   <= sub_stack_add_int + 1;
+          next_sub_rep_cnt     <= (others => '0');
         
-      when op_code_eval =>
-        if fifo_param_full = '1' then
-          next_state <= op_code_eval;
-        else
-          if op_code = func_call_opcode then
-            if func_call_rep = x"000000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state <= simple_func_op;
---                                      next_fifo_param_write <= '1';
-            end if;
-          elsif op_code = ind_func_call_opcode then
-            if func_call_rep = x"000000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state        <= ind_func_call;
---                                      next_fifo_param_write <= '1';
-              next_fifo_mux_sel <= "01";
-            end if;
-          elsif op_code = ind_rep_call_opcode then
-            if ind_rep_mem_data_out = x"000000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state        <= ind_rep_call;
---                                      next_fifo_param_write <= '1';
-              next_fifo_mux_sel <= "10";
-            end if;
-          elsif op_code = ind_all_call_opcode then
-            if ind_rep_mem_data_out = x"000000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state        <= all_ind_call;
---                                      next_fifo_param_write <= '1';
-              next_fifo_mux_sel <= "11";
-            end if;
-          elsif op_code = jump_to_add_opcode then
-            if jump_to_add_rep = x"0000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state          <= sub_jump;
-              next_sub_rep_cnt    <= sub_rep_cnt_int + 1;
-              next_sub_stack_w_en <= '1';
-            end if;
-          elsif op_code = sub_trailer_opcode then
-            next_state         <= trailer_op;
-            next_sub_stack_add <= sub_stack_add_int - 1;
-          elsif op_code = ind_add_jump_opcode then
-            if jump_to_add_rep = x"0000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state          <= ind_sub_add_jump;
-              next_sub_rep_cnt    <= sub_rep_cnt_int + 1;
-              next_sub_stack_w_en <= '1';
-            end if;
-          elsif op_code = ind_rep_jump_opcode then
-            if ind_sub_rep_mem_data_out = x"0000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state            <= sub_jump;
-              next_sub_rep_cnt      <= sub_rep_cnt_int + 1;
-              next_sub_stack_w_en   <= '1';
-              next_ind_sub_rep_flag <= '1';
-            end if;
-          elsif op_code = ind_all_jump_opcode then
-            if ind_sub_rep_mem_data_out = x"0000" then
-              next_state           <= op_code_eval;
-              next_program_mem_add <= program_mem_add_int + 1;
-            else
-              next_state            <= ind_sub_all_jump;
-              next_sub_rep_cnt      <= sub_rep_cnt_int + 1;
-              next_sub_stack_w_en   <= '1';
-              next_ind_sub_rep_flag <= '1';
-            end if;
-          elsif op_code = end_sequence_opcode then  -- this opcode is also used in function_executor_v3
-            next_state            <= wait_start;
-            next_fifo_param_write <= '1';           -- test return to zero
+       when ind_sub_all_jump =>
+          next_state           <= op_code_eval;
+          next_program_mem_add <= ind_sub_add_mem_data_out;
+          next_sub_stack_add   <= sub_stack_add_int + 1;
+          next_sub_rep_cnt     <= (others => '0');
+        
+       when trailer_op =>
+          next_state           <= rep_sub;
+          next_program_mem_add <= data_from_stack(29 downto 20);
+
+       when ind_func_call =>
+          next_state            <= write_fifo;
+          next_fifo_param_write <= '1';
+
+       when ind_rep_call =>
+          next_state            <= write_fifo;
+          next_fifo_param_write <= '1';
+
+       when all_ind_call =>
+          next_state            <= write_fifo;
+          next_fifo_param_write <= '1';
+        
+       when rep_sub =>
+          if data_from_stack(30) = '0' then
+             if program_mem_data(15 downto 0) = data_from_stack(15 downto 0) then
+                next_state       <= write_fifo; 
+                next_sub_rep_cnt <= (others => '0');
+             else
+                next_state       <= op_code_eval;
+                next_sub_rep_cnt <= data_from_stack(15 downto 0);
+             end if;
           else
-            next_state         <= op_code_error_state;
-            next_op_code_error <= '1';
+             if ind_sub_rep_mem_data_out = data_from_stack(15 downto 0) then
+                next_state       <= write_fifo;
+                next_sub_rep_cnt <= (others => '0');
+             else
+                next_state       <= op_code_eval;
+                next_sub_rep_cnt <= data_from_stack(15 downto 0);
+             end if;
           end if;
-        end if;
-        
-      when simple_func_op =>
-        next_state            <= write_fifo;
-        next_fifo_param_write <= '1';
-        
-      when write_fifo =>
-        next_state           <= wait_fifo;
-        next_program_mem_add <= program_mem_add_int + 1;
-        
-      when wait_fifo =>
-        next_state <= op_code_eval;
-        
-      when sub_jump =>
-        next_state           <= op_code_eval;
-        next_program_mem_add <= program_mem_data(25 downto 16);
-        next_sub_stack_add   <= sub_stack_add_int + 1;
-        next_sub_rep_cnt     <= (others => '0');
 
-      when ind_sub_add_jump =>
-        next_state           <= op_code_eval;
-        next_program_mem_add <= ind_sub_add_mem_data_out;
-        next_sub_stack_add   <= sub_stack_add_int + 1;
-        next_sub_rep_cnt     <= (others => '0');
-        
-      when ind_sub_all_jump =>
-        next_state           <= op_code_eval;
-        next_program_mem_add <= ind_sub_add_mem_data_out;
-        next_sub_stack_add   <= sub_stack_add_int + 1;
-        next_sub_rep_cnt     <= (others => '0');
-        
-      when trailer_op =>
-        next_state           <= rep_sub;
-        next_program_mem_add <= data_from_stack(29 downto 20);
-
-      when ind_func_call =>
-        next_state            <= write_fifo;
-        next_fifo_param_write <= '1';
-
-      when ind_rep_call =>
-        next_state            <= write_fifo;
-        next_fifo_param_write <= '1';
-
-      when all_ind_call =>
-        next_state            <= write_fifo;
-        next_fifo_param_write <= '1';
-        
-      when rep_sub =>
-        if data_from_stack(30) = '0' then
-          if program_mem_data(15 downto 0) = data_from_stack(15 downto 0) then
-            next_state       <= write_fifo;
-            next_sub_rep_cnt <= (others => '0');
+       when op_code_error_state =>
+          if op_code_error_reset = '1' then
+             next_state <= wait_start;
           else
-            next_state       <= op_code_eval;
-            next_sub_rep_cnt <= data_from_stack(15 downto 0);
+             next_state         <= op_code_error_state;
+             next_op_code_error <= '1';
           end if;
-        else
-          if ind_sub_rep_mem_data_out = data_from_stack(15 downto 0) then
-            next_state       <= write_fifo;
-            next_sub_rep_cnt <= (others => '0');
-          else
-            next_state       <= op_code_eval;
-            next_sub_rep_cnt <= data_from_stack(15 downto 0);
-          end if;
-        end if;
-        
-      when op_code_error_state =>
-        if op_code_error_reset = '1' then
-          next_state <= wait_start;
-        else
-          next_state         <= op_code_error_state;
-          next_op_code_error <= '1';
-        end if;
         
     end case;
   end process;

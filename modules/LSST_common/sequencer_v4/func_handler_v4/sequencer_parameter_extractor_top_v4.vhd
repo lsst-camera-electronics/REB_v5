@@ -289,19 +289,6 @@ begin
       ram_add      => sub_stack_add,
       ram_data_in  => stack_data_in,
       ram_data_out => data_from_stack); 
-
---  program_memory : generic_dual_port_ram
---    generic map (
---      data_width => 32,
---      add_width  => 10)
---    port map (
---      clk            => clk,
---      ram_wr_en      => program_mem_we,
---      ram_wr_add     => seq_mem_w_add,
---      ram_rd_add     => program_mem_rd_add,
---      ram_data_in    => seq_mem_data_in,
---      ram_data_out_1 => prog_mem_data_out,
---      ram_data_out_2 => prog_mem_redbk);
   
   program_memory : dual_port_ram_ip
     port map (
@@ -313,19 +300,6 @@ begin
       spo  => prog_mem_redbk,
       dpo  => prog_mem_data_out
       );
-
---  indirect_func_mem : generic_dual_port_ram
---    generic map (
---      data_width => 4,
---      add_width  => 4)
---    port map (
---      clk            => clk,
---      ram_wr_en      => ind_func_mem_we,
---      ram_wr_add     => seq_mem_w_add(3 downto 0),
---      ram_rd_add     => prog_mem_data_out(27 downto 24),
---      ram_data_in    => seq_mem_data_in(3 downto 0),
---      ram_data_out_1 => ind_func_mem_data_out,
---      ram_data_out_2 => ind_func_mem_redbk); 
   
   indirect_func_mem : dual_port_ram_4_4
     port map (
@@ -337,20 +311,6 @@ begin
       spo  => ind_func_mem_redbk,
       dpo  => ind_func_mem_data_out
       );
-
---  indirect_rep_mem : generic_dual_port_ram
---    generic map (
---      data_width => 24,
---      add_width  => 4)
---    port map (
---      clk            => clk,
---      ram_wr_en      => ind_rep_mem_we,
---      ram_wr_add     => seq_mem_w_add(3 downto 0),
---      ram_rd_add     => prog_mem_data_out(3 downto 0),
---      ram_data_in    => seq_mem_data_in(23 downto 0),
---      ram_data_out_1 => ind_rep_mem_data_out,
---      ram_data_out_2 => ind_rep_mem_redbk); 
-  
   
   indirect_rep_mem : dual_port_ram_24_4
     port map (
@@ -362,11 +322,6 @@ begin
       spo  => ind_rep_mem_redbk,
       dpo  => ind_rep_mem_data_out
       );
-
-
-
-
-
 
   generic_mux_bus_4_1_clk_0 : generic_mux_bus_4_1_clk
     generic map (
@@ -381,28 +336,7 @@ begin
       bus_in_3 => prog_mem_all_ind,
       bus_out  => fifo_in_bus);
 
---  ff_ce_1 : ff_ce
---    port map (
---      reset    => reset,
---      clk      => clk,
---      data_in  => fifo_param_we,
---      ce       => '1',
---      data_out => fifo_param_we_reg);
-
   fifo_param_we_reg <= fifo_param_we;
-
--- indirect_sub_add_mem : generic_dual_port_ram
---    generic map (
---      data_width => 10,
---      add_width  => 4)
---    port map (
---      clk            => clk,
---      ram_wr_en      => ind_sub_add_mem_we,
---      ram_wr_add     => seq_mem_w_add(3 downto 0),
---      ram_rd_add     => prog_mem_data_out(19 downto 16),
---      ram_data_in    => seq_mem_data_in(9 downto 0),
---      ram_data_out_1 => ind_sub_add_mem_data_out,
---      ram_data_out_2 => ind_sub_add_mem_redbk); 
 
   indirect_sub_add_mem : dual_port_ram_10_4
     port map (
@@ -415,22 +349,6 @@ begin
       dpo  => ind_sub_add_mem_data_out
       );
 
-
-
---  indirect_sub_rep_mem : generic_dual_port_ram
---    generic map (
---      data_width => 16,
---      add_width  => 4)
---    port map (
---      clk            => clk,
---      ram_wr_en      => ind_sub_rep_mem_we,
---      ram_wr_add     => seq_mem_w_add(3 downto 0),
---      ram_rd_add     => prog_mem_data_out(3 downto 0),
---      ram_data_in    => seq_mem_data_in(15 downto 0),
---      ram_data_out_1 => ind_sub_rep_mem_data_out,
---      ram_data_out_2 => ind_sub_rep_mem_redbk); 
-
-
   indirect_sub_rep_mem : dual_port_ram_16_4
     port map (
       a    => seq_mem_w_add(3 downto 0),
@@ -441,8 +359,6 @@ begin
       spo  => ind_sub_rep_mem_redbk,
       dpo  => ind_sub_rep_mem_data_out
       );
-
-
 
   seq_param_fifo_v3_0 : seq_param_fifo_v3
     port map (
@@ -456,20 +372,9 @@ begin
       empty => fifo_param_empty
       );
 
-  --prog_mem_init_add_reg : generic_reg_ce_init
-  --  generic map (width => 9)
-  --  port map (
-  --    reset    => reset,
-  --    clk      => clk,
-  --    ce       => program_mem_init_en,
-  --    init     => '0',
-  --    data_in  => seq_mem_data_in(9 downto 0),
-  --    data_out => program_mem_init_add_int);
-
   program_mem_init_add_int <= program_mem_init_add_in;
   program_mem_init_add_rbk <= program_mem_init_add_int;
 
---stack_data_in <= program_mem_rd_add & prog_mem_data_out(17 downto 0);
   stack_data_in <= '0' & ind_sub_rep_flag & program_mem_rd_add & x"0" & sub_rep_cnt;
 
   prog_mem_rep_ind  <= prog_mem_data_out(31 downto 24) & ind_rep_mem_data_out;

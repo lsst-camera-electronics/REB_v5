@@ -12,7 +12,7 @@ use IEEE.STD_LOGIC_1164.all;
 
 package sequencer_v3_package is
 
-constant func_call_opcode		: std_logic_vector (3 downto 0) 		:= x"1";
+constant func_call_opcode	: std_logic_vector (3 downto 0) 		:= x"1";
 constant ind_func_call_opcode	: std_logic_vector (3 downto 0) 		:= x"2";
 constant ind_rep_call_opcode	: std_logic_vector (3 downto 0) 		:= x"3";
 constant ind_all_call_opcode	: std_logic_vector (3 downto 0) 		:= x"4";
