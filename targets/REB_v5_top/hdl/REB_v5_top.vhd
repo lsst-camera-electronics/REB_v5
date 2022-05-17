@@ -1196,7 +1196,7 @@ architecture Behavioral of REB_v5_top is
   signal init_conv_shift          : std_logic;
   signal end_sequence             : std_logic;
   signal start_add_prog_mem_in    : std_logic_vector(9 downto 0);
---  signal start_add_prog_mem_en    : std_logic;
+  signal start_add_prog_mem_en    : std_logic;
   signal start_add_prog_mem_rbk   : std_logic_vector(9 downto 0);
   signal seq_ind_func_mem_we      : std_logic;
   signal seq_ind_func_mem_rdbk    : std_logic_vector(3 downto 0);
@@ -1845,8 +1845,7 @@ begin
       enable_conv_shift_in     => enable_conv_shift_out,  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
       enable_conv_shift        => enable_conv_shift,  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
       init_conv_shift          => init_conv_shift,  -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-      start_add_prog_mem_en    => open,
-      --  start_add_prog_mem_en    => start_add_prog_mem_en,
+      start_add_prog_mem_en    => start_add_prog_mem_en,
       start_add_prog_mem_rbk   => start_add_prog_mem_rbk,
       seq_ind_func_mem_we      => seq_ind_func_mem_we,
       seq_ind_func_mem_rdbk    => seq_ind_func_mem_rdbk,
@@ -2114,14 +2113,16 @@ begin
       adc_sck_ccd_3  => adc_sck_ccd_3    -- ADC serial clock
       );
 
-  start_add_prog_mem_in <= "000" & sync_cmd_main_add & "00";
+  start_add_prog_mem_in <= "000" & sync_cmd_main_add & "00"            when sync_cmd_start_seq    = '1' else
+                           "000" & regDataWr_masked(4 downto 0) & "00" when start_add_prog_mem_en = '1' else
+                           (others => '0');
 
   sequencer_v4_0 : sequencer_v4_top
 --    sequencer_v3_0 : sequencer_v3_top
     port map (
       reset                    => sync_res,
       clk                      => clk_100_MHz,
-      start_sequence           => seq_start,
+      start_sequence           => sync_cmd_start_seq or start_add_prog_mem_en, --seq_start,
       program_mem_we           => seq_prog_mem_w_en,
       seq_mem_w_add            => regAddr(9 downto 0),
       seq_mem_data_in          => regDataWr_masked,

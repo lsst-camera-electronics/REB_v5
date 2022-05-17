@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139500B"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139500C"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Mon May  9 12:47:19 PDT 2022 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Mon May 16 23:43:25 PDT 2022 by jgt";
 
 end Version;
 
@@ -53,4 +53,5 @@ end Version;
 --          Added STOP Synchronous command 0x30
 --          Fixed bug that caused 160ns of 0 on output when
 --           entering default state
+-- 3139500C Added register START command that specifies MAIN
 -------------------------------------------------------------------------------

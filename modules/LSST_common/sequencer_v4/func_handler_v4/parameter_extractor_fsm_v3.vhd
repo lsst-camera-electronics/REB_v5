@@ -142,9 +142,9 @@ begin
           if start_sequence = '0' then
              next_state           <= wait_start;
              next_sub_stack_add   <= (others => '0');
-             next_program_mem_add <= program_mem_init_add;
              next_sub_rep_cnt     <= (others => '0');
           else
+             next_program_mem_add <= program_mem_init_add;
              next_state <= op_code_eval;
           end if;
         
