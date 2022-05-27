@@ -148,13 +148,20 @@ architecture Behavioral of sequencer_v4_top is
   signal fifo_param_re    : std_logic;
   signal fifo_param_out   : std_logic_vector(31 downto 0);
 
+  signal sequencer_busy_int  : std_logic;
+  signal sequencer_start_int : std_logic;
+  
 begin
 
+   -- Reject triggers when sequencer is running
+   sequencer_busy      <= sequencer_busy_int;
+   sequencer_start_int <= start_sequence and not sequencer_busy_int;
+   
   sequencer_parameter_extractor_top_v4_0 : sequencer_parameter_extractor_top_v4
     port map (
       clk             => clk,
       reset           => reset,
-      start_sequence  => start_sequence,
+      start_sequence  => sequencer_start_int,
       program_mem_we  => program_mem_we,
       seq_mem_w_add   => seq_mem_w_add,
       seq_mem_data_in => seq_mem_data_in,
@@ -207,7 +214,7 @@ begin
       stop_sequence => stop_sequence,
       step_sequence => step_sequence,
 
-      sequencer_busy => sequencer_busy,
+      sequencer_busy => sequencer_busy_int,
       sequencer_out  => sequencer_out,
       end_sequence   => end_sequence
       );
