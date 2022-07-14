@@ -533,7 +533,7 @@ begin
         ccd_temp_start_reset <= '0';
 
         -- REB 1wire sn
-        reb_onewire_reset <= '1';
+        reb_onewire_reset <= '0';
 
         -- back bias switch set
         en_back_bias_sw <= '0';
@@ -777,7 +777,7 @@ begin
     next_ccd_temp_start_reset <= '0';
 
                                         -- REB 1wire sn
-    next_reb_onewire_reset <= '1';
+    next_reb_onewire_reset <= '0';
 
                                         -- back bias switch set
     next_en_back_bias_sw <= '0';
@@ -1504,7 +1504,7 @@ begin
               -- REB 1wire serial number start acq                                                                                                                 
             elsif regAddr = reb_sn_acq_cmd then
               next_state             <= reb_sn_acq_state;
-              next_reb_onewire_reset <= '0';
+              next_reb_onewire_reset <= '1';
 
 ---------- DC/DC clock enable                                                   
             elsif regAddr = dcdc_clk_en_cmd then
@@ -2248,12 +2248,12 @@ begin
 ---------------------- REB 1wire serial number --------------------------                               
 -- REB 1wire serial number acq
       when reb_sn_acq_state =>
-        if reb_sn_crc_ok = '0' and reb_sn_dev_error = '0' and reb_sn_timeout = '0' then
-          next_state             <= reb_sn_acq_state;
+      --  if reb_sn_crc_ok = '0' and reb_sn_dev_error = '0' and reb_sn_timeout = '0' then
+      --    next_state             <= reb_sn_acq_state;
           next_reb_onewire_reset <= '0';
-        else
+      --  else
           next_state <= ack_del_1;
-        end if;
+      --  end if;
 
 -- REB 1wire serial number read w 0             
       when reb_sn_read_w0_state =>
