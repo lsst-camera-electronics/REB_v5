@@ -65,15 +65,15 @@ entity ADC_data_handler_v4 is
 
     data_out : out std_logic_vector(17 downto 0);  -- 18 bits ADC word 
 
-    adc_data_ccd_1 : in  std_logic_vector(15 downto 0);  -- CCD ADC data 
+    adc_data_ccd_1 : in  std_logic_vector(15 downto 0) := x"0000";  -- CCD ADC data
     adc_cnv_ccd_1  : out std_logic;                      -- ADC conv
     adc_sck_ccd_1  : out std_logic;                      -- ADC serial clock
 
-    adc_data_ccd_2 : in  std_logic_vector(15 downto 0);  -- CCD ADC data 
+    adc_data_ccd_2 : in  std_logic_vector(15 downto 0) := x"0000";  -- CCD ADC data
     adc_cnv_ccd_2  : out std_logic;                      -- ADC conv
     adc_sck_ccd_2  : out std_logic;                      -- ADC serial clock
 
-    adc_data_ccd_3 : in  std_logic_vector(15 downto 0);  -- CCD ADC data 
+    adc_data_ccd_3 : in  std_logic_vector(15 downto 0) := x"0000";  -- CCD ADC data
     adc_cnv_ccd_3  : out std_logic;                      -- ADC conv
     adc_sck_ccd_3  : out std_logic                       -- ADC serial clock
 
