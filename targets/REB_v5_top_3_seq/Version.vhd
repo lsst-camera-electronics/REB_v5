@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139510E"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313A510E"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Thu Jul 14 16:36:44 PDT 2022 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Thu Jul 21 19:51:50 PDT 2022 by jgt";
 
 end Version;
 
@@ -44,16 +44,17 @@ end Version;
 -- 30345107 look at me various fixes (masked at start and other errors). Now the
 -- version shuld be identical to GREB 2007 and following
 -- 31395107 new SCI block with A and B link switch
--- 31395008 Changed ADC conversion time from 750ns to 800ns
--- 31395009 Changed ADC conversion time from 750ns to 700ns
--- 3139500B Retured ADC conversion time to 750ns
+-- 31395108 Changed ADC conversion time from 750ns to 800ns
+-- 31395109 Changed ADC conversion time from 750ns to 700ns
+-- 3139510B Retured ADC conversion time to 750ns
 --          Added STOP Synchronous command 0x30
 --          Fixed bug that caused 160ns of 0 on output when
 --           entering default state
--- 3139500C Added register START command that specifies MAIN
--- 3139500D Masked sequencer start with sequencer busy to reject triggers
+-- 3139510C Added register START command that specifies MAIN
+-- 3139510D Masked sequencer start with sequencer busy to reject triggers
 --          when already running.
--- 3139500E Fixed Serial Number Readback
+-- 3139510E Fixed Serial Number Readback
 --          Added FPGA_VERSION to UserID in bitfile
 --          Fixed zero sensor data for non-zero sensors
+-- 313A510E New SCI increasing PGP buffering
 -------------------------------------------------------------------------------

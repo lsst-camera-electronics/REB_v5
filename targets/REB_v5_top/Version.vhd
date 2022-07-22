@@ -23,7 +23,7 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139500E"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313A500E"; -- MAKE_VERSION
 
 constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Thu Jul 14 18:50:53 PDT 2022 by jgt";
 
@@ -57,4 +57,5 @@ end Version;
 -- 3139500D Masked sequencer start with sequencer busy to reject triggers
 --          when already running.
 -- 3139500E Added FPGA_VERSION to UserID in bitfile
+-- 313A500E New SCI increasing PGP buffering
 -------------------------------------------------------------------------------
