@@ -26,7 +26,7 @@ export MODULE_DIRS = $(PROJ_DIR)/../../modules/LSST_common/ADC_data_handler_v4 \
                      $(PROJ_DIR)/../../modules/LSST_common/seq_aligner_shifter \
                      $(PROJ_DIR)/../../modules/LSST_common/sequencer_v4 \
 		     $(PROJ_DIR)/../../modules/LSST_common/si5342_jitter_cleaner \
-		     $(PROJ_DIR)/../../modules/LSST_common/lsst_sci-master-v3a \
+		     $(PROJ_DIR)/../../modules/LSST_common/lsst_sci-master-v3b \
 		     $(PROJ_DIR)/../../modules/LSST_common/sync_cmd_decoder \
 		     $(PROJ_DIR)/../../modules/LSST_common/look_at_me \
 		     $(PROJ_DIR)/../../modules/StdLib  \
