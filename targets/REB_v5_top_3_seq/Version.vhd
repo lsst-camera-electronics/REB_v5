@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313A510E"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313B510E"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Thu Jul 21 21:13:25 PDT 2022 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Tue Jul 26 21:03:05 PDT 2022 by jgt";
 
 end Version;
 
@@ -57,4 +57,5 @@ end Version;
 --          Added FPGA_VERSION to UserID in bitfile
 --          Fixed zero sensor data for non-zero sensors
 -- 313A510E New SCI increasing PGP buffering
+-- 313B510E New SCI increasing PGP buffering to the maximum
 -------------------------------------------------------------------------------

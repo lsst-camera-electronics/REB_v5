@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313A500E"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"313B500E"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Thu Jul 21 21:31:46 PDT 2022 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Tue Jul 26 21:33:41 PDT 2022 by jgt";
 
 end Version;
 
@@ -58,4 +58,5 @@ end Version;
 --          when already running.
 -- 3139500E Added FPGA_VERSION to UserID in bitfile
 -- 313A500E New SCI increasing PGP buffering
+-- 313B500E New SCI increasing PGP buffering to the maximum
 -------------------------------------------------------------------------------
