@@ -3,16 +3,13 @@
 
 
 # temporary emacs files
-*.vhd~
-*.xdc~
-.gitignore~
-.do~
+*~
 #vivado files
 *.jou
 *.log
 
 #build directory
-./build
+build
 
 #ip directoryes 
 ./modules/LSST_common/dcm_user_clk/doc

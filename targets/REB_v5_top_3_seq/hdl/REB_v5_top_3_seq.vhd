@@ -1495,17 +1495,17 @@ begin
   --adc_data_ccd_3           <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
   sequencer_busy_or        <= sequencer_busy(2) or sequencer_busy(1) or sequencer_busy(0);
 
-  adc_data_int(0) <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
+  adc_data_int(0) <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
   adc_data_int(1) <= adc_data_t_ccd_2 & adc_data_b_ccd_2;
-  adc_data_int(2) <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
+  adc_data_int(2) <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
 
-  adc_cnv_ccd_1 <= adc_cnv_int(0);
+  adc_cnv_ccd_3 <= adc_cnv_int(0);
   adc_cnv_ccd_2 <= adc_cnv_int(1);
-  adc_cnv_ccd_3 <= adc_cnv_int(2);
+  adc_cnv_ccd_1 <= adc_cnv_int(2);
 
-  adc_sck_ccd_1 <= adc_sck_int(0);
+  adc_sck_ccd_3 <= adc_sck_int(0);
   adc_sck_ccd_2 <= adc_sck_int(1);
-  adc_sck_ccd_3 <= adc_sck_int(2);
+  adc_sck_ccd_1 <= adc_sck_int(2);
 
 -- trigger signals
   seq_start       <= (trigger_val_bus(2) and trigger_ce_bus(2)) or sync_cmd_start_seq;
@@ -1550,18 +1550,18 @@ begin
 
 ------------ Sequencer's signals assignment ------------
 -- CCD 1
-  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)(0);
-  ASPIC_r_down_ccd_1 <= sequencer_outputs(0)(1);
-  ASPIC_reset_ccd_1  <= sequencer_outputs(0)(2);
-  ASPIC_clamp_ccd_1  <= sequencer_outputs(0)(3);
-  ser_clk_ccd_1(0)   <= sequencer_outputs(0)(4);
-  ser_clk_ccd_1(1)   <= sequencer_outputs(0)(5);
-  ser_clk_ccd_1(2)   <= sequencer_outputs(0)(6);
-  reset_gate_ccd_1   <= sequencer_outputs(0)(7);
-  par_clk_ccd_1(0)   <= sequencer_outputs(0)(8);
-  par_clk_ccd_1(1)   <= sequencer_outputs(0)(9);
-  par_clk_ccd_1(2)   <= sequencer_outputs(0)(10);
-  par_clk_ccd_1(3)   <= sequencer_outputs(0)(11);
+  ASPIC_r_up_ccd_3   <= sequencer_outputs(0)(0);
+  ASPIC_r_down_ccd_3 <= sequencer_outputs(0)(1);
+  ASPIC_reset_ccd_3  <= sequencer_outputs(0)(2);
+  ASPIC_clamp_ccd_3  <= sequencer_outputs(0)(3);
+  ser_clk_ccd_3(0)   <= sequencer_outputs(0)(4);
+  ser_clk_ccd_3(1)   <= sequencer_outputs(0)(5);
+  ser_clk_ccd_3(2)   <= sequencer_outputs(0)(6);
+  reset_gate_ccd_3   <= sequencer_outputs(0)(7);
+  par_clk_ccd_3(0)   <= sequencer_outputs(0)(8);
+  par_clk_ccd_3(1)   <= sequencer_outputs(0)(9);
+  par_clk_ccd_3(2)   <= sequencer_outputs(0)(10);
+  par_clk_ccd_3(3)   <= sequencer_outputs(0)(11);
 
 -- CCD 2
   ASPIC_r_up_ccd_2   <= sequencer_outputs(1)(0);
@@ -1578,18 +1578,18 @@ begin
   par_clk_ccd_2(3)   <= sequencer_outputs(1)(11);
 
 -- CCD 3
-  ASPIC_r_up_ccd_3   <= sequencer_outputs(2)(0);
-  ASPIC_r_down_ccd_3 <= sequencer_outputs(2)(1);
-  ASPIC_reset_ccd_3  <= sequencer_outputs(2)(2);
-  ASPIC_clamp_ccd_3  <= sequencer_outputs(2)(3);
-  ser_clk_ccd_3(0)   <= sequencer_outputs(2)(4);
-  ser_clk_ccd_3(1)   <= sequencer_outputs(2)(5);
-  ser_clk_ccd_3(2)   <= sequencer_outputs(2)(6);
-  reset_gate_ccd_3   <= sequencer_outputs(2)(7);
-  par_clk_ccd_3(0)   <= sequencer_outputs(2)(8);
-  par_clk_ccd_3(1)   <= sequencer_outputs(2)(9);
-  par_clk_ccd_3(2)   <= sequencer_outputs(2)(10);
-  par_clk_ccd_3(3)   <= sequencer_outputs(2)(11);
+  ASPIC_r_up_ccd_1   <= sequencer_outputs(2)(0);
+  ASPIC_r_down_ccd_1 <= sequencer_outputs(2)(1);
+  ASPIC_reset_ccd_1  <= sequencer_outputs(2)(2);
+  ASPIC_clamp_ccd_1  <= sequencer_outputs(2)(3);
+  ser_clk_ccd_1(0)   <= sequencer_outputs(2)(4);
+  ser_clk_ccd_1(1)   <= sequencer_outputs(2)(5);
+  ser_clk_ccd_1(2)   <= sequencer_outputs(2)(6);
+  reset_gate_ccd_1   <= sequencer_outputs(2)(7);
+  par_clk_ccd_1(0)   <= sequencer_outputs(2)(8);
+  par_clk_ccd_1(1)   <= sequencer_outputs(2)(9);
+  par_clk_ccd_1(2)   <= sequencer_outputs(2)(10);
+  par_clk_ccd_1(3)   <= sequencer_outputs(2)(11);
 
   ADC_trigger <= (2 => sequencer_outputs(2)(12), 1 => sequencer_outputs(1)(12), 0 => sequencer_outputs(0)(12));
   -- equivalent to :
@@ -2301,10 +2301,10 @@ begin
       d_to_slave      => regDataWr_masked(15 downto 0),
       command_error   => bias_dac_cmd_err(2 downto 0),
       values_under_th => bias_v_undr_th(2 downto 0),
-      mosi            => din_C_BIAS_ccd_1,
-      ss              => sync_C_BIAS_ccd_1,
-      sclk            => sclk_C_BIAS_ccd_1,
-      ldac            => ldac_C_BIAS_ccd_1
+      mosi            => din_C_BIAS_ccd_3,
+      ss              => sync_C_BIAS_ccd_3,
+      sclk            => sclk_C_BIAS_ccd_3,
+      ldac            => ldac_C_BIAS_ccd_3
       );
 
   --bias_DAC_ccd_2 : ad53xx_DAC_top
@@ -2359,10 +2359,10 @@ begin
       d_to_slave      => regDataWr_masked(15 downto 0),
       command_error   => bias_dac_cmd_err(8 downto 6),
       values_under_th => bias_v_undr_th(8 downto 6),
-      mosi            => din_C_BIAS_ccd_3,
-      ss              => sync_C_BIAS_ccd_3,
-      sclk            => sclk_C_BIAS_ccd_3,
-      ldac            => ldac_C_BIAS_ccd_3
+      mosi            => din_C_BIAS_ccd_1,
+      ss              => sync_C_BIAS_ccd_1,
+      sclk            => sclk_C_BIAS_ccd_1,
+      ldac            => ldac_C_BIAS_ccd_1
       );
 
   clk_rails_prog : dual_ad53xx_DAC_top
