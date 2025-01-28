@@ -23,9 +23,9 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139510F"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"3139510E"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Tue May  2 23:39:28 PDT 2023 by jgt";
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Thu Jul 14 16:36:44 PDT 2022 by jgt";
 
 end Version;
 
@@ -56,5 +56,4 @@ end Version;
 -- 3139500E Fixed Serial Number Readback
 --          Added FPGA_VERSION to UserID in bitfile
 --          Fixed zero sensor data for non-zero sensors
--- 3139500E Fixed Sensor order in 3-sequencer version
 -------------------------------------------------------------------------------
