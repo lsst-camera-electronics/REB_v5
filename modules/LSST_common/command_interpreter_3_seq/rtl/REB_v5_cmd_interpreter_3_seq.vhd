@@ -86,9 +86,11 @@ entity REB_v5_cmd_interpreter_3_seq is
         image_size        : in  std_logic_vector(31 downto 0);  -- this register contains the image size
         image_patter_read : in  std_logic_vector(2 downto 0);  -- this register gives the state of image patter gen. 1 is ON
         ccd_sel_read      : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
+        ccd_oe_read       : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to connect to SCI
         image_size_en     : out std_logic;  -- this line enables the register where the image size is written
         image_patter_en   : out std_logic;  -- this register enable the image patter gen. 1 is ON
         ccd_sel_en        : out std_logic;  -- register enable for CCD acquisition selector
+        ccd_oe_en         : out std_logic;  -- register enable for CCD output enable selector
 
 -- Sequencer
         seq_time_mem_readbk      : in  array316;  -- time memory read bus
@@ -266,9 +268,9 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
                       sync_cmd_mask_wr_state, sync_cmd_mask_rd_state,
                       interrupt_mask_wr_state, interrupt_mask_rd_state, status_block_rst_state,
 -- Image parameters
-                      read_image_size_state, read_image_patter_mode_state, read_ccd_sel_state,
+                      read_image_size_state, read_image_patter_mode_state, read_ccd_sel_state, read_ccd_oe_state,
                       set_image_size_state, set_img_pattern_gen_state,
-                      set_ccd_sel_state,
+                      set_ccd_sel_state, set_ccd_oe_state,
 -- Sequncer
                       func_output_wr, func_time_wr, seq_prog_mem_wr,
                       seq_step_state, seq_stop_state,
@@ -388,6 +390,7 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_image_size_en   : std_logic;
   signal next_image_patter_en : std_logic;
   signal next_ccd_sel_en      : std_logic;
+  signal next_ccd_oe_en       : std_logic;
 
 -- Sequencer
   signal next_seq_time_mem_w_en       : std_logic_vector(2 downto 0);  -- function outupt register enable flag
@@ -487,6 +490,7 @@ begin
         image_size_en   <= '0';
         image_patter_en <= '0';
         ccd_sel_en      <= '0';
+        ccd_oe_en       <= '0';
 
         -- Sequencer reset state                                
         seq_time_mem_w_en       <= (others => '0');
@@ -578,6 +582,7 @@ begin
         image_size_en   <= next_image_size_en;
         image_patter_en <= next_image_patter_en;
         ccd_sel_en      <= next_ccd_sel_en;
+        ccd_oe_en       <= next_ccd_oe_en;
 
         -- Sequencer latch      
         seq_time_mem_w_en       <= next_seq_time_mem_w_en;
@@ -661,7 +666,7 @@ begin
            interrupt_mask_read,
 
            -- image param
-           image_size, image_patter_read, ccd_sel_read,
+           image_size, image_patter_read, ccd_sel_read, ccd_oe_read,
 
            -- sequencer
            seq_time_mem_readbk, seq_out_mem_readbk, seq_prog_mem_readbk, enable_conv_shift_in, start_add_prog_mem_rbk,
@@ -731,6 +736,7 @@ begin
     next_image_size_en   <= '0';
     next_image_patter_en <= '0';
     next_ccd_sel_en      <= '0';
+    next_ccd_oe_en      <= '0';
 
                                         -- Sequencer default state
     next_seq_time_mem_w_en       <= (others => '0');
@@ -924,6 +930,10 @@ begin
                                         -- read CCD selector configuration
             elsif regAddr = ccd_sel_cmd then
               next_state <= read_ccd_sel_state;
+
+                                        -- read CCD selector configuration
+            elsif regAddr = ccd_oe_cmd then
+              next_state <= read_ccd_oe_state;
 
               -------- Sequencer parameters read
               -- time memory read
@@ -1224,6 +1234,11 @@ begin
             elsif regAddr = ccd_sel_cmd then
               next_state      <= set_ccd_sel_state;
               next_ccd_sel_en <= '1';
+
+                                        -- CCD selector enable (CCD 1 = lsb)                                                    
+            elsif regAddr = ccd_oe_cmd then
+              next_state      <= set_ccd_oe_state;
+              next_ccd_oe_en <= '1';
 
 ---------- Sequencer Parameters Write
 
@@ -1701,6 +1716,12 @@ begin
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & '0' & ccd_sel_read;
 
+        -- CCD selector read (add 400008)       
+      when read_ccd_oe_state =>
+        next_state     <= wait_end_cmd;
+        next_regAck    <= '1';
+        next_regDataRd <= x"0000000" & '0' & ccd_oe_read;
+
         -- status block read  
       when statusReg_rd =>
         next_state     <= wait_end_cmd;
@@ -1749,6 +1770,10 @@ begin
 
         -- enables the CCD selector register
       when set_ccd_sel_state =>
+        next_state <= ack_del_1;
+
+        -- enables the CCD selector register
+      when set_ccd_oe_state =>
         next_state <= ack_del_1;
 
 ---------------------- Sequencer Parameters Write/Read --------------------------

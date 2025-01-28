@@ -410,9 +410,11 @@ architecture Behavioral of REB_v5_top_3_seq is
           image_size               : in  std_logic_vector(31 downto 0);  -- this register contains the image size
           image_patter_read        : in  std_logic_vector(2 downto 0);  -- this register gives the state of image patter gen. 1 is ON
           ccd_sel_read             : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
+          ccd_oe_read              : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
           image_size_en            : out std_logic;  -- this line enables the register where the image size is written
           image_patter_en          : out std_logic;  -- this register enable the image patter gen. 1 is ON
           ccd_sel_en               : out std_logic;  -- register enable for CCD acquisition selector
+          ccd_oe_en                : out std_logic;  -- register enable for CCD acquisition selector
 -- Sequencer
           seq_time_mem_readbk      : in  array316;  -- time memory read bus
           seq_out_mem_readbk       : in  array332;  -- time memory read bus
@@ -1073,6 +1075,17 @@ architecture Behavioral of REB_v5_top_3_seq is
       );
   end component;
 
+  component generic_reg_ce_init_1 is
+    generic (width : integer := 15);
+    port (
+      reset    : in  std_logic;         -- syncronus reset
+      clk      : in  std_logic;         -- clock
+      ce       : in  std_logic;         -- clock enable
+      init     : in  std_logic;  -- signal to reset the reg (active high)
+      data_in  : in  std_logic_vector(width downto 0);   -- data in
+      data_out : out std_logic_vector(width downto 0));  -- data out
+  end component;
+
 -- chipscope
   --component DREB_V2_icon
   --  port (
@@ -1219,6 +1232,8 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal ADC_trigger       : std_logic_vector(2 downto 0);
   signal CCD_sel_en        : std_logic;
   signal CCD_sel           : std_logic_vector(2 downto 0);
+  signal CCD_oe_en         : std_logic;
+  signal CCD_oe            : std_logic_vector(2 downto 0);
   signal start_of_img      : std_logic_vector(2 downto 0);
   signal end_of_img        : std_logic_vector(2 downto 0);
   signal pattern_reset     : std_logic_vector(2 downto 0);
@@ -1251,6 +1266,9 @@ architecture Behavioral of REB_v5_top_3_seq is
   -- Heaters DAC
   signal htr_load_start   : std_logic;
   signal htr_ldac_start   : std_logic;
+
+  signal adc_write_enable : std_logic_vector(2 downto 0);
+
   -- CCD 1 signals
   signal par_clk_ccd_1    : std_logic_vector(3 downto 0);
   signal ser_clk_ccd_1    : std_logic_vector(2 downto 0);
@@ -1720,6 +1738,17 @@ begin
 
   --stable_reset <= not stable_clk_lock;
 
+
+  sci_data_oe_reg : generic_reg_ce_init_1
+    generic map (width => 2)
+    port map (
+      reset    => usrRst,
+      clk      => usrClk,
+      ce       => CCD_oe_en,
+      init     => '0',  -- signal to reset the reg (active high)
+      data_in  => regDataWr_masked(2 downto 0),
+      data_out => CCD_oe);                               
+
   LsstSci_0 : LsstSci
     port map (
       -------------------------------------------------------------------------
@@ -1863,9 +1892,11 @@ begin
       image_size               => x"00000000",  -- this register contains the image size
       image_patter_read        => image_patter_read,  -- this register gives the state of image patter gen. 1 is ON
       ccd_sel_read             => "001",  -- this register contains the CCD to drive
+      ccd_oe_read              => CCD_oe,  -- this register contains the CCD to drive
       image_size_en            => open,  -- this line enables the register where the image size is written
       image_patter_en          => image_patter_en,  -- this register enable the image patter gen. 1 is ON
       ccd_sel_en               => open,  -- register enable for CCD acquisition selector
+      ccd_oe_en                => CCD_oe_en,  -- register enable for CCD acquisition selector
 -- Sequencer
       seq_time_mem_readbk      => seq_time_mem_readbk,  -- time memory read bus
       seq_out_mem_readbk       => seq_out_mem_readbk,   -- time memory read bus
@@ -2094,6 +2125,10 @@ begin
       interrupt_bus_out => interrupt_bus_out);
 
 
+  SCI_DataIn(0).wrEn <= adc_write_enable(0) and CCD_oe(0);
+  SCI_DataIn(1).wrEn <= adc_write_enable(1) and CCD_oe(1);
+  SCI_DataIn(2).wrEn <= adc_write_enable(2) and CCD_oe(2);
+
   Image_data_handler_0 : ADC_data_handler_v4
      port map (
         reset => sync_res,
@@ -2116,7 +2151,7 @@ begin
 
         SOT          => SCI_DataIn(0).sot,   -- Start of Image
         EOT          => SCI_DataIn(0).eot,   -- End of Image
-        write_enable => SCI_DataIn(0).wrEn,  -- signal to write the image in the PGP
+        write_enable => adc_write_enable(0),  -- signal to write the image in the PGP
         data_out     => SCI_DataIn(0).data,
 
         test_mode_enb_out => image_patter_read(0),
@@ -2148,7 +2183,7 @@ begin
 
         SOT          => SCI_DataIn(1).sot,   -- Start of Image
         EOT          => SCI_DataIn(1).eot,   -- End of Image
-        write_enable => SCI_DataIn(1).wrEn,  -- signal to write the image in the PGP
+        write_enable => adc_write_enable(1),  -- signal to write the image in the PGP
         data_out     => SCI_DataIn(1).data,
 
         test_mode_enb_out => image_patter_read(1),
@@ -2180,7 +2215,7 @@ begin
 
         SOT          => SCI_DataIn(2).sot,   -- Start of Image
         EOT          => SCI_DataIn(2).eot,   -- End of Image
-        write_enable => SCI_DataIn(2).wrEn,  -- signal to write the image in the PGP
+        write_enable => adc_write_enable(2),  -- signal to write the image in the PGP
         data_out     => SCI_DataIn(2).data,
 
         test_mode_enb_out => image_patter_read(2),
