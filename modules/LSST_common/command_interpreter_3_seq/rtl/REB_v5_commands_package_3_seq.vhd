@@ -163,6 +163,16 @@ package REB_v5_commands_package_3_seq is
   constant ccd_3_bias_ldac_cmd        : std_logic_vector(23 downto 0) := x"400121";
   constant ccd_bias_err_vut_cmd       : std_logic_vector(23 downto 0) := x"40010F";
 
+  constant ccd_1_gd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401100";
+  constant ccd_1_od_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401101";
+  constant ccd_1_rd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401104";
+  constant ccd_2_gd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401110";
+  constant ccd_2_od_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401111";
+  constant ccd_2_rd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401114";
+  constant ccd_3_gd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401120";
+  constant ccd_3_od_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401121";
+  constant ccd_3_rd_thresh_read_cmd : std_logic_vector(23 downto 0) := x"401124";
+
 ---------- CCD clock rails DAC
   constant clk_rail_load_config_cmd : std_logic_vector(23 downto 0) := x"400000";
   constant clk_rail_ldac_cmd        : std_logic_vector(23 downto 0) := x"400001";
@@ -260,31 +270,5 @@ package REB_v5_commands_package_3_seq is
 end REB_v5_commands_package_3_seq;
 
 package body REB_v5_commands_package_3_seq is
-
----- Example 1
---  function <function_name>  (signal <signal_name> : in <type_declaration>  ) return <type_declaration> is
---    variable <variable_name>     : <type_declaration>;
---  begin
---    <variable_name> := <signal_name> xor <signal_name>;
---    return <variable_name>; 
---  end <function_name>;
-
----- Example 2
---  function <function_name>  (signal <signal_name> : in <type_declaration>;
---                         signal <signal_name>   : in <type_declaration>  ) return <type_declaration> is
---  begin
---    if (<signal_name> = '1') then
---      return <signal_name>;
---    else
---      return 'Z';
---    end if;
---  end <function_name>;
-
----- Procedure Example
---  procedure <procedure_name>  (<type_declaration> <constant_name>  : in <type_declaration>) is
---    
---  begin
---    
---  end <procedure_name>;
 
 end REB_v5_commands_package_3_seq;

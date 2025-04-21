@@ -23,7 +23,7 @@ package Version is
 -------------------------------------------------------------------------------
   
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395110"; -- MAKE_VERSION
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395111"; -- MAKE_VERSION
 
 constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Tue Jan 28 12:30:05 PST 2025 by jgt";
 
@@ -44,18 +44,19 @@ end Version;
 -- 30345107 look at me various fixes (masked at start and other errors). Now the
 -- version shuld be identical to GREB 2007 and following
 -- 31395107 new SCI block with A and B link switch
--- 31395008 Changed ADC conversion time from 750ns to 800ns
--- 31395009 Changed ADC conversion time from 750ns to 700ns
--- 3139500B Retured ADC conversion time to 750ns
+-- 31395108 Changed ADC conversion time from 750ns to 800ns
+-- 31395109 Changed ADC conversion time from 750ns to 700ns
+-- 3139510B Retured ADC conversion time to 750ns
 --          Added STOP Synchronous command 0x30
 --          Fixed bug that caused 160ns of 0 on output when
 --           entering default state
--- 3139500C Added register START command that specifies MAIN
--- 3139500D Masked sequencer start with sequencer busy to reject triggers
+-- 3139510C Added register START command that specifies MAIN
+-- 3139510D Masked sequencer start with sequencer busy to reject triggers
 --          when already running.
--- 3139500E Fixed Serial Number Readback
+-- 3139510E Fixed Serial Number Readback
 --          Added FPGA_VERSION to UserID in bitfile
 --          Fixed zero sensor data for non-zero sensors
--- 3139500F Fixed Sensor order in 3-sequencer version (dead end - deprecated)
--- 31395010 Added enable mask for input to DataEncoder
+-- 3139510F Fixed Sensor order in 3-sequencer version (dead end - deprecated)
+-- 31395110 Added enable mask for input to DataEncoder
+-- 31395111 Version with Bias thresholds moved into Generics, but not set differently
 -------------------------------------------------------------------------------

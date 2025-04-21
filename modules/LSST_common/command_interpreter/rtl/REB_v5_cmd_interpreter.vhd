@@ -134,6 +134,15 @@ entity REB_v5_cmd_interpreter is
         ccd_3_bias_load_start : out std_logic;
         ccd_3_bias_ldac_start : out std_logic;
 
+        ccd_1_bias_gd_thresh  : in std_logic_vector(11 downto 0);
+		ccd_1_bias_od_thresh  : in std_logic_vector(11 downto 0);
+		ccd_1_bias_rd_thresh  : in std_logic_vector(11 downto 0);
+		ccd_2_bias_gd_thresh  : in std_logic_vector(11 downto 0);
+		ccd_2_bias_od_thresh  : in std_logic_vector(11 downto 0);
+		ccd_2_bias_rd_thresh  : in std_logic_vector(11 downto 0);
+		ccd_3_bias_gd_thresh  : in std_logic_vector(11 downto 0);
+		ccd_3_bias_od_thresh  : in std_logic_vector(11 downto 0);
+		ccd_3_bias_rd_thresh  : in std_logic_vector(11 downto 0);
 
 -- CCD clock rails DAC          
         clk_rail_load_start : out std_logic;
@@ -295,6 +304,9 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       ccd_3_bias_load_config_state, ccd_3_bias_ldac_state,
                       ccd_bias_read_error_vut_state,
 
+                      ccd_1_gd_thresh_read_state, ccd_1_od_thresh_read_state, ccd_1_rd_thresh_read_state, 
+                      ccd_2_gd_thresh_read_state, ccd_2_od_thresh_read_state, ccd_2_rd_thresh_read_state, 
+                      ccd_3_gd_thresh_read_state, ccd_3_od_thresh_read_state, ccd_3_rd_thresh_read_state, 
 
 -- CCD clock rails DAC  
                       clk_rail_load_config_state, clk_rail_ldac_state,
@@ -984,6 +996,33 @@ begin
             elsif regAddr = ccd_bias_err_vut_cmd then
               next_state <= ccd_bias_read_error_vut_state;
 
+            elsif regAddr = ccd_1_gd_thresh_read_cmd then
+              next_state <= ccd_1_gd_thresh_read_state;
+
+            elsif regAddr = ccd_1_od_thresh_read_cmd then
+              next_state <= ccd_1_od_thresh_read_state;
+
+            elsif regAddr = ccd_1_rd_thresh_read_cmd then
+              next_state <= ccd_1_rd_thresh_read_state;
+
+            elsif regAddr = ccd_2_gd_thresh_read_cmd then
+              next_state <= ccd_2_gd_thresh_read_state;
+
+            elsif regAddr = ccd_2_od_thresh_read_cmd then
+              next_state <= ccd_2_od_thresh_read_state;
+
+            elsif regAddr = ccd_2_rd_thresh_read_cmd then
+              next_state <= ccd_2_rd_thresh_read_state;
+
+            elsif regAddr = ccd_3_gd_thresh_read_cmd then
+              next_state <= ccd_3_gd_thresh_read_state;
+
+            elsif regAddr = ccd_3_od_thresh_read_cmd then
+              next_state <= ccd_3_od_thresh_read_state;
+
+            elsif regAddr = ccd_3_rd_thresh_read_cmd then
+              next_state <= ccd_3_rd_thresh_read_state;
+
               --------DREB voltage and current sensors read                             
               -- V6 voltage read
             elsif regAddr = v6_voltage_cmd then
@@ -1314,8 +1353,6 @@ begin
             elsif regAddr = ccd_3_bias_ldac_cmd then
               next_state                 <= ccd_3_bias_ldac_state;
               next_ccd_3_bias_ldac_start <= '1';
-
-
 
 ---------- CCD clock rails DAC
               -- start write config
@@ -1804,6 +1841,42 @@ begin
         next_state     <= wait_end_cmd;
         next_regDataRd <= "0000" & "000" & bias_v_undr_th & "0000" & "000" & bias_dac_cmd_err;
         next_regAck    <= '1';
+      when ccd_1_gd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_gd_thresh;
+      	next_regAck    <= '1';
+      when ccd_1_od_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_od_thresh;
+      	next_regAck    <= '1';
+      when ccd_1_rd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_rd_thresh;
+      	next_regAck    <= '1';
+      when ccd_2_gd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_gd_thresh;
+      	next_regAck    <= '1';
+      when ccd_2_od_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_od_thresh;
+      	next_regAck    <= '1';
+      when ccd_2_rd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_rd_thresh;
+      	next_regAck    <= '1';
+      when ccd_3_gd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_gd_thresh;
+      	next_regAck    <= '1';
+      when ccd_3_od_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_od_thresh;
+      	next_regAck    <= '1';
+      when ccd_3_rd_thresh_read_state =>
+      	next_state     <= wait_end_cmd;
+      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_rd_thresh;
+      	next_regAck    <= '1';
 
 ---------------------- CCD clock rails DAC Write --------------------------
         
@@ -2039,12 +2112,8 @@ begin
 ---------------------- REB 1wire serial number --------------------------                               
 -- REB 1wire serial number acq
       when reb_sn_acq_state =>
-   --     if reb_sn_crc_ok = '0' and reb_sn_dev_error = '0' and reb_sn_timeout = '0' then
-  --        next_state             <= reb_sn_acq_state;
           next_reb_onewire_reset <= '0';
-     --   else
           next_state <= ack_del_1;
-     --   end if;
 
 -- REB 1wire serial number read w 0             
       when reb_sn_read_w0_state =>

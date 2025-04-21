@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -30,7 +30,10 @@ use IEEE.STD_LOGIC_1164.all;
 --use UNISIM.VComponents.all;
 
 entity ad53xx_DAC_protection_top is
-
+	generic (
+	GD_th : integer range 0 to 2**12-1 := 1138;  -- equivalent to x"472"
+    OD_th : integer range 0 to 2**12-1 := 2275;  -- equivalent to x"8E3"
+    RD_th : integer range 0 to 2**12-1 := 1632); -- equivalent to x"660"
   port (
     clk             : in  std_logic;
     reset           : in  std_logic;
@@ -43,7 +46,10 @@ entity ad53xx_DAC_protection_top is
     mosi            : out std_logic;
     ss              : out std_logic;
     sclk            : out std_logic;
-    ldac            : out std_logic
+    ldac            : out std_logic;
+    gd_thresh       : out std_logic_vector(11 downto 0);
+    od_thresh       : out std_logic_vector(11 downto 0);
+    rd_thresh       : out std_logic_vector(11 downto 0)
     );
 
 end ad53xx_DAC_protection_top;
@@ -84,11 +90,16 @@ architecture Behavioral of ad53xx_DAC_protection_top is
   constant OD_add : std_logic_vector(3 downto 0) := x"1";
   constant RD_add : std_logic_vector(3 downto 0) := x"4";
 
-  constant GD_th : std_logic_vector(11 downto 0) := x"472";
-  constant OD_th : std_logic_vector(11 downto 0) := x"8E3";
-  constant RD_th : std_logic_vector(11 downto 0) := x"660";
+  signal GD_th_int : std_logic_vector(11 downto 0);
+  signal OD_th_int : std_logic_vector(11 downto 0);
+  signal RD_th_int : std_logic_vector(11 downto 0);
 
 begin
+
+  -- Convert integer generics to std_logic_vector
+  GD_th_int <= std_logic_vector(to_unsigned(GD_th, 12));
+  OD_th_int <= std_logic_vector(to_unsigned(OD_th, 12));
+  RD_th_int <= std_logic_vector(to_unsigned(RD_th, 12));
 
   SPI_write_0 : SPI_write
     generic map (clk_divide  => 2,
@@ -116,7 +127,7 @@ begin
         values_under_th_i   <= (others => '1');
       else
         if start_write = '1' and d_to_slave(15 downto 12) = GD_add then
-          if d_to_slave(11 downto 0) < GD_th then
+          if d_to_slave(11 downto 0) < GD_th_int then
             if bbs_switch_on = '1' then
               start_write_delay_1 <= '0';
               d_to_slave_delay_1  <= (others => '0');
@@ -146,7 +157,7 @@ begin
           end if;
           
         elsif start_write = '1' and d_to_slave(15 downto 12) = OD_add then
-          if d_to_slave(11 downto 0) < OD_th then
+          if d_to_slave(11 downto 0) < OD_th_int then
             if bbs_switch_on = '1' then
               start_write_delay_1 <= '0';
               d_to_slave_delay_1  <= (others => '0');
@@ -175,7 +186,7 @@ begin
             values_under_th_i(2) <= values_under_th_i(2);
           end if;
         elsif start_write = '1' and d_to_slave(15 downto 12) = RD_add then
-          if d_to_slave(11 downto 0) < RD_th then
+          if d_to_slave(11 downto 0) < RD_th_int then
             if bbs_switch_on = '1' then
               start_write_delay_1 <= '0';
               d_to_slave_delay_1  <= (others => '0');
@@ -236,6 +247,10 @@ begin
 
   ldac <= not(ldac_delay_1 or ldac_delay_2);
 
+  -- readback outputs
+  gd_thresh <= GD_th_int;
+  od_thresh <= OD_th_int;
+  rd_thresh <= RD_th_int;
 
 end Behavioral;
 
