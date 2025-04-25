@@ -51,13 +51,14 @@ package REB_v5_commands_package is
   -- multiboot
   constant start_multiboot_cmd : std_logic_vector(23 downto 0) := x"000200";
 
-
-
-
 -- Image parameters
   constant image_size_cmd        : std_logic_vector(23 downto 0) := x"400005";
   constant image_patter_mode_cmd : std_logic_vector(23 downto 0) := x"400006";
   constant ccd_sel_cmd           : std_logic_vector(23 downto 0) := x"400007";
+
+  constant ccd_1_seq_override_cmd : std_logic_vector(23 downto 0) := x"400010";
+  constant ccd_2_seq_override_cmd : std_logic_vector(23 downto 0) := x"400011";
+  constant ccd_3_seq_override_cmd : std_logic_vector(23 downto 0) := x"400012";
 
 -- Status Register
   constant read_status_reg_base : std_logic_vector(23 downto 0) := x"A00000";

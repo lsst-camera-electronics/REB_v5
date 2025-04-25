@@ -385,6 +385,13 @@ architecture Behavioral of REB_v5_top is
           image_size_en            : out std_logic;                     -- this line enables the register where the image size is written
           image_patter_en          : out std_logic;                     -- this register enable the image patter gen. 1 is ON
           ccd_sel_en               : out std_logic;                     -- register enable for CCD acquisition selector
+          -- Sequencer defaults
+          ccd_1_seq_override_wr   : out std_logic;
+          ccd_2_seq_override_wr   : out std_logic;
+          ccd_3_seq_override_wr   : out std_logic;
+          ccd_1_seq_override_read : in std_logic_vector(31 downto 0);
+          ccd_2_seq_override_read : in std_logic_vector(31 downto 0);
+          ccd_3_seq_override_read : in std_logic_vector(31 downto 0);
           -- Sequencer
           seq_time_mem_readbk      : in  std_logic_vector(15 downto 0); -- time memory read bus
           seq_out_mem_readbk       : in  std_logic_vector(31 downto 0); -- time memory read bus
@@ -1118,6 +1125,13 @@ architecture Behavioral of REB_v5_top is
   signal seq_op_code_error_reset  : std_logic;
   signal seq_op_code_error_add    : std_logic_vector(9 downto 0);
 
+  signal ccd_1_seq_override_wr : std_logic;
+  signal ccd_1_seq_override    : std_logic_vector(31 downto 0);
+  signal ccd_2_seq_override_wr : std_logic;
+  signal ccd_2_seq_override    : std_logic_vector(31 downto 0);
+  signal ccd_3_seq_override_wr : std_logic;
+  signal ccd_3_seq_override    : std_logic_vector(31 downto 0);
+
   -- Image handler signals
   signal image_patter_read : std_logic;
   signal image_patter_en   : std_logic;
@@ -1406,51 +1420,85 @@ begin
 
   ------------ Sequencer's signals assignment ------------
   -- CCD 1
-  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)  and CCD_sel(0);
-  ASPIC_r_down_ccd_1 <= sequencer_outputs(1)  and CCD_sel(0);
-  ASPIC_reset_ccd_1  <= sequencer_outputs(2)  and CCD_sel(0);
-  ASPIC_clamp_ccd_1  <= sequencer_outputs(3)  and CCD_sel(0);
-  ser_clk_ccd_1(0)   <= sequencer_outputs(4)  and CCD_sel(0);
-  ser_clk_ccd_1(1)   <= sequencer_outputs(5)  and CCD_sel(0);
-  ser_clk_ccd_1(2)   <= sequencer_outputs(6)  and CCD_sel(0);
-  reset_gate_ccd_1   <= sequencer_outputs(7)  and CCD_sel(0);
-  par_clk_ccd_1(0)   <= sequencer_outputs(8)  and CCD_sel(0);
-  par_clk_ccd_1(1)   <= sequencer_outputs(9)  and CCD_sel(0);
-  par_clk_ccd_1(2)   <= sequencer_outputs(10) and CCD_sel(0);
-  par_clk_ccd_1(3)   <= sequencer_outputs(11) and CCD_sel(0);
+  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(0);
+  ASPIC_r_down_ccd_1 <= sequencer_outputs(1)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(1);
+  ASPIC_reset_ccd_1  <= sequencer_outputs(2)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(2);
+  ASPIC_clamp_ccd_1  <= sequencer_outputs(3)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(3);
+  ser_clk_ccd_1(0)   <= sequencer_outputs(4)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(4);
+  ser_clk_ccd_1(1)   <= sequencer_outputs(5)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(5);
+  ser_clk_ccd_1(2)   <= sequencer_outputs(6)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(6);
+  reset_gate_ccd_1   <= sequencer_outputs(7)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(7);
+  par_clk_ccd_1(0)   <= sequencer_outputs(8)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(8);
+  par_clk_ccd_1(1)   <= sequencer_outputs(9)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(9);
+  par_clk_ccd_1(2)   <= sequencer_outputs(10) when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(10);
+  par_clk_ccd_1(3)   <= sequencer_outputs(11) when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(11);
 
   -- CCD 2
-  ASPIC_r_up_ccd_2   <= sequencer_outputs(0)  and CCD_sel(1);
-  ASPIC_r_down_ccd_2 <= sequencer_outputs(1)  and CCD_sel(1);
-  ASPIC_reset_ccd_2  <= sequencer_outputs(2)  and CCD_sel(1);
-  ASPIC_clamp_ccd_2  <= sequencer_outputs(3)  and CCD_sel(1);
-  ser_clk_ccd_2(0)   <= sequencer_outputs(4)  and CCD_sel(1);
-  ser_clk_ccd_2(1)   <= sequencer_outputs(5)  and CCD_sel(1);
-  ser_clk_ccd_2(2)   <= sequencer_outputs(6)  and CCD_sel(1);
-  reset_gate_ccd_2   <= sequencer_outputs(7)  and CCD_sel(1);
-  par_clk_ccd_2(0)   <= sequencer_outputs(8)  and CCD_sel(1);
-  par_clk_ccd_2(1)   <= sequencer_outputs(9)  and CCD_sel(1);
-  par_clk_ccd_2(2)   <= sequencer_outputs(10) and CCD_sel(1);
-  par_clk_ccd_2(3)   <= sequencer_outputs(11) and CCD_sel(1);
+  ASPIC_r_up_ccd_2   <= sequencer_outputs(0)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(0);
+  ASPIC_r_down_ccd_2 <= sequencer_outputs(1)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(1);
+  ASPIC_reset_ccd_2  <= sequencer_outputs(2)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(2);
+  ASPIC_clamp_ccd_2  <= sequencer_outputs(3)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(3);
+  ser_clk_ccd_2(0)   <= sequencer_outputs(4)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(4);
+  ser_clk_ccd_2(1)   <= sequencer_outputs(5)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(5);
+  ser_clk_ccd_2(2)   <= sequencer_outputs(6)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(6);
+  reset_gate_ccd_2   <= sequencer_outputs(7)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(7);
+  par_clk_ccd_2(0)   <= sequencer_outputs(8)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(8);
+  par_clk_ccd_2(1)   <= sequencer_outputs(9)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(9);
+  par_clk_ccd_2(2)   <= sequencer_outputs(10) when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(10);
+  par_clk_ccd_2(3)   <= sequencer_outputs(11) when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(11);
 
   -- CCD 3
-  ASPIC_r_up_ccd_3   <= sequencer_outputs(0)  and CCD_sel(2);
-  ASPIC_r_down_ccd_3 <= sequencer_outputs(1)  and CCD_sel(2);
-  ASPIC_reset_ccd_3  <= sequencer_outputs(2)  and CCD_sel(2);
-  ASPIC_clamp_ccd_3  <= sequencer_outputs(3)  and CCD_sel(2);
-  ser_clk_ccd_3(0)   <= sequencer_outputs(4)  and CCD_sel(2);
-  ser_clk_ccd_3(1)   <= sequencer_outputs(5)  and CCD_sel(2);
-  ser_clk_ccd_3(2)   <= sequencer_outputs(6)  and CCD_sel(2);
-  reset_gate_ccd_3   <= sequencer_outputs(7)  and CCD_sel(2);
-  par_clk_ccd_3(0)   <= sequencer_outputs(8)  and CCD_sel(2);
-  par_clk_ccd_3(1)   <= sequencer_outputs(9)  and CCD_sel(2);
-  par_clk_ccd_3(2)   <= sequencer_outputs(10) and CCD_sel(2);
-  par_clk_ccd_3(3)   <= sequencer_outputs(11) and CCD_sel(2);
+  ASPIC_r_up_ccd_3   <= sequencer_outputs(0)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(0);
+  ASPIC_r_down_ccd_3 <= sequencer_outputs(1)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(1);
+  ASPIC_reset_ccd_3  <= sequencer_outputs(2)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(2);
+  ASPIC_clamp_ccd_3  <= sequencer_outputs(3)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(3);
+  ser_clk_ccd_3(0)   <= sequencer_outputs(4)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(4);
+  ser_clk_ccd_3(1)   <= sequencer_outputs(5)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(5);
+  ser_clk_ccd_3(2)   <= sequencer_outputs(6)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(6);
+  reset_gate_ccd_3   <= sequencer_outputs(7)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(7);
+  par_clk_ccd_3(0)   <= sequencer_outputs(8)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(8);
+  par_clk_ccd_3(1)   <= sequencer_outputs(9)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(9);
+  par_clk_ccd_3(2)   <= sequencer_outputs(10) when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(10);
+  par_clk_ccd_3(3)   <= sequencer_outputs(11) when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(11);
 
   ADC_trigger   <= sequencer_outputs(12);
   start_of_img  <= sequencer_outputs(13);
   end_of_img    <= sequencer_outputs(14);
   pattern_reset <= sequencer_outputs(16);
+
+  -- sequencer defaults (only used when sensor is not selected)
+  ccd_1_sequencer_defaults : generic_reg_ce_init
+    generic map (width => 31)
+    port map (
+      reset    => usrRst,
+      clk      => usrClk,
+      ce       => ccd_1_seq_override_wr,
+      init     => '0',
+      data_in  => regDataWr_masked,
+      data_out => ccd_1_seq_override
+    );
+
+  ccd_2_sequencer_defaults : generic_reg_ce_init
+    generic map (width => 31)
+    port map (
+      reset    => usrRst,
+      clk      => usrClk,
+      ce       => ccd_2_seq_override_wr,
+      init     => '0',
+      data_in  => regDataWr_masked,
+      data_out => ccd_2_seq_override
+    );
+
+  ccd_3_sequencer_defaults : generic_reg_ce_init
+    generic map (width => 31)
+    port map (
+      reset    => usrRst,
+      clk      => usrClk,
+      ce       => ccd_3_seq_override_wr,
+      init     => '0',
+      data_in  => regDataWr_masked,
+      data_out => ccd_3_seq_override
+    );
 
   ------------ Chips NAP mode lines ------------
   --CCD 1
@@ -1646,6 +1694,13 @@ begin
       image_size_en            => open,              -- this line enables the register where the image size is written
       image_patter_en          => image_patter_en,   -- this register enable the image patter gen. 1 is ON
       ccd_sel_en               => CCD_sel_en,        -- register enable for CCD acquisition selector
+      -- Sequencer Defaults
+      ccd_1_seq_override_wr         => ccd_1_seq_override_wr,
+      ccd_2_seq_override_wr         => ccd_2_seq_override_wr,
+      ccd_3_seq_override_wr         => ccd_3_seq_override_wr,
+      ccd_1_seq_override_read       => ccd_1_seq_override,
+      ccd_2_seq_override_read       => ccd_2_seq_override,
+      ccd_3_seq_override_read       => ccd_3_seq_override,
       -- Sequencer
       seq_time_mem_readbk      => seq_time_mem_readbk,   -- time memory read bus
       seq_out_mem_readbk       => seq_out_mem_readbk,    -- time memory read bus

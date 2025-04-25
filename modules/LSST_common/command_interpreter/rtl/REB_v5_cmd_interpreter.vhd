@@ -90,6 +90,14 @@ entity REB_v5_cmd_interpreter is
         image_patter_en   : out std_logic;  -- this register enable the image patter gen. 1 is ON
         ccd_sel_en        : out std_logic;  -- register enable for CCD acquisition selector
 
+-- Sequencer Override
+        ccd_1_seq_override_wr   : out std_logic;
+        ccd_2_seq_override_wr   : out std_logic;
+        ccd_3_seq_override_wr   : out std_logic;
+        ccd_1_seq_override_read : in std_logic_vector(31 downto 0);
+        ccd_2_seq_override_read : in std_logic_vector(31 downto 0);
+        ccd_3_seq_override_read : in std_logic_vector(31 downto 0);
+
 -- Sequencer
         seq_time_mem_readbk      : in  std_logic_vector(15 downto 0);  -- time memory read bus
         seq_out_mem_readbk       : in  std_logic_vector(31 downto 0);  -- time memory read bus
@@ -289,6 +297,9 @@ architecture Behavioral of REB_v5_cmd_interpreter is
                       seq_ind_sub_add_mem_we_state, seq_ind_sub_add_mem_rdbk_state,
                       seq_ind_sub_rep_mem_we_state, seq_ind_sub_rep_mem_rdbk_state,
                       seq_op_code_error_rd_state, seq_op_code_error_reset_state,
+                      ccd_1_seq_override_state, ccd_2_seq_override_state, ccd_3_seq_override_state,
+                      ccd_1_seq_override_rd_state, ccd_2_seq_override_rd_state, ccd_3_seq_override_rd_state,
+
 
 -- ASPIC        
                       aspic_start_trans_state,
@@ -401,6 +412,11 @@ architecture Behavioral of REB_v5_cmd_interpreter is
   signal next_image_patter_en : std_logic;
   signal next_ccd_sel_en      : std_logic;
 
+-- Sequencer Defaults
+  signal next_ccd_1_seq_override_wr : std_logic;
+  signal next_ccd_2_seq_override_wr : std_logic;
+  signal next_ccd_3_seq_override_wr : std_logic;
+
 -- Sequencer
   signal next_seq_time_mem_w_en       : std_logic;  -- function outupt register enable flag
   signal next_seq_out_mem_w_en        : std_logic;  -- function time register enable flag
@@ -500,6 +516,11 @@ begin
         image_patter_en <= '0';
         ccd_sel_en      <= '0';
 
+        -- Sequencer defaults
+        ccd_1_seq_override_wr <= '0';
+        ccd_2_seq_override_wr <= '0';
+        ccd_3_seq_override_wr <= '0';
+
         -- Sequencer reset state                                
         seq_time_mem_w_en       <= '0';
         seq_out_mem_w_en        <= '0';
@@ -591,6 +612,11 @@ begin
         image_patter_en <= next_image_patter_en;
         ccd_sel_en      <= next_ccd_sel_en;
 
+        -- Sequencer defaults
+        ccd_1_seq_override_wr <= next_ccd_1_seq_override_wr;
+        ccd_2_seq_override_wr <= next_ccd_2_seq_override_wr;
+        ccd_3_seq_override_wr <= next_ccd_3_seq_override_wr;
+
         -- Sequencer latch      
         seq_time_mem_w_en       <= next_seq_time_mem_w_en;
         seq_out_mem_w_en        <= next_seq_out_mem_w_en;
@@ -678,6 +704,7 @@ begin
            -- sequencer
            seq_time_mem_readbk, seq_out_mem_readbk, seq_prog_mem_readbk, enable_conv_shift_in, start_add_prog_mem_rbk,
            seq_ind_func_mem_rdbk, seq_ind_rep_mem_rdbk, seq_ind_sub_add_mem_rdbk, seq_ind_sub_rep_mem_rdbk, seq_op_code_error,
+           ccd_1_seq_override_read, ccd_2_seq_override_read, ccd_3_seq_override_read, 
 
            -- ASPIC
            aspic_config_r_ccd_1, aspic_config_r_ccd_2, aspic_config_r_ccd_3, aspic_op_end,
@@ -745,6 +772,9 @@ begin
     next_ccd_sel_en      <= '0';
 
                                         -- Sequencer default state
+    next_ccd_1_seq_override_wr   <= '0';                                      
+    next_ccd_2_seq_override_wr   <= '0';                                      
+    next_ccd_3_seq_override_wr   <= '0';                                      
     next_seq_time_mem_w_en       <= '0';
     next_seq_out_mem_w_en        <= '0';
     next_seq_prog_mem_w_en       <= '0';
@@ -938,6 +968,15 @@ begin
               next_state <= read_ccd_sel_state;
 
               -------- Sequencer parameters read
+            elsif regAddr = ccd_1_seq_override_cmd then
+              next_state <= ccd_1_seq_override_rd_state;
+
+            elsif regAddr = ccd_2_seq_override_cmd then
+              next_state <= ccd_2_seq_override_rd_state;
+
+            elsif regAddr = ccd_3_seq_override_cmd then
+              next_state <= ccd_3_seq_override_rd_state;
+
               -- time memory read
             elsif (regAddr >= func_time_set_base) and (regAddr <= func_time_set_high) then
               next_state <= seq_func_time_rd;
@@ -1250,7 +1289,19 @@ begin
               next_state      <= set_ccd_sel_state;
               next_ccd_sel_en <= '1';
 
+
 ---------- Sequencer Parameters Write
+            elsif regAddr = ccd_1_seq_override_cmd then
+              next_state            <= ccd_1_seq_override_state;
+              next_ccd_1_seq_override_wr <= '1';
+
+            elsif regAddr = ccd_2_seq_override_cmd then
+              next_state            <= ccd_2_seq_override_state;
+              next_ccd_2_seq_override_wr <= '1';
+
+            elsif regAddr = ccd_3_seq_override_cmd then
+              next_state            <= ccd_3_seq_override_state;
+              next_ccd_3_seq_override_wr <= '1';
 
                                         -- function time write          
             elsif (regAddr >= func_time_set_base) and (regAddr <= func_time_set_high)then
@@ -1652,6 +1703,15 @@ begin
 
 ---------------------- Sequencer Parameters Write/Read --------------------------
 
+      when ccd_1_seq_override_state  =>
+        next_state <= ack_del_1;
+
+      when ccd_2_seq_override_state  =>
+        next_state <= ack_del_1;
+
+      when ccd_3_seq_override_state  =>
+        next_state <= ack_del_1;
+
         -- write function output state
       when func_output_wr =>
         next_state <= ack_del_1;
@@ -1706,6 +1766,21 @@ begin
 
 
         -- sequencer time memory read           
+      when ccd_1_seq_override_rd_state =>
+        next_state                   <= wait_end_cmd;
+        next_regDataRd(31 downto 0)  <= ccd_1_seq_override_read;
+        next_regAck                  <= '1';
+
+      when ccd_2_seq_override_rd_state =>
+        next_state                   <= wait_end_cmd;
+        next_regDataRd(31 downto 0)  <= ccd_2_seq_override_read;
+        next_regAck                  <= '1';
+
+      when ccd_3_seq_override_rd_state =>
+        next_state                   <= wait_end_cmd;
+        next_regDataRd(31 downto 0)  <= ccd_3_seq_override_read;
+        next_regAck                  <= '1';
+
       when seq_func_time_rd =>
         next_state                   <= wait_end_cmd;
         next_regDataRd(31 downto 16) <= x"0000";
