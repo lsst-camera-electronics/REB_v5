@@ -1,3 +1,0 @@
-vhdl work tb/LsstSciDataEncoder_tb.vhd
-vhdl work tb/LsstSciSim_tb.vhd
-
