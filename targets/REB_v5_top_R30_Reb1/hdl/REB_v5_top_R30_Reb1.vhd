@@ -2065,7 +2065,7 @@ begin
   bias_DAC_ccd_3 : ad53xx_DAC_protection_top
     generic map (
       GD_th => 1138, -- equivalent to x"472"
-      OD_th => 0,    -- This is the problem sensor
+      OD_th => 10,   -- This is the problem sensor
       RD_th => 1632  -- equivalent to x"660"
       )
     port map (
