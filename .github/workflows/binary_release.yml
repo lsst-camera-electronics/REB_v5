@@ -1,0 +1,51 @@
+name: Create Release with Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up environment
+      run: |
+        echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        echo "ARCHIVE_NAME=${GITHUB_REPOSITORY#*/}-${GITHUB_REF#refs/tags/}-bitfilles.tgz" >> $GITHUB_ENV
+        echo "DIR_NAME=${GITHUB_REPOSITORY#*/}-${GITHUB_REF#refs/tags/}-bitfiles" >> $GITHUB_ENV
+
+    - name: Collect and archive binaries
+      run: |
+        mkdir ${{ env.DIR_NAME }}
+        find . -type f -path "*/images/*.gz" -exec cp {} ${{ env.DIR_NAME }}/ \;
+        tar -czvf ${{ env.ARCHIVE_NAME }} ${{ env.DIR_NAME }}
+
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create ${{ env.RELEASE_VERSION }} \
+          --title "Release ${{ env.RELEASE_VERSION }}" \
+          --notes "Release notes for ${{ env.RELEASE_VERSION }}" \
+          --draft=false \
+          ${{ env.ARCHIVE_NAME }}
+
+    - name: Get Release ID
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        release_id=$(gh release view ${{ env.RELEASE_VERSION }} --json id -q .id)
+        echo "RELEASE_ID=$release_id" >> $GITHUB_ENV
+        echo "UPLOAD_URL=https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets{?name,label}" >> $GITHUB_ENV
+
+    - name: Upload Release Asset
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release upload ${{ env.RELEASE_VERSION }} ${{ env.ARCHIVE_NAME }} \
+          --clobber
