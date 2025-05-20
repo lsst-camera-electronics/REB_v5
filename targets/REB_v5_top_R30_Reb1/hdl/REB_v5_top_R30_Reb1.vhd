@@ -1420,46 +1420,46 @@ begin
 
   ------------ Sequencer's signals assignment ------------
   -- CCD 1
-  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(0);
-  ASPIC_r_down_ccd_1 <= sequencer_outputs(1)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(1);
-  ASPIC_reset_ccd_1  <= sequencer_outputs(2)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(2);
-  ASPIC_clamp_ccd_1  <= sequencer_outputs(3)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(3);
-  ser_clk_ccd_1(0)   <= sequencer_outputs(4)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(4);
-  ser_clk_ccd_1(1)   <= sequencer_outputs(5)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(5);
-  ser_clk_ccd_1(2)   <= sequencer_outputs(6)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(6);
-  reset_gate_ccd_1   <= sequencer_outputs(7)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(7);
-  par_clk_ccd_1(0)   <= sequencer_outputs(8)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(8);
-  par_clk_ccd_1(1)   <= sequencer_outputs(9)  when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(9);
-  par_clk_ccd_1(2)   <= sequencer_outputs(10) when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(10);
-  par_clk_ccd_1(3)   <= sequencer_outputs(11) when ccd_1_seq_override(31) = '1' else ccd_1_seq_override(11);
+  ASPIC_r_up_ccd_1   <= sequencer_outputs(0)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(0);
+  ASPIC_r_down_ccd_1 <= sequencer_outputs(1)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(1);
+  ASPIC_reset_ccd_1  <= sequencer_outputs(2)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(2);
+  ASPIC_clamp_ccd_1  <= sequencer_outputs(3)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(3);
+  ser_clk_ccd_1(0)   <= sequencer_outputs(4)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(4);
+  ser_clk_ccd_1(1)   <= sequencer_outputs(5)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(5);
+  ser_clk_ccd_1(2)   <= sequencer_outputs(6)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(6);
+  reset_gate_ccd_1   <= sequencer_outputs(7)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(7);
+  par_clk_ccd_1(0)   <= sequencer_outputs(8)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(8);
+  par_clk_ccd_1(1)   <= sequencer_outputs(9)  when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(9);
+  par_clk_ccd_1(2)   <= sequencer_outputs(10) when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(10);
+  par_clk_ccd_1(3)   <= sequencer_outputs(11) when ccd_1_seq_override(31) = '0' else ccd_1_seq_override(11);
 
   -- CCD 2
-  ASPIC_r_up_ccd_2   <= sequencer_outputs(0)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(0);
-  ASPIC_r_down_ccd_2 <= sequencer_outputs(1)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(1);
-  ASPIC_reset_ccd_2  <= sequencer_outputs(2)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(2);
-  ASPIC_clamp_ccd_2  <= sequencer_outputs(3)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(3);
-  ser_clk_ccd_2(0)   <= sequencer_outputs(4)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(4);
-  ser_clk_ccd_2(1)   <= sequencer_outputs(5)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(5);
-  ser_clk_ccd_2(2)   <= sequencer_outputs(6)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(6);
-  reset_gate_ccd_2   <= sequencer_outputs(7)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(7);
-  par_clk_ccd_2(0)   <= sequencer_outputs(8)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(8);
-  par_clk_ccd_2(1)   <= sequencer_outputs(9)  when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(9);
-  par_clk_ccd_2(2)   <= sequencer_outputs(10) when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(10);
-  par_clk_ccd_2(3)   <= sequencer_outputs(11) when ccd_2_seq_override(31) = '1' else ccd_2_seq_override(11);
+  ASPIC_r_up_ccd_2   <= sequencer_outputs(0)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(0);
+  ASPIC_r_down_ccd_2 <= sequencer_outputs(1)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(1);
+  ASPIC_reset_ccd_2  <= sequencer_outputs(2)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(2);
+  ASPIC_clamp_ccd_2  <= sequencer_outputs(3)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(3);
+  ser_clk_ccd_2(0)   <= sequencer_outputs(4)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(4);
+  ser_clk_ccd_2(1)   <= sequencer_outputs(5)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(5);
+  ser_clk_ccd_2(2)   <= sequencer_outputs(6)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(6);
+  reset_gate_ccd_2   <= sequencer_outputs(7)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(7);
+  par_clk_ccd_2(0)   <= sequencer_outputs(8)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(8);
+  par_clk_ccd_2(1)   <= sequencer_outputs(9)  when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(9);
+  par_clk_ccd_2(2)   <= sequencer_outputs(10) when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(10);
+  par_clk_ccd_2(3)   <= sequencer_outputs(11) when ccd_2_seq_override(31) = '0' else ccd_2_seq_override(11);
 
   -- CCD 3
-  ASPIC_r_up_ccd_3   <= sequencer_outputs(0)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(0);
-  ASPIC_r_down_ccd_3 <= sequencer_outputs(1)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(1);
-  ASPIC_reset_ccd_3  <= sequencer_outputs(2)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(2);
-  ASPIC_clamp_ccd_3  <= sequencer_outputs(3)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(3);
-  ser_clk_ccd_3(0)   <= sequencer_outputs(4)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(4);
-  ser_clk_ccd_3(1)   <= sequencer_outputs(5)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(5);
-  ser_clk_ccd_3(2)   <= sequencer_outputs(6)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(6);
-  reset_gate_ccd_3   <= sequencer_outputs(7)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(7);
-  par_clk_ccd_3(0)   <= sequencer_outputs(8)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(8);
-  par_clk_ccd_3(1)   <= sequencer_outputs(9)  when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(9);
-  par_clk_ccd_3(2)   <= sequencer_outputs(10) when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(10);
-  par_clk_ccd_3(3)   <= sequencer_outputs(11) when ccd_3_seq_override(31) = '1' else ccd_3_seq_override(11);
+  ASPIC_r_up_ccd_3   <= sequencer_outputs(0)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(0);
+  ASPIC_r_down_ccd_3 <= sequencer_outputs(1)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(1);
+  ASPIC_reset_ccd_3  <= sequencer_outputs(2)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(2);
+  ASPIC_clamp_ccd_3  <= sequencer_outputs(3)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(3);
+  ser_clk_ccd_3(0)   <= sequencer_outputs(4)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(4);
+  ser_clk_ccd_3(1)   <= sequencer_outputs(5)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(5);
+  ser_clk_ccd_3(2)   <= sequencer_outputs(6)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(6);
+  reset_gate_ccd_3   <= sequencer_outputs(7)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(7);
+  par_clk_ccd_3(0)   <= sequencer_outputs(8)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(8);
+  par_clk_ccd_3(1)   <= sequencer_outputs(9)  when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(9);
+  par_clk_ccd_3(2)   <= sequencer_outputs(10) when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(10);
+  par_clk_ccd_3(3)   <= sequencer_outputs(11) when ccd_3_seq_override(31) = '0' else ccd_3_seq_override(11);
 
   ADC_trigger   <= sequencer_outputs(12);
   start_of_img  <= sequencer_outputs(13);
