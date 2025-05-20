@@ -16,7 +16,7 @@ jobs:
     - name: Set up environment
       run: |
         echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        echo "ARCHIVE_NAME=${GITHUB_REPOSITORY#*/}-${GITHUB_REF#refs/tags/}-bitfilles.tgz" >> $GITHUB_ENV
+        echo "ARCHIVE_NAME=${GITHUB_REPOSITORY#*/}-${GITHUB_REF#refs/tags/}-bitfiles.tgz" >> $GITHUB_ENV
         echo "DIR_NAME=${GITHUB_REPOSITORY#*/}-${GITHUB_REF#refs/tags/}-bitfiles" >> $GITHUB_ENV
 
     - name: Collect and archive binaries
