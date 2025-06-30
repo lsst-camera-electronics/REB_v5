@@ -1470,8 +1470,8 @@ begin
   ccd_1_sequencer_defaults : generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => usrRst,
-      clk      => usrClk,
+      reset    => sync_res,
+      clk      => clk_100_Mhz,
       ce       => ccd_1_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
@@ -1481,8 +1481,8 @@ begin
   ccd_2_sequencer_defaults : generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => usrRst,
-      clk      => usrClk,
+      reset    => sync_res,
+      clk      => clk_100_Mhz,
       ce       => ccd_2_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
@@ -1492,8 +1492,8 @@ begin
   ccd_3_sequencer_defaults : generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => usrRst,
-      clk      => usrClk,
+      reset    => sync_res,
+      clk      => clk_100_Mhz,
       ce       => ccd_3_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
