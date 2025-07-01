@@ -1,20 +1,20 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    15:23:28 11/07/2016 
--- Design Name: 
--- Module Name:    REB_v5_top - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:    15:23:28 11/07/2016
+-- Design Name:
+-- Module Name:    REB_v5_top - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
--- Additional Comments: 
+-- Additional Comments:
 --
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -173,7 +173,7 @@ entity REB_v5_top is
     sync_C_BIAS_ccd_3 : out std_logic;
     sclk_C_BIAS_ccd_3 : out std_logic;
 
-    -- V & I sensors  
+    -- V & I sensors
     LTC2945_SCL : inout std_logic;
     LTC2945_SDA : inout std_logic;
 
@@ -206,7 +206,7 @@ entity REB_v5_top is
     bias_t_adc_bias_mux_en  : out std_logic;
     bias_t_adc_sam_mux_sel  : out std_logic_vector(2 downto 0);
     bias_t_adc_bias_mux_sel : out std_logic_vector(2 downto 0);
-    bias_t_adc_shdn         : out std_logic;  -- 0 means Shutdown 
+    bias_t_adc_shdn         : out std_logic;  -- 0 means Shutdown
 
     ------ DACs ------
     -- CCD clock rails DAC
@@ -664,8 +664,8 @@ architecture Behavioral of REB_v5_top is
       en_test_mode      : in  std_logic;                     -- register enable for pattern test mode
       test_mode_in      : in  std_logic;                     -- test mode in
       en_load_ccd_sel   : in  std_logic;                     -- register enable for CCD enable
-      ccd_sel_in        : in  std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3) 
-      ccd_sel_out       : out std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3) 
+      ccd_sel_in        : in  std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3)
+      ccd_sel_out       : out std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3)
       SOT               : out std_logic;                     -- Start of Image
       EOT               : out std_logic;                     -- End of Image
       write_enable      : out std_logic;                     -- signal to write the image in the PGP
@@ -837,7 +837,7 @@ architecture Behavioral of REB_v5_top is
       error_T4        : out   std_logic;
       T4_out          : out   std_logic_vector(15 downto 0);
       sda             : inout std_logic;  --serial data output of i2c bus
-      scl             : inout std_logic   --serial clock output of i2c bus 
+      scl             : inout std_logic   --serial clock output of i2c bus
       );
   end component;
 
@@ -949,7 +949,7 @@ architecture Behavioral of REB_v5_top is
       data_in  : in  std_logic;
       ce       : in  std_logic;
       data_out : out std_logic
-      ); 
+      );
   end component;
 
   component led_blink is
@@ -1031,11 +1031,12 @@ architecture Behavioral of REB_v5_top is
   signal aux_100mhz_clk : std_logic;
 
   -- Reset
-  signal n_rst      : std_logic;
-  signal usrRst     : std_logic;
-  signal sync_res   : std_logic;
-  signal sync_res_1 : std_logic;
-  signal sync_res_2 : std_logic;
+  signal n_rst            : std_logic;
+  signal usrRst           : std_logic;
+  signal sync_res         : std_logic;
+  signal sync_res_1       : std_logic;
+  signal sync_res_2       : std_logic;
+  signal first_reset_done : std_logic;
 
   -- SCI signals
   signal pgpLocLinkReady : std_logic;
@@ -1299,7 +1300,6 @@ architecture Behavioral of REB_v5_top is
   signal back_bias_sw_protected        : std_logic;
   signal back_bias_sw_protected_int    : std_logic;
   signal back_bias_clamp_protected_int : std_logic;
-  signal back_bias_clamp_int           : std_logic;
   signal back_bias_sw_error            : std_logic;
   signal back_bias_sw_error_int        : std_logic;
 
@@ -1415,7 +1415,8 @@ begin
   -- interrupt signals
   interrupt_edge_en <= "00" & x"000" & "001" & "11101" & "11101" & "11101";
   interrupt_bus_in  <= "00" & x"000" & temp_busy & V_I_busy & fe_reset_notice &
-                       x"00" & "00" &
+                       "00000" &
+                       "00000" &
                        sequencer_outputs(31) & SCI_DataIn(0).eot & SCI_DataIn(0).sot & sequencer_busy & sequencer_busy;
 
   ------------ Sequencer's signals assignment ------------
@@ -1801,7 +1802,7 @@ begin
       T3_reb_gr2_error   => T3_reb_gr2_error,
       T4_reb_gr2         => T4_reb_gr2,
       T4_reb_gr2_error   => T4_reb_gr2_error,
-      -- bias and temp ADC 
+      -- bias and temp ADC
       bias_t_adc_busy    => bias_t_adc_busy,
       bias_t_adc_data    => bias_t_adc_d_out,
       bias_t_adc_start_t => start_multiread,
@@ -1889,7 +1890,7 @@ begin
       sync_cmd_stop_seq  => sync_cmd_stop_seq,
       sync_cmd_main_add  => sync_cmd_main_add
       );
-  
+
   REB_interrupt_top_1 : REB_interrupt_top
     generic map (
       interrupt_bus_width => 32)
@@ -2098,7 +2099,7 @@ begin
       ss_dac_1    => sync_RAILS_dac1,
       sclk        => sclk_RAILS,
       ldac        => ldac_RAILS
-      );                
+      );
 
   HTR_DAC : ad56xx_DAC_top
     port map (
@@ -2264,14 +2265,14 @@ begin
   reb_sn_crc_ok    <= not sn_error_bus(1);
 
   ------------------------------------------------------------------------------
-  -- Back Bias switch 
+  -- Back Bias switch
   ------------------------------------------------------------------------------
   back_bias_sw_protected <= regDataWr_masked(0) and not (or_reduce(bias_v_undr_th));
   back_bias_sw_error     <= regDataWr_masked(0) and (or_reduce(bias_v_undr_th));
 
   back_bias_sw : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_protected,
       ce       => en_back_bias_sw,
@@ -2279,30 +2280,33 @@ begin
 
   back_bias_error_ff : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_error,
       ce       => en_back_bias_sw,
-      data_out => back_bias_sw_error_int); 
+      data_out => back_bias_sw_error_int);
 
   back_bias_clamp_protected_int <= not back_bias_sw_protected_int;
 
   back_bias_reg : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_protected_int,
       ce       => '1',
-      data_out => backbias_ssbe); 
+      data_out => backbias_ssbe);
 
   back_bias_clamp_reg : ff_ce_pres
     port map (
-      preset   => sync_res,
+      preset   => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_clamp_protected_int,
       ce       => '1',
       data_out => backbias_clamp);
 
+  ------------------------------------------------------------------------------
+  -- DC/DC Converter Synchronization
+  ------------------------------------------------------------------------------
   dcdc_clk_gen : clk_2MHz_generator
     port map (
       clk             => clk_100_Mhz,
@@ -2313,6 +2317,9 @@ begin
       clk_2MHz_out    => PWR_SYNC1
       );
 
+  ------------------------------------------------------------------------------
+  -- Remote Update
+  ------------------------------------------------------------------------------
   ru_image_ID_we <= ru_start;           -- this works because ru_start is
                                         -- internally delayed for sync.
 
@@ -2400,12 +2407,12 @@ begin
       )
     port map (
       O       => clk_100_Mhz,           -- 1-bit output: Clock output
-      CE0     => '1',                   -- CE not used 
-      CE1     => '1',                   -- CE not used 
-      I0      => clk_100_Mhz_local,     -- local clock generated form OSC 
+      CE0     => '1',                   -- CE not used
+      CE1     => '1',                   -- CE not used
+      I0      => clk_100_Mhz_local,     -- local clock generated form OSC
       I1      => jc_refclk_in,          -- clock from Jitter Cleaner
       IGNORE0 => '0',                   -- 1-bit input: Clock ignore input for I0
-      IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present 
+      IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present
       S0      => not_jc_clk_ready,      -- 1-bit input: Clock select for I0
       S1      => jc_clk_ready           -- 1-bit input: Clock select for I1
       );
@@ -2441,6 +2448,16 @@ begin
   flop1_res : FD port map (D => usrRst, C => clk_100_Mhz, Q => sync_res_1);
   flop2_res : FD port map (D => sync_res_1, C => clk_100_Mhz, Q => sync_res_2);
   flop3_res : FD port map (D => sync_res_2, C => clk_100_Mhz, Q => sync_res);
+
+  first_reset_done_ff : FDRE
+  generic map (
+    INIT => '0')
+  port map(
+    C => clk_100_Mhz,
+    D => sync_res,
+    R => '0',
+    CE => not first_reset_done,
+    Q => first_reset_done);
 
   -- reset notice: this ff generates a signal for the reset notice
   reset_notice : FDRE port map (
@@ -2593,7 +2610,7 @@ begin
       I => aux_100mhz_clk_in  -- Clock buffer input (connect directly to top-level port)
       );
 
-  ------ MISC ------                                  
+  ------ MISC ------
   -- leds
   Utest_led0 : OBUF port map (O => TEST_LED(0), I => test_led_int(0));
   Utest_led1 : OBUF port map (O => TEST_LED(1), I => test_led_int(1));

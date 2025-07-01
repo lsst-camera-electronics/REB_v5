@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Title         : Version File
--- Project       : 
+-- Project       :
 -------------------------------------------------------------------------------
--- File          : 
--- Author        : 
--- Created       : 
+-- File          :
+-- Author        :
+-- Created       :
 -------------------------------------------------------------------------------
 -- Description:
 -- Version Constant Module.
@@ -12,7 +12,7 @@
 -- Copyright (c) 2010 by SLAC National Accelerator Laboratory. All rights reserved.
 -------------------------------------------------------------------------------
 -- Modification history:
--- 
+--
 -------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
@@ -21,11 +21,11 @@ package Version is
 -------------------------------------------------------------------------------
 -- Version History
 -------------------------------------------------------------------------------
-  
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395011"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Wed Apr 30 13:46:26 PDT 2025 by jgt";
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395012"; -- MAKE_VERSION
+
+constant BUILD_STAMP_C : string := "REB_v5_top: Vivado v2018.3 (x86_64) Built Tue Jul  1 13:36:59 PDT 2025 by jgt";
 
 end Version;
 
@@ -40,7 +40,7 @@ end Version;
 -- 31345004 new SCI version added and multiboot remote update added
 -- 31375005 new SCI version added with a 60 LAM bits port and sync cmd set start address
 -- 31375006 new onewire interface
--- 31385006 new SCI with new gtx configuration 
+-- 31385006 new SCI with new gtx configuration
 -- 30345005
 -- 30345006
 -- 30345007 look at me various fixes (masked at start and other errors). Now the
@@ -58,4 +58,5 @@ end Version;
 --          when already running.
 -- 3139500E Added FPGA_VERSION to UserID in bitfile
 -- 31395011 Version with Bias thresholds moved into Generics, but not set differently
+-- 31395012 Version that fixes reset to not cause CCS to power down sensors or open bias switch.
 -------------------------------------------------------------------------------

@@ -1026,11 +1026,12 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal aux_100mhz_clk : std_logic;
 
   -- Reset
-  signal n_rst      : std_logic;
-  signal usrRst     : std_logic;
-  signal sync_res   : std_logic;
-  signal sync_res_1 : std_logic;
-  signal sync_res_2 : std_logic;
+  signal n_rst            : std_logic;
+  signal usrRst           : std_logic;
+  signal sync_res         : std_logic;
+  signal sync_res_1       : std_logic;
+  signal sync_res_2       : std_logic;
+  signal first_reset_done : std_logic;
 
   -- SCI signals
   signal pgpLocLinkReady : std_logic;
@@ -2343,7 +2344,7 @@ begin
 
   back_bias_sw : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_protected,
       ce       => en_back_bias_sw,
@@ -2351,7 +2352,7 @@ begin
 
   back_bias_error_ff : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_error,
       ce       => en_back_bias_sw,
@@ -2361,7 +2362,7 @@ begin
 
   back_bias_reg : ff_ce
     port map (
-      reset    => sync_res,
+      reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_sw_protected_int,
       ce       => '1',
@@ -2369,12 +2370,15 @@ begin
 
   back_bias_clamp_reg : ff_ce_pres
     port map (
-      preset   => sync_res,
+      preset   => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
       data_in  => back_bias_clamp_protected_int,
       ce       => '1',
       data_out => backbias_clamp);
 
+  ------------------------------------------------------------------------------
+  -- DC/DC Converter Synchronization
+  ------------------------------------------------------------------------------
   dcdc_clk_gen : clk_2MHz_generator
     port map (
       clk             => clk_100_Mhz,
@@ -2385,6 +2389,9 @@ begin
       clk_2MHz_out    => PWR_SYNC1
       );
 
+  ------------------------------------------------------------------------------
+  -- Remote Update
+  ------------------------------------------------------------------------------
   ru_image_ID_we <= ru_start;           -- this works because ru_start is
                                         -- internally delayed for sync.
 
@@ -2514,6 +2521,16 @@ begin
   flop1_res : FD port map (D => usrRst, C => clk_100_Mhz, Q => sync_res_1);
   flop2_res : FD port map (D => sync_res_1, C => clk_100_Mhz, Q => sync_res_2);
   flop3_res : FD port map (D => sync_res_2, C => clk_100_Mhz, Q => sync_res);
+
+  first_reset_done_ff : FDRE
+  generic map (
+    INIT => '0')
+  port map(
+    C => clk_100_Mhz,
+    D => sync_res,
+    R => '0',
+    CE => not first_reset_done,
+    Q => first_reset_done);
 
   -- reset notice: this ff generates a signal for the reset notice
   reset_notice : FDRE port map (

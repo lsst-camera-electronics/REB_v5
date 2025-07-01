@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Title         : Version File
--- Project       : 
+-- Project       :
 -------------------------------------------------------------------------------
--- File          : 
--- Author        : 
--- Created       : 
+-- File          :
+-- Author        :
+-- Created       :
 -------------------------------------------------------------------------------
 -- Description:
 -- Version Constant Module.
@@ -12,7 +12,7 @@
 -- Copyright (c) 2010 by SLAC National Accelerator Laboratory. All rights reserved.
 -------------------------------------------------------------------------------
 -- Modification history:
--- 
+--
 -------------------------------------------------------------------------------
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
@@ -21,11 +21,11 @@ package Version is
 -------------------------------------------------------------------------------
 -- Version History
 -------------------------------------------------------------------------------
-  
 
-constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395111"; -- MAKE_VERSION
 
-constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Wed Apr 30 13:59:53 PDT 2025 by jgt";
+constant FPGA_VERSION_C : std_logic_vector(31 downto 0) := x"31395112"; -- MAKE_VERSION
+
+constant BUILD_STAMP_C : string := "REB_v5_top_3_seq: Vivado v2018.3 (x86_64) Built Tue Jul  1 13:54:50 PDT 2025 by jgt";
 
 end Version;
 
@@ -39,7 +39,7 @@ end Version;
 -- 31325004 multiboot remote update added
 -- 31345004 new SCI version added and multiboot remote update added
 -- 31375105 new SCI version added with a 60 LAM bits port and sync cmd set start
---          address and 3 sequencers 
+--          address and 3 sequencers
 -- 30345106 new onewire interface
 -- 30345107 look at me various fixes (masked at start and other errors). Now the
 -- version shuld be identical to GREB 2007 and following
@@ -59,4 +59,5 @@ end Version;
 -- 3139510F Fixed Sensor order in 3-sequencer version (dead end - deprecated)
 -- 31395110 Added enable mask for input to DataEncoder
 -- 31395111 Version with Bias thresholds moved into Generics, but not set differently
+-- 31395012 Version that fixes reset to not cause CCS to power down sensors or open bias switch.
 -------------------------------------------------------------------------------

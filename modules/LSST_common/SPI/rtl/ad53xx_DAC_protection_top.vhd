@@ -1,20 +1,20 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:    13:03:27 10/14/2017 
--- Design Name: 
--- Module Name:    ad53xx_DAC_protection_top - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:    13:03:27 10/14/2017
+-- Design Name:
+-- Module Name:    ad53xx_DAC_protection_top - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
--- Additional Comments: 
+-- Additional Comments:
 --
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -83,8 +83,9 @@ architecture Behavioral of ad53xx_DAC_protection_top is
   signal ldac_delay_1        : std_logic;
   signal ldac_delay_2        : std_logic;
 
-  signal command_error_i   : std_logic_vector(2 downto 0);
-  signal values_under_th_i : std_logic_vector(2 downto 0);
+  signal command_error_i    : std_logic_vector(2 downto 0) := (others => '0');
+  signal values_under_th_i  : std_logic_vector(2 downto 0) := (others => '1');
+  signal first_reset_done_i : std_logic := '0';
 
   constant GD_add : std_logic_vector(3 downto 0) := x"0";
   constant OD_add : std_logic_vector(3 downto 0) := x"1";
@@ -124,7 +125,11 @@ begin
         start_write_delay_1 <= '0';
         d_to_slave_delay_1  <= (others => '0');
         command_error_i     <= (others => '0');
-        values_under_th_i   <= (others => '1');
+        if first_reset_done_i = '0' then
+            -- First reset (power-up) initialization
+            first_reset_done_i <= '1';   -- Mark that first reset has occurred
+	        values_under_th_i  <= (others => '1');
+        end if;
       else
         if start_write = '1' and d_to_slave(15 downto 12) = GD_add then
           if d_to_slave(11 downto 0) < GD_th_int then
@@ -155,7 +160,7 @@ begin
             values_under_th_i(1) <= values_under_th_i(1);
             values_under_th_i(2) <= values_under_th_i(2);
           end if;
-          
+
         elsif start_write = '1' and d_to_slave(15 downto 12) = OD_add then
           if d_to_slave(11 downto 0) < OD_th_int then
             if bbs_switch_on = '1' then
@@ -235,7 +240,7 @@ begin
       clk      => clk,
       data_in  => start_ldac,
       ce       => '1',
-      data_out => ldac_delay_1); 
+      data_out => ldac_delay_1);
 
   ldac_delay_ff_2 : ff_ce
     port map (
@@ -243,7 +248,7 @@ begin
       clk      => clk,
       data_in  => ldac_delay_1,
       ce       => '1',
-      data_out => ldac_delay_2); 
+      data_out => ldac_delay_2);
 
   ldac <= not(ldac_delay_1 or ldac_delay_2);
 
