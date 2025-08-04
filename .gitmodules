@@ -1,0 +1,12 @@
+[submodule "submodules/ruckus"]
+	path = submodules/ruckus
+	url = git@github.com:slaclab/ruckus.git
+[submodule "submodules/surf"]
+	path = submodules/surf
+	url = git@github.com:slaclab/surf.git
+[submodule "submodules/lsst_sci"]
+	path = submodules/lsst_sci
+	url = git@github.com:lsst-camera-daq/lsst_sci.git
+[submodule "submodules/lsst_reb"]
+	path = submodules/lsst_reb
+	url = git@github.com:lsst-camera-electronics/lsst_reb.git
