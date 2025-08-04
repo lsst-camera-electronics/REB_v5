@@ -1,3 +1,0 @@
-vhdl work rtl/aspic_3_spi_link_top_mux.vhd
-vhdl work rtl/aspic_3_spi_link_programmer.vhd
-

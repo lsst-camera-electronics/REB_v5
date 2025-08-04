@@ -21,17 +21,18 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use ieee.std_logic_misc.all; -- for or_reduce
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
 library UNISIM;
 use UNISIM.VComponents.all;
 
-use work.ads8634_and_mux_top_package.all;
-use work.LsstSciPackage.all;
+library surf;
+
+library lsst_sci;
+use lsst_sci.LsstSciPackage.all;
+
+library lsst_reb;
+use lsst_reb.basic_elements_pkg.all;
+
+library common;
 
 entity REB_v5_top is
 
@@ -275,652 +276,6 @@ end REB_v5_top;
 
 architecture Behavioral of REB_v5_top is
 
-  component LsstSci is
-    port (
-      -------------------------------------------------------------------------
-      -- FPGA Interface
-      -------------------------------------------------------------------------
-      StableClk : in std_logic;
-      StableRst : in std_logic;
-      FpgaRstL : in std_logic;
-      PgpRefClk : in  std_logic;
-      PgpRxP    : in  std_logic_vector(1 downto 0);
-      PgpRxM    : in  std_logic_vector(1 downto 0);
-      PgpTxP    : out std_logic_vector(1 downto 0);
-      PgpTxM    : out std_logic_vector(1 downto 0);
-      -------------------------------------------------------------------------
-      -- Clock/Reset Generator Interface
-      -------------------------------------------------------------------------
-      ClkOut : out std_logic;
-      RstOut : out std_logic;
-      ClkIn  : in  std_logic;
-      RstIn  : in  std_logic;
-      -------------------------------------------------------------------------
-      -- SCI Register Encoder/Decoder Interface
-      -------------------------------------------------------------------------
-      RegAddr   : out std_logic_vector(23 downto 0);
-      RegReq    : out std_logic;
-      RegOp     : out std_logic;
-      RegDataWr : out std_logic_vector(31 downto 0);
-      RegWrEn   : out std_logic_vector(31 downto 0);
-      RegAck    : in  std_logic;
-      RegFail   : in  std_logic;
-      RegDataRd : in  std_logic_vector(31 downto 0);
-      -------------------------------------------------------------------------
-      -- Data Encoder Interface
-      -------------------------------------------------------------------------
-      DataIn : in LsstSciImageDataArray(2 downto 0);
-      -------------------------------------------------------------------------
-      -- Notification Interface
-      -------------------------------------------------------------------------
-      NoticeEn : in std_logic;
-      Notice   : in std_logic_vector(59 downto 0);
-      -------------------------------------------------------------------------
-      -- Synchronous Command Interface
-      -------------------------------------------------------------------------
-      SyncCmdEn : out std_logic;
-      SyncCmd   : out std_logic_vector(7 downto 0);
-      -------------------------------------------------------------------------
-      -- Status Block Interface
-      -------------------------------------------------------------------------
-      StatusAddr : in  std_logic_vector(23 downto 0);
-      StatusReg  : out std_logic_vector(31 downto 0);
-      StatusRst  : in  std_logic;
-      -------------------------------------------------------------------------
-      -- Debug Interface
-      -------------------------------------------------------------------------
-      PgpLocLinkReadyOut : out std_logic;
-      PgpRemLinkReadyOut : out std_logic;
-      PgpRxPhyReadyOut   : out std_logic;
-      PgpTxPhyReadyOut   : out std_logic
-      );
-
-  end component;
-
-
-  component REB_v5_cmd_interpreter is
-    port (reset                  : in  std_logic;
-          clk                    : in  std_logic;
-          -- signals from/to SCI
-          regReq                 : in  std_logic;                       -- with this line the master start a read/write procedure (1 to start)
-          regOp                  : in  std_logic;                       -- this line define if the procedure is read or write (1 to write)
-          regAddr                : in  std_logic_vector(23 downto 0);   -- address bus
-          statusReg              : in  std_logic_vector(31 downto 0);   -- status reg bus. The RCI handle this bus and this machine pass it to the sure if he wants to read it
-          regWrEn                : in  std_logic_vector(31 downto 0);   -- write enable bus. This bus enables the data write bits
-          regDataWr_masked       : in  std_logic_vector(31 downto 0);   -- data write bus masked. Is the logical AND of data write bus and write enable bus
-          regAck                 : out std_logic;                       -- acknowledge line to activate when the read/write procedure is completed
-          regFail                : out std_logic;                       -- line to activate when an error occurs during the read/write procedure
-          regDataRd              : out std_logic_vector(31 downto 0);   -- data bus to RCI used to transfer read data
-          StatusReset            : out std_logic;                       -- status block reset
-          -- Base Register Set signals
-          busy_bus               : in  std_logic_vector(31 downto 0);   -- busy bus is composed by the different register sets busy
-          time_base_actual_value : in  std_logic_vector(63 downto 0);   -- time base value
-          trig_tm_value_SB       : in  std_logic_vector(63 downto 0);   -- Status Block trigger time
-          trig_tm_value_TB       : in  std_logic_vector(63 downto 0);   -- Time Base trigger time
-          trig_tm_value_seq      : in  std_logic_vector(63 downto 0);   -- Sequencer Trigger time
-          trig_tm_value_V_I      : in  std_logic_vector(63 downto 0);   -- Voltage and current sens trigger time
-          trig_tm_value_pcb_t    : in  std_logic_vector(63 downto 0);   -- PCB temperature Trigger time
-          trigger_ce_bus         : out std_logic_vector(31 downto 0);   -- bus to enable register sets trigger. To trigger a register set that stops itself use en AND val
-          trigger_val_bus        : out std_logic_vector(31 downto 0);   -- bus of register sets trigger values
-          load_time_base_lsw     : out std_logic;                       -- ce signal to load the time base lsw
-          load_time_base_MSW     : out std_logic;                       -- ce signal to load the time base MSW
-          cnt_preset             : out std_logic_vector(63 downto 0);   -- preset value for the time base counter
-          Mgt_avcc_ok            : in  std_logic;
-          Mgt_accpll_ok          : in  std_logic;
-          Mgt_avtt_ok            : in  std_logic;
-          V3_3v_ok               : in  std_logic;
-          Switch_addr            : in  std_logic_vector(7 downto 0);
-          -- sync commands
-          sync_cmd_delay_en      : out std_logic;                       -- set the sync command0 delay
-          sync_cmd_delay_read    : in  std_logic_vector(7 downto 0);
-          sync_cmd_mask_en       : out std_logic;
-          sync_cmd_mask_read     : in  std_logic_vector(31 downto 0);
-          -- interrupt commands
-          interrupt_mask_wr_en     : out std_logic;
-          interrupt_mask_read      : in  std_logic_vector(31 downto 0);
-          -- Image parameters
-          image_size               : in  std_logic_vector(31 downto 0); -- this register contains the image size
-          image_patter_read        : in  std_logic;                     -- this register gives the state of image patter gen. 1 is ON
-          ccd_sel_read             : in  std_logic_vector(2 downto 0);  -- this register contains the CCD to drive
-          image_size_en            : out std_logic;                     -- this line enables the register where the image size is written
-          image_patter_en          : out std_logic;                     -- this register enable the image patter gen. 1 is ON
-          ccd_sel_en               : out std_logic;                     -- register enable for CCD acquisition selector
-          -- Sequencer defaults
-          ccd_1_seq_override_wr   : out std_logic;
-          ccd_2_seq_override_wr   : out std_logic;
-          ccd_3_seq_override_wr   : out std_logic;
-          ccd_1_seq_override_read : in std_logic_vector(31 downto 0);
-          ccd_2_seq_override_read : in std_logic_vector(31 downto 0);
-          ccd_3_seq_override_read : in std_logic_vector(31 downto 0);
-          -- Sequencer
-          seq_time_mem_readbk      : in  std_logic_vector(15 downto 0); -- time memory read bus
-          seq_out_mem_readbk       : in  std_logic_vector(31 downto 0); -- time memory read bus
-          seq_prog_mem_readbk      : in  std_logic_vector(31 downto 0); -- sequencer program memory read
-          seq_time_mem_w_en        : out std_logic;                     -- this signal enables the time memory write
-          seq_out_mem_w_en         : out std_logic;                     -- this signal enables the output memory write
-          seq_prog_mem_w_en        : out std_logic;                     -- this signal enables the program memory write
-          seq_step                 : out std_logic;                     -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-          seq_stop                 : out std_logic;                     -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-          enable_conv_shift_in     : in  std_logic;                     -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          enable_conv_shift        : out std_logic;                     -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          init_conv_shift          : out std_logic;                     -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-          start_add_prog_mem_en    : out std_logic;
-          start_add_prog_mem_rbk   : in  std_logic_vector(9 downto 0);
-          seq_ind_func_mem_we      : out std_logic;
-          seq_ind_func_mem_rdbk    : in  std_logic_vector(3 downto 0);
-          seq_ind_rep_mem_we       : out std_logic;
-          seq_ind_rep_mem_rdbk     : in  std_logic_vector(23 downto 0);
-          seq_ind_sub_add_mem_we   : out std_logic;
-          seq_ind_sub_add_mem_rdbk : in  std_logic_vector(9 downto 0);
-          seq_ind_sub_rep_mem_we   : out std_logic;
-          seq_ind_sub_rep_mem_rdbk : in  std_logic_vector(15 downto 0);
-          seq_op_code_error        : in  std_logic;
-          seq_op_code_error_add    : in  std_logic_vector(9 downto 0);
-          seq_op_code_error_reset  : out std_logic;
-          -- ASPIC
-          aspic_config_r_ccd_1     : in  std_logic_vector(15 downto 0);
-          aspic_config_r_ccd_2     : in  std_logic_vector(15 downto 0);
-          aspic_config_r_ccd_3     : in  std_logic_vector(15 downto 0);
-          aspic_op_end             : in  std_logic;
-          aspic_start_trans        : out std_logic;
-          aspic_start_reset        : out std_logic;
-          -- CCD bias DAC
-          bias_dac_cmd_err         : in  std_logic_vector(8 downto 0);
-          bias_v_undr_th           : in  std_logic_vector(8 downto 0);
-          ccd_1_bias_load_start    : out std_logic;
-          ccd_1_bias_ldac_start    : out std_logic;
-          ccd_2_bias_load_start    : out std_logic;
-          ccd_2_bias_ldac_start    : out std_logic;
-          ccd_3_bias_load_start    : out std_logic;
-          ccd_3_bias_ldac_start    : out std_logic;
-          ccd_1_bias_gd_thresh     : in std_logic_vector(11 downto 0);
-          ccd_1_bias_od_thresh     : in std_logic_vector(11 downto 0);
-          ccd_1_bias_rd_thresh     : in std_logic_vector(11 downto 0);
-          ccd_2_bias_gd_thresh     : in std_logic_vector(11 downto 0);
-          ccd_2_bias_od_thresh     : in std_logic_vector(11 downto 0);
-          ccd_2_bias_rd_thresh     : in std_logic_vector(11 downto 0);
-          ccd_3_bias_gd_thresh     : in std_logic_vector(11 downto 0);
-          ccd_3_bias_od_thresh     : in std_logic_vector(11 downto 0);
-          ccd_3_bias_rd_thresh     : in std_logic_vector(11 downto 0);
-          -- CCD clock rails DAC
-          clk_rail_load_start      : out std_logic;
-          clk_rail_ldac_start      : out std_logic;
-          -- Heater DAC
-          htr_load_start           : out std_logic;
-          htr_ldac_start           : out std_logic;
-          -- DREB voltage and current sensors
-          v6_voltage               : in  std_logic_vector(15 downto 0);
-          v6_voltage_error         : in  std_logic;
-          v6_current               : in  std_logic_vector(15 downto 0);
-          v6_current_error         : in  std_logic;
-          v9_voltage               : in  std_logic_vector(15 downto 0);
-          v9_voltage_error         : in  std_logic;
-          v9_current               : in  std_logic_vector(15 downto 0);
-          v9_current_error         : in  std_logic;
-          v24_voltage              : in  std_logic_vector(15 downto 0);
-          v24_voltage_error        : in  std_logic;
-          v24_current              : in  std_logic_vector(15 downto 0);
-          v24_current_error        : in  std_logic;
-          v40_voltage              : in  std_logic_vector(15 downto 0);
-          v40_voltage_error        : in  std_logic;
-          v40_current              : in  std_logic_vector(15 downto 0);
-          v40_current_error        : in  std_logic;
-          vn15_voltage             : in  std_logic_vector(15 downto 0);
-          vn15_voltage_error       : in  std_logic;
-          vn15_current             : in  std_logic_vector(15 downto 0);
-          vn15_current_error       : in  std_logic;
-          -- DREB temperature
-          T1_dreb                  : in  std_logic_vector(15 downto 0);
-          T1_dreb_error            : in  std_logic;
-          T2_dreb                  : in  std_logic_vector(15 downto 0);
-          T2_dreb_error            : in  std_logic;
-          -- REB temperature gr1
-          T1_reb_gr1               : in  std_logic_vector(15 downto 0);
-          T1_reb_gr1_error         : in  std_logic;
-          T2_reb_gr1               : in  std_logic_vector(15 downto 0);
-          T2_reb_gr1_error         : in  std_logic;
-          T3_reb_gr1               : in  std_logic_vector(15 downto 0);
-          T3_reb_gr1_error         : in  std_logic;
-          T4_reb_gr1               : in  std_logic_vector(15 downto 0);
-          T4_reb_gr1_error         : in  std_logic;
-          -- REB temperature gr2
-          T1_reb_gr2               : in  std_logic_vector(15 downto 0);
-          T1_reb_gr2_error         : in  std_logic;
-          T2_reb_gr2               : in  std_logic_vector(15 downto 0);
-          T2_reb_gr2_error         : in  std_logic;
-          T3_reb_gr2               : in  std_logic_vector(15 downto 0);
-          T3_reb_gr2_error         : in  std_logic;
-          T4_reb_gr2               : in  std_logic_vector(15 downto 0);
-          T4_reb_gr2_error         : in  std_logic;
-          -- bias and temp ADC
-          bias_t_adc_busy          : in  std_logic;
-          bias_t_adc_data          : in  array716;
-          bias_t_adc_start_t       : out std_logic;
-          bias_t_adc_start_b       : out std_logic;
-          bias_t_adc_start_r       : out std_logic;
-          -- CCD temperature
-          ccd_temp_busy            : in  std_logic;
-          ccd_temp                 : in  std_logic_vector(23 downto 0);
-          ccd_temp_start           : out std_logic;
-          ccd_temp_start_reset     : out std_logic;
-          -- REB 1wire serial number
-          reb_onewire_reset        : out std_logic;
-          reb_sn_crc_ok            : in  std_logic;
-          reb_sn_dev_error         : in  std_logic;
-          reb_sn                   : in  std_logic_vector(47 downto 0);
-          reb_sn_timeout           : in  std_logic;
-          -- back bias switch
-          back_bias_sw_rb          : in  std_logic;
-          back_bias_cl_rb          : in  std_logic;
-          back_bias_sw_error       : in  std_logic;
-          en_back_bias_sw          : out std_logic;
-          -- Jitter Cleaner
-          jc_status_bus            : in  std_logic_vector(5 downto 0);
-          jc_start_config          : out std_logic;
-          -- multiboot
-          start_multiboot          : out std_logic;
-          -- remote update
-          remote_update_fifo_full     : in  std_logic;
-          remote_update_status_reg    : in  std_logic_vector(15 downto 0);
-          remote_update_reboot_status : in  std_logic_vector(31 downto 0);
-          start_remote_update         : out std_logic;
-          remote_update_bitstrm_we    : out std_logic;
-          remote_update_daq_done      : out std_logic;
-          -- XADC
-          xadc_drdy_out            : in  std_logic;
-          xadc_ot_out              : in  std_logic;  -- Over-Temperature alarm output
-          xadc_vccaux_alarm_out    : in  std_logic;  -- VCCAUX-sensor alarm output
-          xadc_vccint_alarm_out    : in  std_logic;  -- VCCINT-sensor alarm output
-          xadc_user_temp_alarm_out : in  std_logic;  -- Temperature-sensor alarm output
-          xadc_vbram_alarm_out     : in  std_logic;  -- VCCINT-sensor alarm output
-          xadc_alarm_out           : in  std_logic;  -- OR'ed output of all the Alarms
-          xadc_channel_out         : in  std_logic_vector (4 downto 0);
-          xadc_do_out              : in  std_logic_vector(15 downto 0);
-          xadc_den_in              : out std_logic;
-          -- DC/DC clock enable
-          dcdc_clk_en_in           : in  std_logic;
-          dcdc_clk_en              : out std_logic
-          );
-  end component;
-
-  component sync_cmd_decoder_top
-    port (
-      pgp_clk            : in  std_logic;
-      pgp_reset          : in  std_logic;
-      clk                : in  std_logic;
-      reset              : in  std_logic;
-      sync_cmd_en        : in  std_logic;
-      delay_en           : in  std_logic;
-      delay_in           : in  std_logic_vector(7 downto 0);
-      delay_read         : out std_logic_vector(7 downto 0);
-      sync_cmd           : in  std_logic_vector(7 downto 0);
-      sync_cmd_start_seq : out std_logic;  -- this signal is delayed buy at least
-                                           -- 1 clk with respect to sync_cmd_main_add
-      sync_cmd_step_seq  : out std_logic;  -- this signal is delayed buy at least
-                                           -- 1 clk with respect to sync_cmd_main_add
-      sync_cmd_stop_seq  : out std_logic;  -- this signal is delayed buy at least
-                                           -- 1 clk with respect to sync_cmd_main_add
-      sync_cmd_main_add  : out std_logic_vector(4 downto 0)
-      );
-  end component;
-
-  component REB_interrupt_top
-    generic (
-      interrupt_bus_width : integer := 32);
-
-    port (
-      clk               : in  std_logic;
-      reset             : in  std_logic;
-      edge_en           : in  std_logic_vector(interrupt_bus_width-1 downto 0);
-      interrupt_bus_in  : in  std_logic_vector(interrupt_bus_width-1 downto 0);
-      mask_bus_in_en    : in  std_logic;
-      mask_bus_in       : in  std_logic_vector(interrupt_bus_width-1 downto 0);
-      mask_bus_out      : out std_logic_vector(interrupt_bus_width-1 downto 0);
-      interrupt_en_out  : out std_logic;
-      interrupt_bus_out : out std_logic_vector(interrupt_bus_width-1 downto 0));
-  end component;
-
-  component base_reg_set_top is
-    port (
-      clk                : in  std_logic;
-      reset              : in  std_logic;
-      en_time_base_cnt   : in  std_logic;
-      load_time_base_lsw : in  std_logic;
-      load_time_base_MSW : in  std_logic;
-      StatusReset        : in  std_logic;
-      trigger_TB         : in  std_logic;
-      trigger_seq        : in  std_logic;
-      trigger_V_I_read   : in  std_logic;
-      trigger_temp_pcb   : in  std_logic;
-      cnt_preset         : in  std_logic_vector(63 downto 0);
-      cnt_busy           : out std_logic;
-      cnt_actual_value   : out std_logic_vector(63 downto 0);
-      trig_tm_value_SB   : out std_logic_vector(63 downto 0);
-      trig_tm_value_TB   : out std_logic_vector(63 downto 0);
-      trig_tm_value_seq  : out std_logic_vector(63 downto 0);
-      trig_tm_value_V_I  : out std_logic_vector(63 downto 0);
-      trig_tm_value_pcb  : out std_logic_vector(63 downto 0)
-      );
-  end component;
-
-  component sequencer_v4_top is
-    port (
-      reset                    : in  std_logic;  -- syncronus reset
-      clk                      : in  std_logic;  -- clock
-      start_sequence           : in  std_logic;
-      program_mem_we           : in  std_logic;
-      seq_mem_w_add            : in  std_logic_vector(9 downto 0);
-      seq_mem_data_in          : in  std_logic_vector(31 downto 0);
-      prog_mem_redbk           : out std_logic_vector(31 downto 0);
-      program_mem_init_add_in  : in  std_logic_vector(9 downto 0);
-      program_mem_init_add_rbk : out std_logic_vector(9 downto 0);
-      ind_func_mem_we          : in  std_logic;
-      ind_func_mem_redbk       : out std_logic_vector(3 downto 0);
-      ind_rep_mem_we           : in  std_logic;
-      ind_rep_mem_redbk        : out std_logic_vector(23 downto 0);
-      ind_sub_add_mem_we       : in  std_logic;
-      ind_sub_add_mem_redbk    : out std_logic_vector(9 downto 0);
-      ind_sub_rep_mem_we       : in  std_logic;
-      ind_sub_rep_mem_redbk    : out std_logic_vector(15 downto 0);
-      time_mem_w_en            : in  std_logic;
-      time_mem_readbk          : out std_logic_vector(15 downto 0);
-      out_mem_w_en             : in  std_logic;
-      out_mem_readbk           : out std_logic_vector(31 downto 0);
-      stop_sequence            : in  std_logic;
-      step_sequence            : in  std_logic;
-      op_code_error_reset      : in  std_logic;
-      op_code_error            : out std_logic;
-      op_code_error_add        : out std_logic_vector(9 downto 0);
-      sequencer_busy           : out std_logic;
-      sequencer_out            : out std_logic_vector(31 downto 0);
-      end_sequence             : out std_logic
-      );
-  end component;
-
-  component sequencer_aligner_shifter_top is
-    generic(start_adc_bit : natural := 12);
-    port (
-      clk           : in  std_logic;
-      reset         : in  std_logic;
-      shift_on_en   : in  std_logic;
-      shift_on      : in  std_logic;
-      init_shift    : in  std_logic;
-      sequencer_in  : in  std_logic_vector(31 downto 0);
-      shift_on_out  : out std_logic;
-      sequencer_out : out std_logic_vector(31 downto 0)
-      );
-  end component;
-
-  component ADC_data_handler_v4 is
-    port (
-      reset             : in  std_logic;
-      clk               : in  std_logic;
-      testmode_rst      : in  std_logic;
-      testmode_col      : in  std_logic;
-      start_of_img      : in  std_logic;                     -- this signal is generated by the user (using the sequencer) and has to arrive before the first trigger
-      end_of_img        : in  std_logic;                     -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
-      end_sequence      : in  std_logic;                     -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
-      trigger           : in  std_logic;                     -- this signal start the operations (ADC conv and send data to PGP)
-      en_test_mode      : in  std_logic;                     -- register enable for pattern test mode
-      test_mode_in      : in  std_logic;                     -- test mode in
-      en_load_ccd_sel   : in  std_logic;                     -- register enable for CCD enable
-      ccd_sel_in        : in  std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3)
-      ccd_sel_out       : out std_logic_vector(2 downto 0);  -- register to select which CCD acquire (1, 2 or 3)
-      SOT               : out std_logic;                     -- Start of Image
-      EOT               : out std_logic;                     -- End of Image
-      write_enable      : out std_logic;                     -- signal to write the image in the PGP
-      test_mode_enb_out : out std_logic;
-      data_out          : out std_logic_vector(17 downto 0); -- 18 bits ADC word
-      adc_data_ccd_1    : in  std_logic_vector(15 downto 0); -- CCD ADC data
-      adc_cnv_ccd_1     : out std_logic;                     -- ADC conv
-      adc_sck_ccd_1     : out std_logic;                     -- ADC serial clock
-      adc_data_ccd_2    : in  std_logic_vector(15 downto 0); -- CCD ADC data
-      adc_cnv_ccd_2     : out std_logic;                     -- ADC conv
-      adc_sck_ccd_2     : out std_logic;                     -- ADC serial clock
-      adc_data_ccd_3    : in  std_logic_vector(15 downto 0); -- CCD ADC data
-      adc_cnv_ccd_3     : out std_logic;                     -- ADC conv
-      adc_sck_ccd_3     : out std_logic                      -- ADC serial clock
-      );
-  end component;
-
-  component aspic_3_spi_link_top_mux is
-    port (
-      clk                : in  std_logic;
-      reset              : in  std_logic;
-      start_link_trans   : in  std_logic;
-      start_reset        : in  std_logic;
-      miso_ccd1          : in  std_logic;
-      miso_ccd2          : in  std_logic;
-      miso_ccd3          : in  std_logic;
-      word2send          : in  std_logic_vector(31 downto 0);
-      aspic_mosi         : out std_logic;
-      ss_t_ccd1          : out std_logic;
-      ss_t_ccd2          : out std_logic;
-      ss_t_ccd3          : out std_logic;
-      ss_b_ccd1          : out std_logic;
-      ss_b_ccd2          : out std_logic;
-      ss_b_ccd3          : out std_logic;
-      aspic_sclk         : out std_logic;
-      aspic_n_reset      : out std_logic;
-      busy               : out std_logic;
-      d_slave_ready_ccd1 : out std_logic;
-      d_slave_ready_ccd2 : out std_logic;
-      d_slave_ready_ccd3 : out std_logic;
-      d_from_slave_ccd1  : out std_logic_vector(15 downto 0);
-      d_from_slave_ccd2  : out std_logic_vector(15 downto 0);
-      d_from_slave_ccd3  : out std_logic_vector(15 downto 0)
-      );
-  end component;
-
-  component ad53xx_DAC_protection_top
-    generic (
-      GD_th : integer;
-      OD_th : integer;
-      RD_th : integer);
-    port (
-      clk             : in  std_logic;
-      reset           : in  std_logic;
-      start_write     : in  std_logic;
-      start_ldac      : in  std_logic;
-      bbs_switch_on   : in  std_logic;
-      d_to_slave      : in  std_logic_vector(15 downto 0);
-      command_error   : out std_logic_vector(2 downto 0);
-      values_under_th : out std_logic_vector(2 downto 0);
-      mosi            : out std_logic;
-      ss              : out std_logic;
-      sclk            : out std_logic;
-      ldac            : out std_logic;
-      gd_thresh       : out std_logic_vector(11 downto 0);
-      od_thresh       : out std_logic_vector(11 downto 0);
-      rd_thresh       : out std_logic_vector(11 downto 0)
-      );
-  end component;
-
-  component dual_ad53xx_DAC_top is
-    port (
-      clk         : in  std_logic;
-      reset       : in  std_logic;
-      start_write : in  std_logic;
-      start_ldac  : in  std_logic;
-      d_to_slave  : in  std_logic_vector(16 downto 0);
-      mosi        : out std_logic;
-      ss_dac_0    : out std_logic;
-      ss_dac_1    : out std_logic;
-      sclk        : out std_logic;
-      ldac        : out std_logic
-      );
-  end component;
-
-  component ad56xx_DAC_top is
-    port (
-      clk         : in  std_logic;
-      reset       : in  std_logic;
-      start_write : in  std_logic;
-      start_ldac  : in  std_logic;
-      d_to_slave  : in  std_logic_vector(23 downto 0);
-      mosi        : out std_logic;
-      ss          : out std_logic;
-      sclk        : out std_logic;
-      ldac        : out std_logic
-      );
-  end component;
-
-  component ltc2945_multi_read_top is
-    port (
-      clk               : in    std_logic;
-      reset             : in    std_logic;
-      start_procedure   : in    std_logic;
-      busy              : out   std_logic;
-      error_v6_voltage  : out   std_logic;
-      v6_voltage_out    : out   std_logic_vector(15 downto 0);
-      error_v6_current  : out   std_logic;
-      v6_current_out    : out   std_logic_vector(15 downto 0);
-      error_v9_voltage  : out   std_logic;
-      v9_voltage_out    : out   std_logic_vector(15 downto 0);
-      error_v9_current  : out   std_logic;
-      v9_current_out    : out   std_logic_vector(15 downto 0);
-      error_v24_voltage : out   std_logic;
-      v24_voltage_out   : out   std_logic_vector(15 downto 0);
-      error_v24_current : out   std_logic;
-      v24_current_out   : out   std_logic_vector(15 downto 0);
-      error_v40_voltage : out   std_logic;
-      v40_voltage_out   : out   std_logic_vector(15 downto 0);
-      error_v40_current : out   std_logic;
-      v40_current_out   : out   std_logic_vector(15 downto 0);
-      sda               : inout std_logic;  --serial data output of i2c bus
-      scl               : inout std_logic   --serial clock output of i2c bus
-      );
-  end component;
-
-  component ltc2945_single_read_top is
-    port (
-      clk              : in    std_logic;
-      reset            : in    std_logic;
-      start_procedure  : in    std_logic;
-      busy             : out   std_logic;
-      error_v1_voltage : out   std_logic;
-      v1_voltage_out   : out   std_logic_vector(15 downto 0);
-      error_v1_current : out   std_logic;
-      v1_current_out   : out   std_logic_vector(15 downto 0);
-      sda              : inout std_logic;  --serial data output of i2c bus
-      scl              : inout std_logic   --serial clock output of i2c bus
-      );
-  end component;
-
-  component adt7420_temp_multiread_2_top is
-    port (
-      clk             : in    std_logic;
-      reset           : in    std_logic;
-      start_procedure : in    std_logic;
-      busy            : out   std_logic;
-      error_T1        : out   std_logic;
-      T1_out          : out   std_logic_vector(15 downto 0);
-      error_T2        : out   std_logic;
-      T2_out          : out   std_logic_vector(15 downto 0);
-      sda             : inout std_logic;  --serial data output of i2c bus
-      scl             : inout std_logic   --serial clock output of i2c bus
-      );
-  end component;
-
-  component adt7420_temp_multiread_4_top is
-    port (
-      clk             : in    std_logic;
-      reset           : in    std_logic;
-      start_procedure : in    std_logic;
-      busy            : out   std_logic;
-      error_T1        : out   std_logic;
-      T1_out          : out   std_logic_vector(15 downto 0);
-      error_T2        : out   std_logic;
-      T2_out          : out   std_logic_vector(15 downto 0);
-      error_T3        : out   std_logic;
-      T3_out          : out   std_logic_vector(15 downto 0);
-      error_T4        : out   std_logic;
-      T4_out          : out   std_logic_vector(15 downto 0);
-      sda             : inout std_logic;  --serial data output of i2c bus
-      scl             : inout std_logic   --serial clock output of i2c bus
-      );
-  end component;
-
-  component ads8634_and_mux_top
-    port (
-      clk                  : in  std_logic;
-      reset                : in  std_logic;
-      start_multiread      : in  std_logic;
-      start_singleread     : in  std_logic;
-      start_read_adc_reg   : in  std_logic;
-      mux_address_in       : in  std_logic_vector(5 downto 0);
-      data_to_adc          : in  std_logic_vector(15 downto 0);
-      miso                 : in  std_logic;
-      mosi                 : out std_logic;
-      ss                   : out std_logic;
-      sclk                 : out std_logic;
-      link_busy            : out std_logic;
-      pwd_line             : out std_logic;
-      mux_sam_en_out       : out std_logic;
-      mux_bias_en_out      : out std_logic;
-      mux_sam_address_out  : out std_logic_vector(2 downto 0);
-      mux_bias_address_out : out std_logic_vector(2 downto 0);
-      data_out             : out array716);
-  end component;
-
-  component ad7794_top is
-    port (
-      clk             : in  std_logic;
-      reset           : in  std_logic;
-      start           : in  std_logic;
-      start_reset     : in  std_logic;
-      read_write      : in  std_logic;
-      ad7794_dout_rdy : in  std_logic;
-      reg_add         : in  std_logic_vector(2 downto 0);
-      d_to_slave      : in  std_logic_vector(15 downto 0);
-      ad7794_din      : out std_logic;
-      ad7794_cs       : out std_logic;
-      ad7794_sclk     : out std_logic;
-      busy            : out std_logic;
-      d_from_slave    : out std_logic_vector(23 downto 0)
-      );
-  end component;
-
-  component onewire_master
-    generic (
-      main_clk_freq : integer;
-      word_2_write  : std_logic_vector(7 downto 0));
-    port (
-      clk         : in    std_logic;
-      reset       : in    std_logic;
-      start_acq   : in    std_logic;
-      dq          : inout std_logic;
-      done        : out   std_logic;
-      d_from_chip : out   std_logic_vector(63 downto 0);
-      error_bus   : out   std_logic_vector(1 downto 0));
-  end component;
-
-  component si5342_jitter_cleaner_top
-    port (
-      clk          : in  std_logic;
-      reset        : in  std_logic;
-      start_config : in  std_logic;
-      jc_config    : in  std_logic_vector(1 downto 0);
-      config_busy  : out std_logic;
-      jc_clk_ready : out std_logic;
-      jc_clk_in_en : out std_logic;
-      miso         : in  std_logic;
-      mosi         : out std_logic;
-      chip_select  : out std_logic;
-      sclk         : out std_logic);
-  end component;
-
-  component clk_2MHz_generator is
-    port (
-      clk             : in  std_logic;
-      reset           : in  std_logic;
-      clk_2MHz_en     : in  std_logic;
-      clk_2MHz_en_in  : in  std_logic;
-      clk_2MHz_en_out : out std_logic;
-      clk_2MHz_out    : out std_logic
-      );
-  end component;
-
   component dcm_user_clk
     port (
       -- Clock in ports
@@ -933,94 +288,10 @@ architecture Behavioral of REB_v5_top is
       );
   end component;
 
-  component ff_ce is
-    port (
-      reset    : in  std_logic;  -- syncronus reset
-      clk      : in  std_logic;  -- clock
-      data_in  : in  std_logic;  -- data in
-      ce       : in  std_logic;  -- clock enable
-      data_out : out std_logic); -- data out
-  end component;
-
-  component ff_ce_pres is
-    port (
-      preset   : in  std_logic;
-      clk      : in  std_logic;
-      data_in  : in  std_logic;
-      ce       : in  std_logic;
-      data_out : out std_logic
-      );
-  end component;
-
-  component led_blink is
-    port (
-      clk_in  : in  std_logic;
-      led_out : out std_logic);
-  end component;
-
-  component multiboot_top
-    port (
-      inBitstreamClk       : in  std_logic;
-      inSpiClk             : in  std_logic;
-      inReset_EnableB      : in  std_logic;
-      inCheckIdOnly        : in  std_logic;
-      inVerifyOnly         : in  std_logic;
-      inStartProg          : in  std_logic;
-      inDaqDone            : in  std_logic;
-      inStartReboot        : in  std_logic;
-      inImageSelWe         : in  std_logic;
-      inImageSel           : in  std_logic_vector(1 downto 0);
-      inBitstreamWe        : in  std_logic;
-      inBitstream32        : in  std_logic_vector(31 downto 0);
-      outBitstreamFifoFull : out std_logic;
-      outStarted           : out std_logic;
-      outStatusReg         : out std_logic_vector(15 downto 0);
-      outRebootStatus      : out std_logic_vector(31 downto 0);
-      outSpiCsB            : out std_logic;
-      outSpiMosi           : out std_logic;
-      inSpiMiso            : in  std_logic;
-      outSpiWpB            : out std_logic;
-      outSpiHoldB          : out std_logic);
-  end component;
-
-  component mon_xadc
-    port (
-      DADDR_IN            : in  std_logic_vector (6 downto 0);  -- Address bus for the dynamic reconfiguration port
-      DCLK_IN             : in  std_logic;                      -- Clock input for the dynamic reconfiguration port
-      DEN_IN              : in  std_logic;                      -- Enable Signal for the dynamic reconfiguration port
-      DI_IN               : in  std_logic_vector (15 downto 0); -- Input data bus for the dynamic reconfiguration port
-      DWE_IN              : in  std_logic;                      -- Write Enable for the dynamic reconfiguration port
-      BUSY_OUT            : out std_logic;                      -- ADC Busy signal
-      CHANNEL_OUT         : out std_logic_vector (4 downto 0);  -- Channel Selection Outputs
-      DO_OUT              : out std_logic_vector (15 downto 0); -- Output data bus for dynamic reconfiguration port
-      DRDY_OUT            : out std_logic;                      -- Data ready signal for the dynamic reconfiguration port
-      EOC_OUT             : out std_logic;                      -- End of Conversion Signal
-      EOS_OUT             : out std_logic;                      -- End of Sequence Signal
-      OT_OUT              : out std_logic;                      -- Over-Temperature alarm output
-      VCCAUX_ALARM_OUT    : out std_logic;                      -- VCCAUX-sensor alarm output
-      VCCINT_ALARM_OUT    : out std_logic;                      -- VCCINT-sensor alarm output
-      USER_TEMP_ALARM_OUT : out std_logic;                      -- Temperature-sensor alarm output
-      VBRAM_ALARM_OUT     : out std_logic;                      -- VCCINT-sensor alarm output
-      ALARM_OUT           : out std_logic;                      -- OR'ed output of all the Alarms
-      VP_IN               : in  std_logic;                      -- Dedicated Analog Input Pair
-      VN_IN               : in  std_logic
-      );
-  end component;
-
-  component generic_reg_ce_init is
-    generic (width : integer := 15);
-    port (
-      reset    : in  std_logic;  -- syncronus reset
-      clk      : in  std_logic;  -- clock
-      ce       : in  std_logic;  -- clock enable
-      init     : in  std_logic;  -- signal to reset the reg (active high)
-      data_in  : in  std_logic_vector(width downto 0);   -- data in
-      data_out : out std_logic_vector(width downto 0));  -- data out
-  end component;
-
   -- Clocks
   signal pgpRefClk         : std_logic;
   signal stable_clk        : std_logic;
+  signal stable_clk_int    : std_logic;
   signal stable_reset      : std_logic;
   signal stable_clk_lock   : std_logic;
   signal usrClk            : std_logic;
@@ -1346,25 +617,6 @@ architecture Behavioral of REB_v5_top is
   signal ru_satatus_reg         : std_logic_vector(15 downto 0);
   signal ru_reboot_status       : std_logic_vector(31 downto 0);
 
-  -- xadc
-  signal xadc_daddr_in            : std_logic_vector (6 downto 0);  -- Address bus for the dynamic reconfiguration port
-  signal xadc_dclk_in             : std_logic;                      -- Clock input for the dynamic reconfiguration port
-  signal xadc_den_in              : std_logic;                      -- Enable Signal for the dynamic reconfiguration port
-  signal xadc_di_in               : std_logic_vector (15 downto 0); -- Input data bus for the dynamic reconfiguration port
-  signal xadc_dwe_in              : std_logic;                      -- Write Enable for the dynamic reconfiguration port
-  signal xadc_busy_out            : std_logic;                      -- ADC Busy signal
-  signal xadc_channel_out         : std_logic_vector (4 downto 0);  -- Channel Selection Outputs
-  signal xadc_do_out              : std_logic_vector (15 downto 0); -- Output data bus for dynamic reconfiguration port
-  signal xadc_drdy_out            : std_logic;                      -- Data ready signal for the dynamic reconfiguration port
-  signal xadc_eoc_out             : std_logic;                      -- End of Conversion Signal
-  signal xadc_eos_out             : std_logic;                      -- End of Sequence Signal
-  signal xadc_ot_out              : std_logic;                      -- Over-Temperature alarm output
-  signal xadc_vccaux_alarm_out    : std_logic;                      -- VCCAUX-sensor alarm output
-  signal xadc_vccint_alarm_out    : std_logic;                      -- VCCINT-sensor alarm output
-  signal xadc_user_temp_alarm_out : std_logic;                      -- Temperature-sensor alarm output
-  signal xadc_vbram_alarm_out     : std_logic;                      -- VCCINT-sensor alarm output
-  signal xadc_alarm_out           : std_logic;                      -- OR'ed output of all the Alarms
-
   -- chipscope
   signal CONTROL0       : std_logic_vector(35 downto 0);
   signal CONTROL1       : std_logic_vector(35 downto 0);
@@ -1468,7 +720,7 @@ begin
   pattern_reset <= sequencer_outputs(16);
 
   -- sequencer defaults (only used when sensor is not selected)
-  ccd_1_sequencer_defaults : generic_reg_ce_init
+  ccd_1_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
       reset    => sync_res,
@@ -1479,7 +731,7 @@ begin
       data_out => ccd_1_seq_override
     );
 
-  ccd_2_sequencer_defaults : generic_reg_ce_init
+  ccd_2_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
       reset    => sync_res,
@@ -1490,7 +742,7 @@ begin
       data_out => ccd_2_seq_override
     );
 
-  ccd_3_sequencer_defaults : generic_reg_ce_init
+  ccd_3_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
       reset    => sync_res,
@@ -1562,13 +814,13 @@ begin
       O     => PgpRefClk,
       ODIV2 => open);
 
-  ClockManager_local_100MHz : entity work.ClockManager7
+  ClockManager_local_100MHz : entity surf.ClockManager7
     generic map (
       TPD_G              => TPD_C,
       TYPE_G             => "MMCM",
       INPUT_BUFG_G       => true,
       FB_BUFG_G          => true,
-      OUTPUT_BUFG_G      => false,
+      OUTPUT_BUFG_G      => true,
       RST_IN_POLARITY_G  => '1',
       NUM_CLOCKS_G       => 1,
       BANDWIDTH_G        => "OPTIMIZED",
@@ -1584,7 +836,7 @@ begin
       locked    => stable_clk_lock,
       rstOut(0) => open);
 
-  LsstSci_0 : LsstSci
+  LsstSci_0 : entity lsst_sci.LsstSci
     port map (
       -------------------------------------------------------------------------
       -- FPGA Interface
@@ -1647,7 +899,7 @@ begin
       PgpTxPhyReadyOut   => open
       );
 
-  REB_v5_cmd_interpreter_0 : REB_v5_cmd_interpreter
+  REB_v5_cmd_interpreter_0 : entity common.REB_v5_cmd_interpreter
     port map (
       reset                  => sync_res,
       clk                    => clk_100_Mhz,
@@ -1836,23 +1088,12 @@ begin
       start_remote_update      => ru_start,
       remote_update_bitstrm_we => ru_bitstream_we,
       remote_update_daq_done   => ru_transfer_done,
-      -- XADC
-      xadc_drdy_out            => xadc_drdy_out,
-      xadc_ot_out              => xadc_ot_out,              -- Over-Temperature alarm output
-      xadc_vccaux_alarm_out    => xadc_vccaux_alarm_out,    -- VCCAUX-sensor alarm output
-      xadc_vccint_alarm_out    => xadc_vccint_alarm_out,    -- VCCINT-sensor alarm output
-      xadc_user_temp_alarm_out => xadc_user_temp_alarm_out, -- Temperature-sensor alarm output
-      xadc_vbram_alarm_out     => xadc_vbram_alarm_out,     -- VCCINT-sensor alarm output
-      xadc_alarm_out           => xadc_alarm_out,           -- OR'ed output of all the Alarms
-      xadc_channel_out         => xadc_channel_out,
-      xadc_do_out              => xadc_do_out,
-      xadc_den_in              => xadc_den_in,
       -- DC/DC clock enable
       dcdc_clk_en_in => dcdc_clk_en_out,
       dcdc_clk_en    => dcdc_clk_en
       );
 
-  base_reg_set_top_0 : base_reg_set_top
+  base_reg_set_top_0 : entity lsst_reb.base_reg_set_top
     port map (
       clk                => clk_100_Mhz,
       reset              => sync_res,
@@ -1864,6 +1105,7 @@ begin
       trigger_seq        => seq_start,
       trigger_V_I_read   => V_I_read_start,
       trigger_temp_pcb   => temp_read_start,
+      trigger_fast_adc   => '0',
       cnt_preset         => cnt_preset,
       cnt_busy           => time_base_busy,
       cnt_actual_value   => time_base_actual_value,
@@ -1871,10 +1113,11 @@ begin
       trig_tm_value_TB   => trig_tm_value_TB,
       trig_tm_value_seq  => trig_tm_value_seq,
       trig_tm_value_V_I  => trig_tm_value_V_I,
-      trig_tm_value_pcb  => trig_tm_value_pcb_t
+      trig_tm_value_pcb  => trig_tm_value_pcb_t,
+      trig_tm_value_adc  => open
       );
 
-  sync_cmd_decoder_top_1 : sync_cmd_decoder_top
+  sync_cmd_decoder_top_1 : entity lsst_reb.sync_cmd_decoder_top
     port map (
       pgp_clk            => usrClk,
       pgp_reset          => usrRst,
@@ -1891,7 +1134,7 @@ begin
       sync_cmd_main_add  => sync_cmd_main_add
       );
 
-  REB_interrupt_top_1 : REB_interrupt_top
+  REB_interrupt_top_1 : entity lsst_reb.REB_interrupt_top
     generic map (
       interrupt_bus_width => 32)
     port map (
@@ -1905,7 +1148,7 @@ begin
       interrupt_en_out  => interrupt_en_out,
       interrupt_bus_out => interrupt_bus_out);
 
-  Image_data_handler_0 : ADC_data_handler_v4
+  Image_data_handler_0 : entity lsst_reb.ADC_data_handler_v4
     port map (
       reset             => sync_res,
       clk               => clk_100_Mhz,
@@ -1940,7 +1183,7 @@ begin
                            "000" & regDataWr_masked(4 downto 0) & "00" when start_add_prog_mem_en = '1' else
                            (others => '0');
 
-  sequencer_v4_0 : sequencer_v4_top
+  sequencer_v4_0 : entity lsst_reb.sequencer_v4_top
     port map (
       reset                    => sync_res,
       clk                      => clk_100_MHz,
@@ -1973,7 +1216,7 @@ begin
       end_sequence             => end_sequence
       );
 
-  sequencer_aligner_shifter : sequencer_aligner_shifter_top
+  sequencer_aligner_shifter : entity lsst_reb.sequencer_aligner_shifter_top
     generic map(start_adc_bit => 12)
     port map (
       clk           => clk_100_Mhz,
@@ -1987,7 +1230,7 @@ begin
       );
 
   -- ASPIC 3 and ASPIC 4 have the same SPI link
-  aspic_4_spi_link_top_mux_0 : aspic_3_spi_link_top_mux
+  aspic_4_spi_link_top_mux_0 : entity lsst_reb.aspic_3_spi_link_top_mux
     port map (
       clk                => clk_100_Mhz,
       reset              => sync_res,
@@ -2015,7 +1258,7 @@ begin
       d_from_slave_ccd3  => aspic_config_r_ccd_3
       );
 
-  bias_DAC_ccd_1 : ad53xx_DAC_protection_top
+  bias_DAC_ccd_1 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
       GD_th => 1138, -- equivalent to x"472"
       OD_th => 2275, -- equivalent to x"8E3"
@@ -2039,7 +1282,7 @@ begin
       rd_thresh       => bias_rd_thresh_ccd_1
       );
 
-  bias_DAC_ccd_2 : ad53xx_DAC_protection_top
+  bias_DAC_ccd_2 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
       GD_th => 1138, -- equivalent to x"472"
       OD_th => 2275, -- equivalent to x"8E3"
@@ -2063,7 +1306,7 @@ begin
       rd_thresh       => bias_rd_thresh_ccd_2
       );
 
-  bias_DAC_ccd_3 : ad53xx_DAC_protection_top
+  bias_DAC_ccd_3 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
       GD_th => 1138, -- equivalent to x"472"
       OD_th => 2275, -- equivalent to x"8E3"
@@ -2087,7 +1330,7 @@ begin
       rd_thresh       => bias_rd_thresh_ccd_3
       );
 
-  clk_rails_prog : dual_ad53xx_DAC_top
+  clk_rails_prog : entity lsst_reb.dual_ad53xx_DAC_top
     port map (
       clk         => clk_100_Mhz,
       reset       => sync_res,
@@ -2101,7 +1344,7 @@ begin
       ldac        => ldac_RAILS
       );
 
-  HTR_DAC : ad56xx_DAC_top
+  HTR_DAC : entity lsst_reb.ad56xx_DAC_top
     port map (
       clk         => clk_100_Mhz,
       reset       => sync_res,
@@ -2114,7 +1357,7 @@ begin
       ldac        => ldac_HTR
       );
 
-  ltc2945_V_I_sens : ltc2945_multi_read_top
+  ltc2945_V_I_sens : entity lsst_reb.ltc2945_multi_read_top
     port map (
       clk               => clk_100_Mhz,
       reset             => sync_res,
@@ -2140,7 +1383,7 @@ begin
       scl               => LTC2945_SCL   --serial clock output of i2c bus
       );
 
-  ltc2945_V_I_sens_n15 : ltc2945_single_read_top
+  ltc2945_V_I_sens_n15 : entity lsst_reb.ltc2945_single_read_top
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2155,7 +1398,7 @@ begin
       scl              => LTC2945n15_SCL   --serial clock output of i2c bus
       );
 
-  DREB_temp_read : adt7420_temp_multiread_2_top
+  DREB_temp_read : entity lsst_reb.adt7420_temp_multiread_2_top
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2169,7 +1412,7 @@ begin
       scl             => scl_temp0      --serial clock output of i2c bus
       );
 
-  REB_temp_red_gr1 : adt7420_temp_multiread_4_top
+  REB_temp_red_gr1 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2187,7 +1430,7 @@ begin
       scl             => scl_temp1
       );
 
-  REB_temp_red_gr2 : adt7420_temp_multiread_4_top
+  REB_temp_red_gr2 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2205,7 +1448,7 @@ begin
       scl             => scl_temp2
       );
 
-  bias_and_temp_adc : ads8634_and_mux_top
+  bias_and_temp_adc : entity lsst_reb.ads8634_and_mux_top
     port map (
       clk                  => clk_100_Mhz,
       reset                => sync_res,
@@ -2226,7 +1469,7 @@ begin
       mux_bias_address_out => bias_t_adc_bias_mux_sel,
       data_out             => bias_t_adc_d_out);
 
-  ccd_temperature_sensor : ad7794_top
+  ccd_temperature_sensor : entity lsst_reb.ad7794_top
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2248,7 +1491,7 @@ begin
   sn_start     <= sn_start_dcm or reb_onewire_reset;
   reb_sn       <= reb_sn_long(55 downto 8);
 
-  onewire_master_1 : onewire_master
+  onewire_master_1 : entity lsst_reb.onewire_master
     generic map (
       main_clk_freq => 100,
       word_2_write  => "00110011")
@@ -2270,7 +1513,7 @@ begin
   back_bias_sw_protected <= regDataWr_masked(0) and not (or_reduce(bias_v_undr_th));
   back_bias_sw_error     <= regDataWr_masked(0) and (or_reduce(bias_v_undr_th));
 
-  back_bias_sw : ff_ce
+  back_bias_sw : entity lsst_reb.ff_ce
     port map (
       reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
@@ -2278,7 +1521,7 @@ begin
       ce       => en_back_bias_sw,
       data_out => back_bias_sw_protected_int);
 
-  back_bias_error_ff : ff_ce
+  back_bias_error_ff : entity lsst_reb.ff_ce
     port map (
       reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
@@ -2288,7 +1531,7 @@ begin
 
   back_bias_clamp_protected_int <= not back_bias_sw_protected_int;
 
-  back_bias_reg : ff_ce
+  back_bias_reg : entity lsst_reb.ff_ce
     port map (
       reset    => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
@@ -2296,7 +1539,7 @@ begin
       ce       => '1',
       data_out => backbias_ssbe);
 
-  back_bias_clamp_reg : ff_ce_pres
+  back_bias_clamp_reg : entity lsst_reb.ff_ce_pres
     port map (
       preset   => sync_res and not first_reset_done, -- do not reset after POR
       clk      => clk_100_Mhz,
@@ -2307,7 +1550,7 @@ begin
   ------------------------------------------------------------------------------
   -- DC/DC Converter Synchronization
   ------------------------------------------------------------------------------
-  dcdc_clk_gen : clk_2MHz_generator
+  dcdc_clk_gen : entity lsst_reb.clk_2MHz_generator
     port map (
       clk             => clk_100_Mhz,
       reset           => sync_res,
@@ -2323,7 +1566,7 @@ begin
   ru_image_ID_we <= ru_start;           -- this works because ru_start is
                                         -- internally delayed for sync.
 
-  Remote_Update_top : multiboot_top
+  Remote_Update_top : entity lsst_reb.multiboot_top
     port map (
       inBitstreamClk       => clk_100_Mhz,
       inSpiClk             => clk_25_Mhz,
@@ -2347,7 +1590,7 @@ begin
       outSpiWpB            => ru_outSpiWpB,
       outSpiHoldB          => ru_outSpiHoldB);
 
-  led_blink_0 : led_blink
+  led_blink_0 : entity lsst_reb.led_blink
     port map (
       clk_in  => clk_100_Mhz,
       led_out => test_led_int(3));
@@ -2378,7 +1621,7 @@ begin
         S  => '0'                       -- 1-bit set input
         );
 
-  jitter_cleaner : si5342_jitter_cleaner_top
+  jitter_cleaner : entity lsst_reb.si5342_jitter_cleaner_top
     port map (
       clk          => clk_100_Mhz,
       reset        => sync_res,
@@ -2415,29 +1658,6 @@ begin
       IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present
       S0      => not_jc_clk_ready,      -- 1-bit input: Clock select for I0
       S1      => jc_clk_ready           -- 1-bit input: Clock select for I1
-      );
-
-  monitor_xadc : mon_xadc
-    port map (
-      daddr_in            => xadc_daddr_in,
-      dclk_in             => clk_100_Mhz,
-      den_in              => xadc_den_in,
-      di_in               => xadc_di_in,
-      dwe_in              => xadc_dwe_in,
-      busy_out            => xadc_busy_out,
-      channel_out         => xadc_channel_out,
-      do_out              => xadc_do_out,
-      drdy_out            => xadc_drdy_out,
-      eoc_out             => xadc_eoc_out,
-      eos_out             => xadc_eos_out,
-      ot_out              => xadc_ot_out,
-      vbram_alarm_out     => xadc_vbram_alarm_out,
-      vccaux_alarm_out    => xadc_vccaux_alarm_out,
-      vccint_alarm_out    => xadc_vccint_alarm_out,
-      user_temp_alarm_out => xadc_user_temp_alarm_out,
-      alarm_out           => xadc_alarm_out,  -- OR'ed output of all the Alarms
-      VP_IN               => '0',
-      VN_IN               => '0'
       );
 
   -- Resets

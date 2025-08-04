@@ -1,53 +1,54 @@
+# -------------------------------------------------------------------------------
+# -- Revision History:
+# -- 00000000 First version (imported from REB v4_6)
+# -- 302c5001 serial clk pin assigment corrected. Video ADC machine corrected.
+# --          Jitter cleaner function added
+# -- 302c5002 synchronous command decoder for senqwuencer start added
+# -- 30335003 Look at me added, Temp busy and error fixed.
+# -- 31325004 multiboot remote update added
+# -- 31345004 new SCI version added and multiboot remote update added
+# -- 31375005 new SCI version added with a 60 LAM bits port and sync cmd set start address
+# -- 31375006 new onewire interface
+# -- 31385006 new SCI with new gtx configuration
+# -- 30345005
+# -- 30345006
+# -- 30345007 look at me various fixes (masked at start and other errors). Now the
+# -- version shuld be identical to GREB 2007 and following
+# -- 31395007 SCI module updated with the A and B link switch capability
+# -- 31395008 Changed ADC conversion time from 750ns to 800ns
+# -- 31395009 Changed ADC conversion time from 750ns to 700ns
+# -- 3139500A Changed ADC conversion time from 750ns to 500ns
+# -- 3139500B Retured ADC conversion time to 750ns
+# --          Added STOP Synchronous command 0x30
+# --          Fixed bug that caused 160ns of 0 on output when
+# --           entering default state
+# -- 3139500C Added register START command that specifies MAIN
+# -- 3139500D Masked sequencer start with sequencer busy to reject triggers
+# --          when already running.
+# -- 3139500E Added FPGA_VERSION to UserID in bitfile
+# -- 31395011 Version with Bias thresholds moved into Generics, but not set differently
+# -- 31395012 Version that fixes reset to not cause CCS to power down sensors or open bias switch.
+# -- 31395013 Nominally same as version 13, but refactored to use new build system and modern Vivado
+# -------------------------------------------------------------------------------
+
+# Define Firmware Version Number (and don't forget to change the register values! :facepalm:)
+export PRJ_VERSION = 0x31395013
+
+export GIT_BYPASS=1
+export OVERRIDE_SUBMODULE_LOCKS=0
+
+export GEN_BIT_IMAGE=1
+export GEN_BIT_IMAGE_GZIP=1
+export GEN_MCS_IMAGE=0
+export GEN_MCS_IMAGE_GZIP=0
+export GEN_MULTIBOOT_IMAGE=0
+export GEN_MULTIBOOT_IMAGE_GZIP=1
 
 # Define target output
-target: bit prom multiboot
+target: prom
 
 # Define target part
 export PRJ_PART = XC7K160TFFG676-1
 
-# List of build core directories.
-export MODULE_DIRS = $(PROJ_DIR)/../../modules/LSST_common/ADC_data_handler_v4 \
-                     $(PROJ_DIR)/../../modules/LSST_common/BRS \
-                     $(PROJ_DIR)/../../modules/LSST_common/LSST_basic_elements \
-                     $(PROJ_DIR)/../../modules/LSST_common/SPI \
-                     $(PROJ_DIR)/../../modules/LSST_common/ad7794_temp_sens \
-				     $(PROJ_DIR)/../../modules/LSST_common/ads8634_and_mux \
-                     $(PROJ_DIR)/../../modules/LSST_common/adt7420_multiread \
-                     $(PROJ_DIR)/../../modules/LSST_common/aspic_3_program \
-                     $(PROJ_DIR)/../../modules/LSST_common/command_interpreter \
-                     $(PROJ_DIR)/../../modules/LSST_common/dcm_user_clk \
-                     $(PROJ_DIR)/../../modules/LSST_common/dual_ad53xx \
-                     $(PROJ_DIR)/../../modules/LSST_common/led_blink \
-                     $(PROJ_DIR)/../../modules/LSST_common/ltc2945_V_I_sensors \
-                     $(PROJ_DIR)/../../modules/LSST_common/mon_xadc \
-                     $(PROJ_DIR)/../../modules/LSST_common/multiboot \
-                     $(PROJ_DIR)/../../modules/LSST_common/onewire_iface_v2 \
-				     $(PROJ_DIR)/../../modules/LSST_common/clk_2MHz_gen \
-                     $(PROJ_DIR)/../../modules/LSST_common/seq_aligner_shifter \
-                     $(PROJ_DIR)/../../modules/LSST_common/sequencer_v4 \
-				     $(PROJ_DIR)/../../modules/LSST_common/si5342_jitter_cleaner \
-				     $(PROJ_DIR)/../../modules/LSST_common/lsst_sci-master-v39 \
-				     $(PROJ_DIR)/../../modules/LSST_common/sync_cmd_decoder \
-				     $(PROJ_DIR)/../../modules/LSST_common/look_at_me \
-				     $(PROJ_DIR)/../../modules/StdLib  \
-				     $(PROJ_DIR)/../../modules/MgtLib/gtx7  \
-                     $(PROJ_DIR)/../../modules/pgp2b/core \
-                     $(PROJ_DIR)/../../modules/pgp2b/gtx7 \
-				     $(PROJ_DIR)
-
 # Use top level makefile
-include ../../modules/StdLib/build/system_vivado_v1.mk
-
-###############################################################
-#### multiboot #####################################################
-###############################################################
-$(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_multiboot.mcs: $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION).mcs
-	$(call ACTION_HEADER,"PROM Multiboot Generate")
-	@cd $(OUT_DIR); vivado -mode batch -source $(VIVADO_DIR)/mcs_jump_maker.tcl
-	@echo ""
-	@gzip -c -f -9 $@ > $@.gz
-	@echo "Multiboot Prom file copied to $@"
-	@echo "Don't forget to 'svn commit' when the image is stable!"
-
-.PHONY      : multiboot
-multiboot   : bit $(IMAGES_DIR)/$(PROJECT)_$(PRJ_VERSION)_multiboot.mcs
+include ../../submodules/ruckus/system_vivado.mk
