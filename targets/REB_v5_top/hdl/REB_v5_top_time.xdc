@@ -10,10 +10,11 @@ create_clock -period 6.400 -name TXOUTCLK_A -waveform {0.000 3.200} [get_pins Ls
 create_clock -period 6.400 -name TXOUTCLK_B -waveform {0.000 3.200} [get_pins LsstSci_0/LsstPgpFrontEnd_Inst/PgpCore[1].Pgp2bGtx7Fixedlat_Inst/Gtx7Core_1/gtxe2_i/TXOUTCLK]
 
 # Local clocks derived from RXOUT clocks
-create_generated_clock -name clk_100_Mhz_local_from_A -master_clock RXOUTCLK_A [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT0]
-create_generated_clock -name clk_100_Mhz_local_from_B -master_clock RXOUTCLK_B [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT0]
-create_generated_clock -name clk_25_Mhz_from_A -master_clock RXOUTCLK_A [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT1]
-create_generated_clock -name clk_25_Mhz_from_B -master_clock RXOUTCLK_B [get_pins dcm_user_clk_0/inst/mmcm_adv_inst/CLKOUT1]
+create_generated_clock -name stable_clk -source [get_pins ClockManager_local_100MHz/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks PgpRefClk_P] [get_pins ClockManager_local_100MHz/MmcmGen.U_Mmcm/CLKOUT0]
+create_generated_clock -name clk_100_Mhz_local_from_A -source [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_A] [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKOUT0]
+create_generated_clock -name clk_100_Mhz_local_from_B -source [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_B] [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKOUT0]
+create_generated_clock -name clk_25_Mhz_from_A -source [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_A] [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKOUT1]
+create_generated_clock -name clk_25_Mhz_from_B -source [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_B] [get_pins dcm_user_clk_0/MmcmGen.U_Mmcm/CLKOUT1]
 
 #### Set clock interactions ####
 # Ensure mutual exclusivity for the RXOUT and derived clocks
@@ -30,4 +31,4 @@ set_clock_groups -logically_exclusive -group RXOUTCLK_B -group {clk_100_Mhz_loca
 
 
 #### Set asynchronous clocks ####
-set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B -group {clk_100_Mhz_local_from_A clk_100_Mhz_local_from_B clk_25_Mhz_from_A clk_25_Mhz_from_B}
+set_clock_groups -asynchronous -group stable_clk -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B -group {clk_100_Mhz_local_from_A clk_100_Mhz_local_from_B clk_25_Mhz_from_A clk_25_Mhz_from_B}

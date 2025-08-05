@@ -276,18 +276,6 @@ end REB_v5_top;
 
 architecture Behavioral of REB_v5_top is
 
-  component dcm_user_clk
-    port (
-      -- Clock in ports
-      CLK_IN1  : in  std_logic;
-      -- Clock out ports
-      CLK_OUT1 : out std_logic;
-      CLK_OUT2 : out std_logic;
-      -- Status and control signals
-      LOCKED : out std_logic
-      );
-  end component;
-
   -- Clocks
   signal pgpRefClk         : std_logic;
   signal stable_clk        : std_logic;
@@ -1595,15 +1583,31 @@ begin
       clk_in  => clk_100_Mhz,
       led_out => test_led_int(3));
 
-  dcm_user_clk_0 : dcm_user_clk
-    port map
-    (                                   -- Clock in ports
-      CLK_IN1  => usrClk,
-      -- Clock out ports
-      CLK_OUT1 => clk_100_Mhz_local,
-      CLK_OUT2 => clk_25_Mhz,
-      -- Status and control signals
-      LOCKED   => dcm_locked);
+  dcm_user_clk_0 : entity surf.ClockManager7
+    generic map (
+      TPD_G              => TPD_C,
+      TYPE_G             => "MMCM",
+      INPUT_BUFG_G       => false,
+      FB_BUFG_G          => false,
+      OUTPUT_BUFG_G      => false,
+      RST_IN_POLARITY_G  => '1',
+      NUM_CLOCKS_G       => 2,
+      BANDWIDTH_G        => "OPTIMIZED",
+      CLKIN_PERIOD_G     => 6.4,
+      DIVCLK_DIVIDE_G    => 5,
+      CLKFBOUT_MULT_F_G  => 32.000,
+      CLKOUT0_DIVIDE_G   => 10,
+      CLKOUT0_RST_HOLD_G => 8,
+      CLKOUT1_DIVIDE_G   => 40,
+      CLKOUT1_RST_HOLD_G => 8)
+    port map (
+      clkIn     => usrClk,
+      rstIn     => '0',
+      clkOut(0) => clk_100_Mhz_local,
+      clkOut(1) => clk_25_Mhz,
+      locked    => dcm_locked,
+      rstOut(0) => open,
+      rstOut(1) => open);
 
   -- Jitter cleaner
   jc_ref_clk_out : ODDR
