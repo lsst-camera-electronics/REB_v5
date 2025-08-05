@@ -605,11 +605,6 @@ architecture Behavioral of REB_v5_top is
   signal ru_satatus_reg         : std_logic_vector(15 downto 0);
   signal ru_reboot_status       : std_logic_vector(31 downto 0);
 
-  -- chipscope
-  signal CONTROL0       : std_logic_vector(35 downto 0);
-  signal CONTROL1       : std_logic_vector(35 downto 0);
-  signal DREB_v2_ila_in : std_logic_vector(95 downto 0);
-
   signal ASPIC_ss_t_ccd_1_int : std_logic;
   signal ASPIC_ss_t_ccd_2_int : std_logic;
   signal ASPIC_ss_t_ccd_3_int : std_logic;
@@ -1861,16 +1856,5 @@ begin
   U_GPIO : OBUFDS port map (I  => gpio_int,
                             O  => gpio_p,
                             OB => gpio_n);
-
-  DREB_v2_ila_in(0) <= regReq;
-  DREB_v2_ila_in(1) <= regOp;
-  DREB_v2_ila_in(2) <= regAck;
-
-  DREB_v2_ila_in(3) <= bias_t_adc_miso;
-  DREB_v2_ila_in(4) <= bias_t_adc_mosi_int;
-  DREB_v2_ila_in(5) <= bias_t_adc_cs_int;
-  DREB_v2_ila_in(6) <= bias_t_adc_sclk_int;
-  DREB_v2_ila_in(7) <= bias_t_adc_busy;
-  DREB_v2_ila_in(8) <= bias_t_adc_shdn_int;
 
 end Behavioral;

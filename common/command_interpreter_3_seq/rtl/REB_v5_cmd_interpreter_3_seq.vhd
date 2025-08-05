@@ -1,39 +1,33 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date:     14/12/2018 
--- Design Name: 
--- Module Name:    REB_v5_cmd_interpreter_3_seq - Behavioral 
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Company:
+-- Engineer:
 --
--- Dependencies: 
+-- Create Date:     14/12/2018
+-- Design Name:
+-- Module Name:    REB_v5_cmd_interpreter_3_seq - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool versions:
+-- Description:
 --
--- Revision: 
+-- Dependencies:
+--
+-- Revision:
 -- Revision 0.01 - File Created
--- Additional Comments: 
+-- Additional Comments:
 --
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
-use work.REB_v5_commands_package_3_seq.all;
-use work.Base_register_Set_package_3_seq.all;
-use work.LsstSciPackage.all;
-use work.ads8634_and_mux_top_package.all;
+library common;
+use common.REB_v5_commands_package_3_seq.all;
 
+library lsst_sci;
+use lsst_sci.LsstSciPackage.all;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library lsst_reb;
+use lsst_reb.basic_elements_pkg.all;
 
 entity REB_v5_cmd_interpreter_3_seq is
 
@@ -52,17 +46,17 @@ entity REB_v5_cmd_interpreter_3_seq is
         regDataRd        : out std_logic_vector(31 downto 0);  -- data bus to RCI used to transfer read data
         StatusReset      : out std_logic;  -- status block reset
 
--- Base Register Set signals            
+-- Base Register Set signals
         busy_bus               : in std_logic_vector(31 downto 0);  -- busy bus is composed by the different register sets busy
-        time_base_actual_value : in std_logic_vector(63 downto 0);  -- time base value 
-        trig_tm_value_SB       : in std_logic_vector(63 downto 0);  -- Status Block trigger time 
+        time_base_actual_value : in std_logic_vector(63 downto 0);  -- time base value
+        trig_tm_value_SB       : in std_logic_vector(63 downto 0);  -- Status Block trigger time
         trig_tm_value_TB       : in std_logic_vector(63 downto 0);  -- Time Base trigger time
         trig_tm_value_seq      : in std_logic_vector(63 downto 0);  -- Sequencer Trigger time
         trig_tm_value_V_I      : in std_logic_vector(63 downto 0);  -- Voltage and current sens trigger time
         trig_tm_value_pcb_t    : in std_logic_vector(63 downto 0);  -- PCB temperature Trigger time
 
-        trigger_ce_bus     : out std_logic_vector(31 downto 0);  -- bus to enable register sets trigger. To trigger a register set that stops itself use en AND val                                      
-        trigger_val_bus    : out std_logic_vector(31 downto 0);  -- bus of register sets trigger values  
+        trigger_ce_bus     : out std_logic_vector(31 downto 0);  -- bus to enable register sets trigger. To trigger a register set that stops itself use en AND val
+        trigger_val_bus    : out std_logic_vector(31 downto 0);  -- bus of register sets trigger values
         load_time_base_lsw : out std_logic;  -- ce signal to load the time base lsw
         load_time_base_MSW : out std_logic;  -- ce signal to load the time base MSW
         cnt_preset         : out std_logic_vector(63 downto 0);  -- preset value for the time base counter
@@ -99,7 +93,7 @@ entity REB_v5_cmd_interpreter_3_seq is
         seq_time_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the time memory write
         seq_out_mem_w_en         : out std_logic_vector(2 downto 0);  -- this signal enables the output memory write
         seq_prog_mem_w_en        : out std_logic_vector(2 downto 0);  -- this signal enables the program memory write
-        seq_step                 : out std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
+        seq_step                 : out std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
         seq_stop                 : out std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
         enable_conv_shift_in     : in  std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
         enable_conv_shift        : out std_logic_vector(2 downto 0);  -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
@@ -137,20 +131,20 @@ entity REB_v5_cmd_interpreter_3_seq is
         ccd_3_bias_ldac_start : out std_logic;
 
         ccd_1_bias_gd_thresh  : in std_logic_vector(11 downto 0);
-		ccd_1_bias_od_thresh  : in std_logic_vector(11 downto 0);
-		ccd_1_bias_rd_thresh  : in std_logic_vector(11 downto 0);
-		ccd_2_bias_gd_thresh  : in std_logic_vector(11 downto 0);
-		ccd_2_bias_od_thresh  : in std_logic_vector(11 downto 0);
-		ccd_2_bias_rd_thresh  : in std_logic_vector(11 downto 0);
-		ccd_3_bias_gd_thresh  : in std_logic_vector(11 downto 0);
-		ccd_3_bias_od_thresh  : in std_logic_vector(11 downto 0);
-		ccd_3_bias_rd_thresh  : in std_logic_vector(11 downto 0);
+    ccd_1_bias_od_thresh  : in std_logic_vector(11 downto 0);
+    ccd_1_bias_rd_thresh  : in std_logic_vector(11 downto 0);
+    ccd_2_bias_gd_thresh  : in std_logic_vector(11 downto 0);
+    ccd_2_bias_od_thresh  : in std_logic_vector(11 downto 0);
+    ccd_2_bias_rd_thresh  : in std_logic_vector(11 downto 0);
+    ccd_3_bias_gd_thresh  : in std_logic_vector(11 downto 0);
+    ccd_3_bias_od_thresh  : in std_logic_vector(11 downto 0);
+    ccd_3_bias_rd_thresh  : in std_logic_vector(11 downto 0);
 
--- CCD clock rails DAC          
+-- CCD clock rails DAC
         clk_rail_load_start : out std_logic;
         clk_rail_ldac_start : out std_logic;
 
--- Heater DAC           
+-- Heater DAC
         htr_load_start : out std_logic;
         htr_ldac_start : out std_logic;
 
@@ -202,7 +196,7 @@ entity REB_v5_cmd_interpreter_3_seq is
         T4_reb_gr2       : in std_logic_vector(15 downto 0);
         T4_reb_gr2_error : in std_logic;
 
--- bias and temp ADC 
+-- bias and temp ADC
         bias_t_adc_busy    : in  std_logic;
         bias_t_adc_data    : in  array716;
         bias_t_adc_start_t : out std_logic;
@@ -244,18 +238,6 @@ entity REB_v5_cmd_interpreter_3_seq is
         remote_update_bitstrm_we : out std_logic;
         remote_update_daq_done   : out std_logic;
 
--- XADC
-        xadc_drdy_out            : in  std_logic;
-        xadc_ot_out              : in  std_logic;  -- Over-Temperature alarm output
-        xadc_vccaux_alarm_out    : in  std_logic;  -- VCCAUX-sensor alarm output
-        xadc_vccint_alarm_out    : in  std_logic;  -- VCCINT-sensor alarm output
-        xadc_user_temp_alarm_out : in  std_logic;  -- Temperature-sensor alarm output
-        xadc_vbram_alarm_out     : in  std_logic;  -- VCCINT-sensor alarm output
-        xadc_alarm_out           : in  std_logic;  -- OR'ed output of all the Alarms
-        xadc_channel_out         : in  std_logic_vector (4 downto 0);
-        xadc_do_out              : in  std_logic_vector(15 downto 0);
-        xadc_den_in              : out std_logic;
-
 -- DC/DC clock enable
         dcdc_clk_en_in : in  std_logic;
         dcdc_clk_en    : out std_logic
@@ -292,7 +274,7 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
                       seq_ind_sub_rep_mem_we_state, seq_ind_sub_rep_mem_rdbk_state,
                       seq_op_code_error_rd_state, seq_op_code_error_reset_state,
 
--- ASPIC        
+-- ASPIC
                       aspic_start_trans_state,
                       aspic_start_trans_state_1, aspic_start_trans_state_2, aspic_start_trans_state_3,
                       aspic_start_reset_state,
@@ -300,20 +282,20 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
                       aspic_read_conf_ccd_1_state, aspic_read_conf_ccd_2_state,
                       aspic_read_conf_ccd_3_state,
 
--- CCD bias DAC 
+-- CCD bias DAC
                       ccd_1_bias_load_config_state, ccd_1_bias_ldac_state,
                       ccd_2_bias_load_config_state, ccd_2_bias_ldac_state,
                       ccd_3_bias_load_config_state, ccd_3_bias_ldac_state,
                       ccd_bias_read_error_vut_state,
 
-                      ccd_1_gd_thresh_read_state, ccd_1_od_thresh_read_state, ccd_1_rd_thresh_read_state, 
-                      ccd_2_gd_thresh_read_state, ccd_2_od_thresh_read_state, ccd_2_rd_thresh_read_state, 
-                      ccd_3_gd_thresh_read_state, ccd_3_od_thresh_read_state, ccd_3_rd_thresh_read_state, 
+                      ccd_1_gd_thresh_read_state, ccd_1_od_thresh_read_state, ccd_1_rd_thresh_read_state,
+                      ccd_2_gd_thresh_read_state, ccd_2_od_thresh_read_state, ccd_2_rd_thresh_read_state,
+                      ccd_3_gd_thresh_read_state, ccd_3_od_thresh_read_state, ccd_3_rd_thresh_read_state,
 
--- CCD clock rails DAC  
+-- CCD clock rails DAC
                       clk_rail_load_config_state, clk_rail_ldac_state,
 
--- Heater DAC   
+-- Heater DAC
                       htr_load_config_state, htr_ldac_state,
 
 -- DREB voltage and current sensors
@@ -334,7 +316,7 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
                       REB_T1_gr2_state, REB_T2_gr2_state,
                       REB_T3_gr2_state, REB_T4_gr2_state,
 
--- bias and temp ADC 
+-- bias and temp ADC
                       bias_t_adc_start_t_state, bias_t_adc_start_b_state,
                       bias_t_adc_start_r_state,
                       bias_t_adc_T1_state, bias_t_adc_T2_state, bias_t_adc_T3_state,
@@ -347,20 +329,18 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
 -- REB 1wire serial number
                       reb_sn_acq_state, reb_sn_read_w0_state, reb_sn_read_w1_state,
 
--- back bias switch 
+-- back bias switch
                       back_bias_sw_set_state, back_bias_sw_read_state,
 
 -- Jitter Cleaner
                       jc_start_config_state, jc_read_config_state,
 
--- multiboot    
+-- multiboot
                       start_multiboot_state, reboot_status_rd_state,
 
 -- remote update
                       remote_update_rd_status_state,
                       start_remote_update_state, remote_update_bitstrm_we_state, remote_update_daq_done_state,
--- XADC
-                      read_xadc_param_state, read_xadc_alarms_state,
 
 -- DC/DC clock enable
                       dcdc_clk_en_rd, dcdc_clk_en_state
@@ -395,7 +375,7 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_sync_cmd_delay_en : std_logic;
   signal next_sync_cmd_mask_en  : std_logic;
 
-  -- interrupt signals 
+  -- interrupt signals
   signal next_interrupt_mask_wr_en : std_logic;
 
 -- Image parameters
@@ -408,8 +388,8 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_seq_time_mem_w_en       : std_logic_vector(2 downto 0);  -- function outupt register enable flag
   signal next_seq_out_mem_w_en        : std_logic_vector(2 downto 0);  -- function time register enable flag
   signal next_seq_prog_mem_w_en       : std_logic_vector(2 downto 0);  -- sequencer program memory enable flag
-  signal next_seq_step                : std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)   
-  signal next_seq_stop                : std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL and stop all function)   
+  signal next_seq_step                : std_logic_vector(2 downto 0);  -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
+  signal next_seq_stop                : std_logic_vector(2 downto 0);  -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL and stop all function)
   signal next_enable_conv_shift       : std_logic_vector(2 downto 0);
   signal next_init_conv_shift         : std_logic_vector(2 downto 0);
   signal next_start_add_prog_mem_en   : std_logic_vector(2 downto 0);
@@ -423,7 +403,7 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_aspic_start_trans : std_logic;
   signal next_aspic_start_reset : std_logic;
 
--- CCD bias DAC         
+-- CCD bias DAC
   signal next_ccd_1_bias_load_start : std_logic;
   signal next_ccd_1_bias_ldac_start : std_logic;
   signal next_ccd_2_bias_load_start : std_logic;
@@ -431,27 +411,27 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_ccd_3_bias_load_start : std_logic;
   signal next_ccd_3_bias_ldac_start : std_logic;
 
--- CCD clock rails DAC          
+-- CCD clock rails DAC
   signal next_clk_rail_load_start : std_logic;
   signal next_clk_rail_ldac_start : std_logic;
 
--- Heater DAC           
+-- Heater DAC
   signal next_htr_load_start : std_logic;
   signal next_htr_ldac_start : std_logic;
 
--- bias and temp ADC 
+-- bias and temp ADC
   signal next_bias_t_adc_start_t : std_logic;
   signal next_bias_t_adc_start_b : std_logic;
   signal next_bias_t_adc_start_r : std_logic;
 
--- CCD tempearture 
+-- CCD tempearture
   signal next_ccd_temp_start       : std_logic;
   signal next_ccd_temp_start_reset : std_logic;
 
 -- REB 1wire serial number
   signal next_reb_onewire_reset : std_logic;
 
--- back bias switch 
+-- back bias switch
   signal next_en_back_bias_sw : std_logic;
 
 -- Jitter Cleaner
@@ -465,13 +445,10 @@ architecture Behavioral of REB_v5_cmd_interpreter_3_seq is
   signal next_remote_update_bitstrm_we : std_logic;
   signal next_remote_update_daq_done   : std_logic;
 
--- XADC
-  signal next_xadc_den_in : std_logic;
-
--- DC/DC clock enable   
+-- DC/DC clock enable
   signal next_dcdc_clk_en : std_logic;
-  
-  
+
+
 begin
 
   process (clk)
@@ -504,7 +481,7 @@ begin
         ccd_sel_en      <= '0';
         ccd_oe_en       <= '0';
 
-        -- Sequencer reset state                                
+        -- Sequencer reset state
         seq_time_mem_w_en       <= (others => '0');
         seq_out_mem_w_en        <= (others => '0');
         seq_prog_mem_w_en       <= (others => '0');
@@ -523,7 +500,7 @@ begin
         aspic_start_trans <= '0';
         aspic_start_reset <= '0';
 
-        -- CCD bias rails DAC           
+        -- CCD bias rails DAC
         ccd_1_bias_load_start <= '0';
         ccd_1_bias_ldac_start <= '0';
         ccd_2_bias_load_start <= '0';
@@ -531,20 +508,20 @@ begin
         ccd_3_bias_load_start <= '0';
         ccd_3_bias_ldac_start <= '0';
 
-        -- CCD clock rails DAC          
+        -- CCD clock rails DAC
         clk_rail_load_start <= '0';
         clk_rail_ldac_start <= '0';
 
-        -- Heater DAC           
+        -- Heater DAC
         htr_load_start <= '0';
         htr_ldac_start <= '0';
 
-        -- bias and temp ADC 
+        -- bias and temp ADC
         bias_t_adc_start_t <= '0';
         bias_t_adc_start_b <= '0';
         bias_t_adc_start_r <= '0';
 
-        -- CCD temperature 
+        -- CCD temperature
         ccd_temp_start       <= '0';
         ccd_temp_start_reset <= '0';
 
@@ -564,9 +541,6 @@ begin
         start_remote_update      <= '0';
         remote_update_bitstrm_we <= '0';
         remote_update_daq_done   <= '0';
-
-        -- XADC
-        xadc_den_in <= '0';
 
         -- DC/DC clock enable
         dcdc_clk_en <= '0';
@@ -596,7 +570,7 @@ begin
         ccd_sel_en      <= next_ccd_sel_en;
         ccd_oe_en       <= next_ccd_oe_en;
 
-        -- Sequencer latch      
+        -- Sequencer latch
         seq_time_mem_w_en       <= next_seq_time_mem_w_en;
         seq_out_mem_w_en        <= next_seq_out_mem_w_en;
         seq_prog_mem_w_en       <= next_seq_prog_mem_w_en;
@@ -615,7 +589,7 @@ begin
         aspic_start_trans <= next_aspic_start_trans;
         aspic_start_reset <= next_aspic_start_reset;
 
-        -- CCD bias DAC         
+        -- CCD bias DAC
         ccd_1_bias_load_start <= next_ccd_1_bias_load_start;
         ccd_1_bias_ldac_start <= next_ccd_1_bias_ldac_start;
         ccd_2_bias_load_start <= next_ccd_2_bias_load_start;
@@ -623,15 +597,15 @@ begin
         ccd_3_bias_load_start <= next_ccd_3_bias_load_start;
         ccd_3_bias_ldac_start <= next_ccd_3_bias_ldac_start;
 
-        -- CCD clock rails DAC          
+        -- CCD clock rails DAC
         clk_rail_load_start <= next_clk_rail_load_start;
         clk_rail_ldac_start <= next_clk_rail_ldac_start;
 
-        -- Heater DAC           
+        -- Heater DAC
         htr_load_start <= next_htr_load_start;
         htr_ldac_start <= next_htr_ldac_start;
 
-        -- bias and temp ADC 
+        -- bias and temp ADC
         bias_t_adc_start_t <= next_bias_t_adc_start_t;
         bias_t_adc_start_b <= next_bias_t_adc_start_b;
         bias_t_adc_start_r <= next_bias_t_adc_start_r;
@@ -657,9 +631,6 @@ begin
         start_remote_update      <= next_start_remote_update;
         remote_update_bitstrm_we <= next_remote_update_bitstrm_we;
         remote_update_daq_done   <= next_remote_update_daq_done;
-
-        -- XADC
-        xadc_den_in <= next_xadc_den_in;
 
         -- DC/DC clock enable
         dcdc_clk_en <= next_dcdc_clk_en;
@@ -695,6 +666,10 @@ begin
            vn15_voltage, vn15_current,
            v6_voltage_error, v6_current_error, v9_voltage_error, v9_current_error, v24_voltage_error,
            v24_current_error, v40_voltage_error, v40_current_error, vn15_voltage_error, vn15_current_error,
+           Mgt_avcc_ok, Mgt_avtt_ok, V3_3v_ok,
+           ccd_1_bias_gd_thresh, ccd_1_bias_od_thresh, ccd_1_bias_rd_thresh,
+           ccd_2_bias_gd_thresh, ccd_2_bias_od_thresh, ccd_2_bias_rd_thresh,
+           ccd_3_bias_gd_thresh, ccd_3_bias_od_thresh, ccd_3_bias_rd_thresh,
 
            -- PCB temp
            t1_dreb, t1_dreb_error, t2_dreb, t2_dreb_error,
@@ -703,7 +678,7 @@ begin
            t1_reb_gr2, t1_reb_gr2_error, t2_reb_gr2, t2_reb_gr2_error, t3_reb_gr2, t3_reb_gr2_error,
            t4_reb_gr2, t4_reb_gr2_error,
 
-           -- bias and temp ADC 
+           -- bias and temp ADC
            bias_t_adc_busy, bias_t_adc_data,
 
            -- CCD temp
@@ -715,16 +690,12 @@ begin
            -- Remote Update
            remote_update_fifo_full, remote_update_status_reg, remote_update_reboot_status,
 
-           -- XADC
-           xadc_channel_out, xadc_do_out, xadc_ot_out, xadc_vccaux_alarm_out, xadc_vccint_alarm_out,
-           xadc_user_temp_alarm_out, xadc_vbram_alarm_out, xadc_alarm_out,
-
            -- Bacbias switch
            back_bias_sw_rb, back_bias_cl_rb, back_bias_sw_error,
 
            -- others
-           dcdc_clk_en_in, mgt_accpll_ok, seq_op_code_error_add
-           )  
+           dcdc_clk_en_in, mgt_accpll_ok, seq_op_code_error_add, jc_status_bus
+           )
   begin
 
     -------------------- outputs default values --------------------
@@ -769,7 +740,7 @@ begin
     next_aspic_start_trans <= '0';
     next_aspic_start_reset <= '0';
 
-                                        -- CCD bias DAC         
+                                        -- CCD bias DAC
     next_ccd_1_bias_load_start <= '0';
     next_ccd_1_bias_ldac_start <= '0';
     next_ccd_2_bias_load_start <= '0';
@@ -777,20 +748,20 @@ begin
     next_ccd_3_bias_load_start <= '0';
     next_ccd_3_bias_ldac_start <= '0';
 
-                                        -- CCD clock rails DAC          
+                                        -- CCD clock rails DAC
     next_clk_rail_load_start <= '0';
     next_clk_rail_ldac_start <= '0';
 
-                                        -- Heater DAC           
+                                        -- Heater DAC
     next_htr_load_start <= '0';
     next_htr_ldac_start <= '0';
 
-                                        -- bias and temp ADC 
+                                        -- bias and temp ADC
     next_bias_t_adc_start_t <= '0';
     next_bias_t_adc_start_b <= '0';
     next_bias_t_adc_start_r <= '0';
 
-                                        -- CCD temperature 
+                                        -- CCD temperature
     next_ccd_temp_start       <= '0';
     next_ccd_temp_start_reset <= '0';
 
@@ -814,9 +785,6 @@ begin
                                         -- Jitter Cleaner
     next_jc_start_config <= '0';
 
-                                        -- XADC
-    next_xadc_den_in <= '0';
-
                                         -- DC/DC clock enable
     next_dcdc_clk_en <= '0';
 
@@ -824,7 +792,7 @@ begin
 
     case pres_state is
 --------------------------------------------------------  CMD INTERPTETER --------------------------------------------------------
-      
+
       when wait_cmd =>
         if regReq = '0' then
           next_state <= wait_cmd;
@@ -864,11 +832,11 @@ begin
             elsif regAddr = read_reserved_2_cmd then
               next_state <= reserved_2;
 
-                                        -- reserved 3           
+                                        -- reserved 3
             elsif regAddr = read_reserved_3_cmd then
               next_state <= reserved_3;
 
-                                        -- read busy state              
+                                        -- read busy state
             elsif regAddr = read_state_busy_cmd then
               next_state <= state_busy;
 
@@ -876,11 +844,11 @@ begin
             elsif regAddr = read_trig_time_SB_lsw_cmd then
               next_state <= trigger_time_SB_lsw;
 
-                                        -- read trigger time MSW           
+                                        -- read trigger time MSW
             elsif regAddr = read_trig_time_SB_MSW_cmd then
               next_state <= trigger_time_SB_MSW;
 
-                                        -- read Time Base trigger time lsw      
+                                        -- read Time Base trigger time lsw
             elsif regAddr = read_trig_time_TB_lsw_cmd then
               next_state <= trigger_time_TB_lsw;
 
@@ -896,7 +864,7 @@ begin
             elsif regAddr = read_trig_time_seq_MSW_cmd then
               next_state <= trigger_time_seq_MSW;
 
-                                        -- read Voltage and Current sens trigger time lsw       
+                                        -- read Voltage and Current sens trigger time lsw
             elsif regAddr = read_trig_time_V_I_lsw_cmd then
               next_state <= trigger_time_V_I_lsw;
 
@@ -912,11 +880,11 @@ begin
             elsif regAddr = read_trig_time_pcb_t_MSW_cmd then
               next_state <= trigger_time_pcb_t_MSW;
 
-                                        -- read Voltages OK 
+                                        -- read Voltages OK
             elsif regAddr = read_v_ok_cmd then
               next_state <= v_ok_state;
 
-                                        -- read status register         
+                                        -- read status register
             elsif (regAddr >= read_status_reg_base) and (regAddr <= read_status_reg_high) then
               next_state <= statusReg_rd;
 
@@ -930,8 +898,8 @@ begin
               next_state <= interrupt_mask_rd_state;
 
 
-              -------- Image parameters read                            
-              -- read image size          
+              -------- Image parameters read
+              -- read image size
             elsif regAddr = image_size_cmd then
               next_state <= read_image_size_state;
 
@@ -970,39 +938,39 @@ begin
             elsif regAddr = enable_conv_shift_cmd_0 or regAddr = enable_conv_shift_cmd_1 or regAddr = enable_conv_shift_cmd_2 then
               next_state <= enable_conv_shift_rd;
 
-                                        -- read the program mem start address 
+                                        -- read the program mem start address
             elsif regAddr = start_add_cmd_0 or regAddr = start_add_cmd_1 or regAddr = start_add_cmd_2 then
               next_state <= start_add_prog_mem_rd_state;
 
-                                        -- reads indirect functions memory  
+                                        -- reads indirect functions memory
             elsif ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
               ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
               ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2)) then
               next_state                                         <= seq_ind_func_mem_rdbk_state;
 
-                                        -- reads indirect repetitions mem 
+                                        -- reads indirect repetitions mem
             elsif ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
               ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
               ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2)) then
               next_state                                        <= seq_ind_rep_mem_rdbk_state;
 
-                                        -- reads indirect subroutines mem 
+                                        -- reads indirect subroutines mem
             elsif ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
               ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
               ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2)) then
               next_state                                            <= seq_ind_sub_add_mem_rdbk_state;
 
-                                        -- reads indirect subroutines repetitions mem 
+                                        -- reads indirect subroutines repetitions mem
             elsif ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
               ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
               ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2)) then
               next_state                                            <= seq_ind_sub_rep_mem_rdbk_state;
 
-                                        -- reads op code error flag 
+                                        -- reads op code error flag
             elsif regAddr = seq_op_code_error_rd_cmd_0 or regAddr = seq_op_code_error_rd_cmd_1 or regAddr = seq_op_code_error_rd_cmd_2 then
               next_state <= seq_op_code_error_rd_state;
 
-              --------ASPIC parameters read             
+              --------ASPIC parameters read
               -- ASPIC configuration ccd 1 read
             elsif regAddr = aspic_conf_read_ccd1_cmd then
               next_state <= aspic_read_conf_ccd_1_state;
@@ -1047,7 +1015,7 @@ begin
             elsif regAddr = ccd_3_rd_thresh_read_cmd then
               next_state <= ccd_3_rd_thresh_read_state;
 
-              --------DREB voltage and current sensors read                             
+              --------DREB voltage and current sensors read
               -- V6 voltage read
             elsif regAddr = v6_voltage_cmd then
               next_state <= v6_voltage_state;
@@ -1088,7 +1056,7 @@ begin
             elsif regAddr = vn15_current_cmd then
               next_state <= vn15_current_state;
 
-              --------DREB temperature sensors read                             
+              --------DREB temperature sensors read
               -- DREB T1 read
             elsif regAddr = DREB_T1_cmd then
               next_state <= DREB_T1_state;
@@ -1097,7 +1065,7 @@ begin
             elsif regAddr = DREB_T2_cmd then
               next_state <= DREB_T2_state;
 
-              --------REB temperature sensors gr1 read                          
+              --------REB temperature sensors gr1 read
               -- REB T1 gr1 read
             elsif regAddr = REB_T1_gr1_cmd then
               next_state <= REB_T1_gr1_state;
@@ -1114,7 +1082,7 @@ begin
             elsif regAddr = REB_T4_gr1_cmd then
               next_state <= REB_T4_gr1_state;
 
-              --------REB temperature sensors gr2 read                          
+              --------REB temperature sensors gr2 read
               -- REB T1 gr2 read
             elsif regAddr = REB_T1_gr2_cmd then
               next_state <= REB_T1_gr2_state;
@@ -1131,7 +1099,7 @@ begin
             elsif regAddr = REB_T4_gr2_cmd then
               next_state <= REB_T4_gr2_state;
 
-              --------bias and temp ADC 
+              --------bias and temp ADC
               -- bias and temp ADC T1 read (T ASPIC)
             elsif regAddr = bias_t_adc_read_T1_cmd then
               next_state <= bias_t_adc_T1_state;
@@ -1160,11 +1128,11 @@ begin
             elsif regAddr = bias_t_adc_read_B_cmd then
               next_state <= bias_t_adc_B_state;
 
-              --------CCD temeprature read                                      
+              --------CCD temeprature read
             elsif regAddr = ccd_temp_read_cmd then
               next_state <= ccd_temp_read_state;
 
-              --------REB 1wire serial number                   
+              --------REB 1wire serial number
               -- REB serial number word 0 read
             elsif regAddr = reb_sn_read_w0_cmd then
               next_state <= reb_sn_read_w0_state;
@@ -1184,25 +1152,16 @@ begin
             elsif regAddr = start_multiboot_cmd then
               next_state <= reboot_status_rd_state;
 
-              ---------- Jitter Cleaner read config    
+              ---------- Jitter Cleaner read config
             elsif regAddr = jc_start_config_cmd then
               next_state <= jc_read_config_state;
 
-              -------- XADC param reads         
-            elsif regAddr = read_xadc_param_cmd then
-              next_state       <= read_xadc_param_state;
-              next_xadc_den_in <= '1';
-
-              -------- XADC alarms reads                
-            elsif regAddr = read_xadc_alarms_cmd then
-              next_state <= read_xadc_alarms_state;
-
-              --------back bias switch read             
+              --------back bias switch read
               -- back bias switch read
             elsif regAddr = back_bias_sw_cmd then
               next_state <= back_bias_sw_read_state;
 
--- ERROR                                                        
+-- ERROR
             else
               next_state   <= error_state;
               next_regFail <= '1';
@@ -1211,25 +1170,25 @@ begin
           else
 
 ------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------  WRITE --------------------------------------------------------                                                        
+--------------------------------------------------------  WRITE --------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------
 
 ---------- Base Register Set write
 
-                                        -- TIME BASE SET lsw 
+                                        -- TIME BASE SET lsw
             if regAddr = time_base_lsw_cmd then
               next_state                    <= time_base_set_lsw;
               next_load_time_base_lsw       <= '1';
               next_cnt_preset(31 downto 0)  <= regDataWr_masked;
               next_cnt_preset(63 downto 32) <= (others => '0');
 
-                                                  -- TIME BASE SET MSW 
+                                                  -- TIME BASE SET MSW
             elsif regAddr = time_base_MSW_cmd then
               next_state                    <= time_base_set_MSW;
               next_load_time_base_MSW       <= '1';
               next_cnt_preset(31 downto 0)  <= (others => '0');
               next_cnt_preset(63 downto 32) <= regDataWr_masked;
-                                                  -- TRIGGER SET 
+                                                  -- TRIGGER SET
             elsif regAddr = trigger_set_cmd then  -- trigger
               next_state           <= trigger_state;
               next_trigger_ce_bus  <= regWrEn;
@@ -1241,7 +1200,7 @@ begin
               next_state       <= status_block_rst_state;
               next_StatusReset <= '1';
 
----------- Sync Commands 
+---------- Sync Commands
               -- sync command 0 delay set
             elsif regAddr = sync_cmd_delay_cmd then
               next_state             <= sync_cmd_delay_wr_state;
@@ -1259,29 +1218,29 @@ begin
 
 ---------- Image Parameters Write
 
-                                        -- image size write                                                     
+                                        -- image size write
             elsif regAddr = image_size_cmd then
               next_state         <= set_image_size_state;
               next_image_size_en <= '1';
 
-              -- Image Patter Generator enable (1 = ON)                                                 
+              -- Image Patter Generator enable (1 = ON)
             elsif regAddr = image_patter_mode_cmd then
               next_state           <= set_img_pattern_gen_state;
               next_image_patter_en <= '1';
 
-                                        -- CCD selector enable (CCD 1 = lsb)                                                    
+                                        -- CCD selector enable (CCD 1 = lsb)
             elsif regAddr = ccd_sel_cmd then
               next_state      <= set_ccd_sel_state;
               next_ccd_sel_en <= '1';
 
-                                        -- CCD selector enable (CCD 1 = lsb)                                                    
+                                        -- CCD selector enable (CCD 1 = lsb)
             elsif regAddr = ccd_oe_cmd then
               next_state      <= set_ccd_oe_state;
               next_ccd_oe_en <= '1';
 
 ---------- Sequencer Parameters Write
 
-              -- function time write          
+              -- function time write
             elsif ((regAddr >= func_time_set_base_0) and (regAddr <= func_time_set_high_0)) or
               ((regAddr >= func_time_set_base_1) and (regAddr <= func_time_set_high_1)) or
               ((regAddr >= func_time_set_base_2) and (regAddr <= func_time_set_high_2))
@@ -1312,7 +1271,7 @@ begin
               end if;
 
 
-                                        -- program memory write                 
+                                        -- program memory write
             elsif ((regAddr >= prog_mem_base_0) and (regAddr <= prog_mem_high_0)) or
               ((regAddr >= prog_mem_base_1) and (regAddr <= prog_mem_high_1)) or
               ((regAddr >= prog_mem_base_2) and (regAddr <= prog_mem_high_2))
@@ -1328,7 +1287,7 @@ begin
               end if;
 
 
-                                        -- sequencer step                       
+                                        -- sequencer step
             elsif regAddr = seq_step_cmd_0 or regAddr = seq_step_cmd_1 or regAddr = seq_step_cmd_2 then
               next_state <= seq_step_state;
               if regAddr(13 downto 12) = "00" then
@@ -1379,7 +1338,7 @@ begin
               end if;
 
 
-                                        -- indirect memory write                        
+                                        -- indirect memory write
             elsif regAddr = start_add_cmd_0 or regAddr = start_add_cmd_1 or regAddr = start_add_cmd_2 then
               next_state <= enable_start_add_prog_mem_state;
               if regAddr(13 downto 12) = "00" then
@@ -1390,8 +1349,8 @@ begin
                 --this condition is met also with "11" but is blocked by the previousstate
                 next_start_add_prog_mem_en(2) <= '1';
               end if;
-              
-              
+
+
             elsif ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
               ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
               ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2))
@@ -1405,8 +1364,8 @@ begin
                 --this condition is met also with "11" but is blocked by the previousstate
                 next_seq_ind_func_mem_we(2) <= '1';
               end if;
-              
-              
+
+
             elsif ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
               ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
               ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2))
@@ -1420,8 +1379,8 @@ begin
                 --this condition is met also with "11" but is blocked by the previousstate
                 next_seq_ind_rep_mem_we(2) <= '1';
               end if;
-              
-              
+
+
             elsif ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
               ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
               ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2))
@@ -1435,8 +1394,8 @@ begin
                 --this condition is met also with "11" but is blocked by the previousstate
                 next_seq_ind_sub_add_mem_we(2) <= '1';
               end if;
-              
-              
+
+
             elsif ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
               ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
               ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2))
@@ -1467,12 +1426,12 @@ begin
 
 
 ---------- ASPIC Parameters Write
-              -- ASPIC start trans                                                                                                              
+              -- ASPIC start trans
             elsif regAddr = aspic_start_trans_cmd then
               next_state             <= aspic_start_trans_state;
               next_aspic_start_trans <= '1';
 
-              -- ASPIC start reset                                                                                                              
+              -- ASPIC start reset
             elsif regAddr = aspic_start_reset_cmd then
               next_state             <= aspic_start_reset_state;
               next_aspic_start_reset <= '1';
@@ -1546,39 +1505,39 @@ begin
             elsif regAddr = ccd_temp_start_cmd then
               next_state          <= ccd_temp_start_state;
               next_ccd_temp_start <= '1';
-              
+
             elsif regAddr = ccd_temp_start_reset_cmd then
               next_state                <= ccd_temp_start_reset_state;
               next_ccd_temp_start_reset <= '1';
 
 
----------- REB 1wire serial number                                                      
-              -- REB 1wire serial number start acq                                                                                                                 
+---------- REB 1wire serial number
+              -- REB 1wire serial number start acq
             elsif regAddr = reb_sn_acq_cmd then
               next_state             <= reb_sn_acq_state;
               next_reb_onewire_reset <= '1';
 
----------- DC/DC clock enable                                                   
+---------- DC/DC clock enable
             elsif regAddr = dcdc_clk_en_cmd then
               next_state       <= dcdc_clk_en_state;
               next_dcdc_clk_en <= '1';
 
----------- Jitter Cleaner start config                                                      
+---------- Jitter Cleaner start config
             elsif regAddr = jc_start_config_cmd then
               next_state           <= jc_start_config_state;
               next_jc_start_config <= '1';
 
----------- Back bias switch enable                                                      
+---------- Back bias switch enable
             elsif regAddr = back_bias_sw_cmd then
               next_state           <= back_bias_sw_set_state;
               next_en_back_bias_sw <= '1';
 
----------- multiboot                                                    
+---------- multiboot
             elsif regAddr = start_multiboot_cmd then
               next_state           <= start_multiboot_state;
               next_start_multiboot <= '1';
 
----------- remote update                                                   
+---------- remote update
             elsif regAddr = ru_start_cmd then
               next_state               <= start_remote_update_state;
               next_start_remote_update <= '1';
@@ -1597,7 +1556,7 @@ begin
               next_state                  <= remote_update_daq_done_state;
               next_remote_update_daq_done <= '1';
 
----------- ERROR                                                                                                        
+---------- ERROR
             else
               next_state   <= error_state;
               next_regFail <= '1';
@@ -1615,7 +1574,7 @@ begin
 ------------------------------------------------------------------------------------------------------------------------
 
 ---------------------- BASE REGISTER SET READ  --------------------------
-        -- SCHEMA (add 0)               
+        -- SCHEMA (add 0)
       when schema =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
@@ -1651,12 +1610,12 @@ begin
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= reserved_2_value;
-        -- RESERVED 3 (add 7)           
+        -- RESERVED 3 (add 7)
       when reserved_3 =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= reserved_3_value;
-        -- STATE (add 8)        
+        -- STATE (add 8)
       when state_busy =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
@@ -1734,31 +1693,31 @@ begin
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & Mgt_avcc_ok & Mgt_accpll_ok & Mgt_avtt_ok & V3_3v_ok;
-        -- immage size read (add 400005)                
+        -- immage size read (add 400005)
       when read_image_size_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= image_size;
 
-        -- image patter on read (add 400006)    
+        -- image patter on read (add 400006)
       when read_image_patter_mode_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & '0' & image_patter_read;
 
-        -- CCD selector read (add 400007)       
+        -- CCD selector read (add 400007)
       when read_ccd_sel_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & '0' & ccd_sel_read;
 
-        -- CCD selector read (add 400008)       
+        -- CCD selector read (add 400008)
       when read_ccd_oe_state =>
         next_state     <= wait_end_cmd;
         next_regAck    <= '1';
         next_regDataRd <= x"0000000" & '0' & ccd_oe_read;
 
-        -- status block read  
+        -- status block read
       when statusReg_rd =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= statusReg;
@@ -1766,7 +1725,7 @@ begin
 
 ---------------------- BASE REGISTER SET WRITE  --------------------------
 
-        -- TIME BASE lsw write (add4) 
+        -- TIME BASE lsw write (add4)
       when time_base_set_lsw =>
         next_state <= ack_del_1;
 
@@ -1796,7 +1755,7 @@ begin
 
 ---------------------- Image Parameters Write --------------------------
 
-        -- write the image size register 
+        -- write the image size register
       when set_image_size_state =>
         next_state <= ack_del_1;
 
@@ -1867,7 +1826,7 @@ begin
         next_state <= ack_del_1;
 
 
-        -- sequencer time memory read           
+        -- sequencer time memory read
       when seq_func_time_rd =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd(15 downto 0) <= seq_time_mem_readbk(0);
@@ -1881,7 +1840,7 @@ begin
         next_regDataRd(31 downto 16) <= x"0000";
         next_regAck                  <= '1';
 
-        -- sequencer output memory read         
+        -- sequencer output memory read
       when seq_func_out_rd =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= seq_out_mem_readbk(0);
@@ -1894,7 +1853,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- sequencer program memory read                
+        -- sequencer program memory read
       when seq_prog_mem_rd =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= seq_prog_mem_readbk(0);
@@ -1907,7 +1866,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- enable video ADC conv shift read             
+        -- enable video ADC conv shift read
       when enable_conv_shift_rd =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"0000000" & "000" & enable_conv_shift_in(0);
@@ -1920,7 +1879,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- program memory init address read             
+        -- program memory init address read
       when start_add_prog_mem_rd_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"00000" & "00" & start_add_prog_mem_rbk(0);
@@ -1933,7 +1892,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- indirect functions mem read          
+        -- indirect functions mem read
       when seq_ind_func_mem_rdbk_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"0000000" & seq_ind_func_mem_rdbk(0);
@@ -1946,7 +1905,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- indirect function repetitons mem read                
+        -- indirect function repetitons mem read
       when seq_ind_rep_mem_rdbk_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"00" & seq_ind_rep_mem_rdbk(0);
@@ -1959,7 +1918,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- indirect subrutine address mem read          
+        -- indirect subrutine address mem read
       when seq_ind_sub_add_mem_rdbk_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"00000" & "00" & seq_ind_sub_add_mem_rdbk(0);
@@ -1972,7 +1931,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        -- indirect subrutine repetition mem read               
+        -- indirect subrutine repetition mem read
       when seq_ind_sub_rep_mem_rdbk_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= x"0000" & seq_ind_sub_rep_mem_rdbk(0);
@@ -1985,7 +1944,7 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
-        --op code error flag read       
+        --op code error flag read
       when seq_op_code_error_rd_state =>
         if regAddr(13 downto 12) = "00" then
           next_regDataRd <= "000" & seq_op_code_error(0) & x"0000" & "00" & seq_op_code_error_add(0);
@@ -2018,17 +1977,17 @@ begin
         next_regDataRd <= x"0000"&aspic_config_r_ccd_3;
         next_regAck    <= '1';
 
--- following stses are necessariy to wait ASPIC spi fsm to start and activate busy                      
+-- following stses are necessariy to wait ASPIC spi fsm to start and activate busy
         -- ASPIC start transaction
       when aspic_start_trans_state =>
         next_state <= aspic_start_trans_state_1;
-        
+
       when aspic_start_trans_state_1 =>
         next_state <= aspic_start_trans_state_2;
-        
+
       when aspic_start_trans_state_2 =>
         next_state <= aspic_start_trans_state_3;
-        
+
       when aspic_start_trans_state_3 =>
         if aspic_op_end = '1' then
           next_state <= aspic_start_trans_state_3;
@@ -2039,13 +1998,13 @@ begin
         -- ASPIC start reset
       when aspic_start_reset_state =>
         next_state <= aspic_start_reset_state_1;
-        
+
       when aspic_start_reset_state_1 =>
         next_state <= aspic_start_reset_state_2;
-        
+
       when aspic_start_reset_state_2 =>
         next_state <= aspic_start_reset_state_3;
-        
+
       when aspic_start_reset_state_3 =>
         if aspic_op_end = '1' then
           next_state <= aspic_start_reset_state_3;
@@ -2054,17 +2013,17 @@ begin
         end if;
 
 ---------------------- CCD bias DAC Write --------------------------
-        -- CCD 1        
+        -- CCD 1
       when ccd_1_bias_load_config_state =>
         next_state <= ack_del_1;
       when ccd_1_bias_ldac_state =>
         next_state <= ack_del_1;
-        -- CCD 2        
+        -- CCD 2
       when ccd_2_bias_load_config_state =>
         next_state <= ack_del_1;
       when ccd_2_bias_ldac_state =>
         next_state <= ack_del_1;
-        -- CCD 3        
+        -- CCD 3
       when ccd_3_bias_load_config_state =>
         next_state <= ack_del_1;
       when ccd_3_bias_ldac_state =>
@@ -2075,44 +2034,44 @@ begin
         next_regDataRd <= "0000" & "000" & bias_v_undr_th & "0000" & "000" & bias_dac_cmd_err;
         next_regAck    <= '1';
       when ccd_1_gd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_gd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_1_bias_gd_thresh;
+        next_regAck    <= '1';
       when ccd_1_od_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_od_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_1_bias_od_thresh;
+        next_regAck    <= '1';
       when ccd_1_rd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_1_bias_rd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_1_bias_rd_thresh;
+        next_regAck    <= '1';
       when ccd_2_gd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_gd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_2_bias_gd_thresh;
+        next_regAck    <= '1';
       when ccd_2_od_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_od_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_2_bias_od_thresh;
+        next_regAck    <= '1';
       when ccd_2_rd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_2_bias_rd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_2_bias_rd_thresh;
+        next_regAck    <= '1';
       when ccd_3_gd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_gd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_3_bias_gd_thresh;
+        next_regAck    <= '1';
       when ccd_3_od_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_od_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_3_bias_od_thresh;
+        next_regAck    <= '1';
       when ccd_3_rd_thresh_read_state =>
-      	next_state     <= wait_end_cmd;
-      	next_regDataRd <= x"0000" & x"0" & ccd_3_bias_rd_thresh;
-      	next_regAck    <= '1';
+        next_state     <= wait_end_cmd;
+        next_regDataRd <= x"0000" & x"0" & ccd_3_bias_rd_thresh;
+        next_regAck    <= '1';
 
 ---------------------- CCD clock rails DAC Write --------------------------
-        
+
       when clk_rail_load_config_state =>
         next_state <= ack_del_1;
 
@@ -2120,14 +2079,14 @@ begin
         next_state <= ack_del_1;
 
 ---------------------- Heater DAC Write --------------------------
-        
+
       when HTR_load_config_state =>
         next_state <= ack_del_1;
 
       when HTR_ldac_state =>
         next_state <= ack_del_1;
 
----------------------- DREB voltage and current sensors --------------------------      
+---------------------- DREB voltage and current sensors --------------------------
         -- V6 voltage
       when v6_voltage_state =>
         next_state     <= wait_end_cmd;
@@ -2188,8 +2147,8 @@ begin
         next_regDataRd <= x"000" &"000" & vn15_current_error & vn15_current;
         next_regAck    <= '1';
 
----------------------- DREB Temperature sensors --------------------------      
-        -- DREB T1 
+---------------------- DREB Temperature sensors --------------------------
+        -- DREB T1
       when DREB_T1_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" &"000" & T1_dreb_error & T1_dreb;
@@ -2201,8 +2160,8 @@ begin
         next_regDataRd <= x"000" &"000" & T2_dreb_error & T2_dreb;
         next_regAck    <= '1';
 
----------------------- REB Temperature sensors group 1 --------------------------       
-        -- REB T1 gr1 
+---------------------- REB Temperature sensors group 1 --------------------------
+        -- REB T1 gr1
       when REB_T1_gr1_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" &"000" & T1_reb_gr1_error & T1_reb_gr1;
@@ -2214,7 +2173,7 @@ begin
         next_regDataRd <= x"000" &"000" & T2_reb_gr1_error & T2_reb_gr1;
         next_regAck    <= '1';
 
-        -- REB T3 gr1 
+        -- REB T3 gr1
       when REB_T3_gr1_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" &"000" & T3_reb_gr1_error & T3_reb_gr1;
@@ -2226,8 +2185,8 @@ begin
         next_regDataRd <= x"000" &"000" & T4_reb_gr1_error & T4_reb_gr1;
         next_regAck    <= '1';
 
----------------------- REB Temperature sensors group 2 --------------------------       
-        -- REB T1 gr2 
+---------------------- REB Temperature sensors group 2 --------------------------
+        -- REB T1 gr2
       when REB_T1_gr2_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" &"000" & T1_reb_gr2_error & T1_reb_gr2;
@@ -2239,7 +2198,7 @@ begin
         next_regDataRd <= x"000" &"000" & T2_reb_gr2_error & T2_reb_gr2;
         next_regAck    <= '1';
 
-        -- REB T3 gr2 
+        -- REB T3 gr2
       when REB_T3_gr2_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" &"000" & T3_reb_gr2_error & T3_reb_gr2;
@@ -2251,7 +2210,7 @@ begin
         next_regDataRd <= x"000" &"000" & T4_reb_gr2_error & T4_reb_gr2;
         next_regAck    <= '1';
 
----------------------- bias and temp ADC ----------------------  
+---------------------- bias and temp ADC ----------------------
 
         -- start T read
       when bias_t_adc_start_t_state =>
@@ -2277,49 +2236,49 @@ begin
           next_state <= ack_del_1;
         end if;
 
-        -- Read T1 
+        -- Read T1
       when bias_t_adc_T1_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(0);
         next_regAck    <= '1';
 
-        -- Read T2 
+        -- Read T2
       when bias_t_adc_T2_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(1);
         next_regAck    <= '1';
 
-        -- Read T3 
+        -- Read T3
       when bias_t_adc_T3_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(2);
         next_regAck    <= '1';
 
-        -- Read T4 
+        -- Read T4
       when bias_t_adc_T4_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(3);
         next_regAck    <= '1';
 
-        -- Read T5 
+        -- Read T5
       when bias_t_adc_T5_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(4);
         next_regAck    <= '1';
 
-        -- Read T6 
+        -- Read T6
       when bias_t_adc_T6_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(5);
         next_regAck    <= '1';
 
-        -- Read Bias 
+        -- Read Bias
       when bias_t_adc_B_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"0000" & bias_t_adc_data(6);
         next_regAck    <= '1';
 
----------------------- CCD Temperature sensor --------------------------                                
+---------------------- CCD Temperature sensor --------------------------
         -- CCD temperature read
       when ccd_temp_read_state =>
         next_state     <= wait_end_cmd;
@@ -2333,7 +2292,7 @@ begin
         else
           next_state <= ack_del_1;
         end if;
-        
+
       when ccd_temp_start_reset_state =>
         if ccd_temp_busy = '1' then
           next_state <= ccd_temp_start_reset_state;
@@ -2342,52 +2301,52 @@ begin
         end if;
 
 
----------------------- REB 1wire serial number --------------------------                               
+---------------------- REB 1wire serial number --------------------------
 -- REB 1wire serial number acq
       when reb_sn_acq_state =>
           next_reb_onewire_reset <= '0';
           next_state <= ack_del_1;
 
--- REB 1wire serial number read w 0             
+-- REB 1wire serial number read w 0
       when reb_sn_read_w0_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= reb_sn(31 downto 0);
         next_regAck    <= '1';
 
--- REB 1wire serial number read w 1             
+-- REB 1wire serial number read w 1
       when reb_sn_read_w1_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000" & '0' & reb_sn_timeout & reb_sn_dev_error & reb_sn_crc_ok & reb_sn(47 downto 32);
         next_regAck    <= '1';
 
----------------------- Jitter Cleaner  --------------------------      
+---------------------- Jitter Cleaner  --------------------------
 -- read jitter cleaner status bus
       when jc_read_config_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= x"000000" & "00" & jc_status_bus;
         next_regAck    <= '1';
 
--- start config process 
+-- start config process
       when jc_start_config_state =>
         next_state <= ack_del_1;
 
----------------------- Back bias switch enable --------------------------                               
--- Back bias enable read        
+---------------------- Back bias switch enable --------------------------
+-- Back bias enable read
       when back_bias_sw_read_state =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= X"0000000" & '0' & back_bias_sw_error & back_bias_cl_rb & back_bias_sw_rb;
         next_regAck    <= '1';
 
-        -- Back bias enable 
+        -- Back bias enable
       when back_bias_sw_set_state =>
         next_state <= ack_del_1;
 
----------------------- Multiboot --------------------------                             
+---------------------- Multiboot --------------------------
         -- start multiboot
       when start_multiboot_state =>
         next_state <= ack_del_1;
 
-        ---------------------- Remote Update --------------------------                             
+        ---------------------- Remote Update --------------------------
 
         -- start remote update
       when start_remote_update_state =>
@@ -2409,28 +2368,8 @@ begin
         next_regDataRd <= remote_update_reboot_status;
         next_regAck    <= '1';
 
----------------------- XADC --------------------------                          
-
-        -- read XADC parameter
-      when read_xadc_param_state =>
-        if xadc_drdy_out = '0' then
-          next_state <= read_xadc_param_state;
-        else
-          next_state     <= wait_end_cmd;
-          next_regDataRd <= X"0000" & xadc_do_out;
-          next_regAck    <= '1';
-        end if;
-
-        -- read XADC alarms
-      when read_xadc_alarms_state =>
-        next_state     <= wait_end_cmd;
-        next_regDataRd <= X"000000" & "00" & xadc_ot_out & xadc_vccaux_alarm_out & xadc_vccint_alarm_out
-                          & xadc_user_temp_alarm_out & xadc_vbram_alarm_out & xadc_alarm_out;
-        next_regAck <= '1';
-
-
----------------------- DC/DC clock enable --------------------------                            
--- DC/DC clock enable read      
+---------------------- DC/DC clock enable --------------------------
+-- DC/DC clock enable read
       when dcdc_clk_en_rd =>
         next_state     <= wait_end_cmd;
         next_regDataRd <= X"0000000" & "000" & dcdc_clk_en_in;
@@ -2441,7 +2380,7 @@ begin
         next_state <= ack_del_1;
 
 ---------------------- WAIT END CMD  --------------------------
-        
+
       when wait_end_cmd =>
         if regReq = '1' then
           next_state <= wait_end_cmd;
@@ -2457,15 +2396,15 @@ begin
         next_state  <= wait_end_cmd;
         next_regAck <= '1';
 
---------------------------------------------------------   error detected --------------------------------------------------------  
-        
+--------------------------------------------------------   error detected --------------------------------------------------------
+
       when error_state =>
         if regReq = '1' then
           next_state <= error_state;
         else
           next_state <= wait_cmd;
         end if;
-        
+
     end case;
   end process;
 
