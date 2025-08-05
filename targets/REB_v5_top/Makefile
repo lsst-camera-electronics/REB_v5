@@ -34,10 +34,10 @@
 # Define Firmware Version Number (and don't forget to change the register values! :facepalm:)
 export PRJ_VERSION = 0x31395013
 
-export GIT_BYPASS=1
+export GIT_BYPASS=0
 export OVERRIDE_SUBMODULE_LOCKS=0
 
-export GEN_BIT_IMAGE=1
+export GEN_BIT_IMAGE=0
 export GEN_BIT_IMAGE_GZIP=1
 export GEN_MCS_IMAGE=0
 export GEN_MCS_IMAGE_GZIP=0
