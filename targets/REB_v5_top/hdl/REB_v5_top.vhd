@@ -277,24 +277,24 @@ end REB_v5_top;
 architecture Behavioral of REB_v5_top is
 
   -- Clocks
-  signal pgpRefClk         : std_logic;
-  signal stable_clk        : std_logic;
-  signal stable_clk_int    : std_logic;
-  signal stable_reset      : std_logic;
-  signal stable_clk_lock   : std_logic;
-  signal usrClk            : std_logic;
-  signal clk_100_Mhz_local : std_logic;
-  signal clk_100_Mhz       : std_logic;
-  signal clk_25_Mhz        : std_logic;
+  signal pgpRefClk       : std_logic;
+  signal stable_clk      : std_logic;
+  signal stable_clk_int  : std_logic;
+  signal stable_reset    : std_logic;
+  signal stable_clk_lock : std_logic;
+  signal usrClk          : std_logic;
+  signal sys_clk_local   : std_logic;
+  signal sys_clk         : std_logic;
+  signal multiboot_clk   : std_logic;
 
   signal aux_100mhz_clk : std_logic;
 
   -- Reset
   signal n_rst            : std_logic;
   signal usrRst           : std_logic;
-  signal sync_res         : std_logic;
-  signal sync_res_1       : std_logic;
-  signal sync_res_2       : std_logic;
+  signal sys_rst          : std_logic;
+  signal sys_rst_1        : std_logic;
+  signal sys_rst_2        : std_logic;
   signal first_reset_done : std_logic;
 
   -- SCI signals
@@ -711,8 +711,8 @@ begin
   ccd_1_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => sync_res,
-      clk      => clk_100_Mhz,
+      reset    => sys_rst,
+      clk      => sys_clk,
       ce       => ccd_1_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
@@ -722,8 +722,8 @@ begin
   ccd_2_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => sync_res,
-      clk      => clk_100_Mhz,
+      reset    => sys_rst,
+      clk      => sys_clk,
       ce       => ccd_2_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
@@ -733,8 +733,8 @@ begin
   ccd_3_sequencer_defaults : entity lsst_reb.generic_reg_ce_init
     generic map (width => 31)
     port map (
-      reset    => sync_res,
-      clk      => clk_100_Mhz,
+      reset    => sys_rst,
+      clk      => sys_clk,
       ce       => ccd_3_seq_override_wr,
       init     => '0',
       data_in  => regDataWr_masked,
@@ -802,7 +802,7 @@ begin
       O     => PgpRefClk,
       ODIV2 => open);
 
-  ClockManager_local_100MHz : entity surf.ClockManager7
+  ClockManager_stable_clk : entity surf.ClockManager7
     generic map (
       TPD_G              => TPD_C,
       TYPE_G             => "MMCM",
@@ -842,8 +842,8 @@ begin
       -------------------------------------------------------------------------
       ClkOut => usrClk,
       RstOut => usrRst,
-      ClkIn  => clk_100_Mhz,
-      RstIn  => sync_res,
+      ClkIn  => sys_clk,
+      RstIn  => sys_rst,
       -------------------------------------------------------------------------
       -- SCI Register Encoder/Decoder Interface
       -------------------------------------------------------------------------
@@ -889,8 +889,8 @@ begin
 
   REB_v5_cmd_interpreter_0 : entity common.REB_v5_cmd_interpreter
     port map (
-      reset                  => sync_res,
-      clk                    => clk_100_Mhz,
+      reset                  => sys_rst,
+      clk                    => sys_clk,
       -- signals from/to SCI
       regReq                 => regReq,                 -- with this line the master start a read/write procedure (1 to start)
       regOp                  => regOp,                  -- this line define if the procedure is read or write (1 to write)
@@ -1083,8 +1083,8 @@ begin
 
   base_reg_set_top_0 : entity lsst_reb.base_reg_set_top
     port map (
-      clk                => clk_100_Mhz,
-      reset              => sync_res,
+      clk                => sys_clk,
+      reset              => sys_rst,
       en_time_base_cnt   => trigger_ce_bus(1),
       load_time_base_lsw => load_time_base_lsw,
       load_time_base_MSW => load_time_base_MSW,
@@ -1109,8 +1109,8 @@ begin
     port map (
       pgp_clk            => usrClk,
       pgp_reset          => usrRst,
-      clk                => clk_100_Mhz,
-      reset              => sync_res,
+      clk                => sys_clk,
+      reset              => sys_rst,
       sync_cmd_en        => sync_cmd_en,
       delay_en           => sync_cmd_delay_en,
       delay_in           => regDataWr_masked(7 downto 0),
@@ -1126,7 +1126,7 @@ begin
     generic map (
       interrupt_bus_width => 32)
     port map (
-      clk               => clk_100_Mhz,
+      clk               => sys_clk,
       reset             => usrRst,
       edge_en           => interrupt_edge_en,
       interrupt_bus_in  => interrupt_bus_in,
@@ -1138,8 +1138,8 @@ begin
 
   Image_data_handler_0 : entity lsst_reb.ADC_data_handler_v4
     port map (
-      reset             => sync_res,
-      clk               => clk_100_Mhz,
+      reset             => sys_rst,
+      clk               => sys_clk,
       testmode_rst      => pattern_reset,
       testmode_col      => sequencer_outputs(8),
       start_of_img      => start_of_img,
@@ -1173,8 +1173,8 @@ begin
 
   sequencer_v4_0 : entity lsst_reb.sequencer_v4_top
     port map (
-      reset                    => sync_res,
-      clk                      => clk_100_MHz,
+      reset                    => sys_rst,
+      clk                      => sys_clk,
       start_sequence           => sync_cmd_start_seq or start_add_prog_mem_en, --seq_start,
       program_mem_we           => seq_prog_mem_w_en,
       seq_mem_w_add            => regAddr(9 downto 0),
@@ -1207,8 +1207,8 @@ begin
   sequencer_aligner_shifter : entity lsst_reb.sequencer_aligner_shifter_top
     generic map(start_adc_bit => 12)
     port map (
-      clk           => clk_100_Mhz,
-      reset         => sync_res,
+      clk           => sys_clk,
+      reset         => sys_rst,
       shift_on_en   => enable_conv_shift,
       shift_on      => regDataWr_masked(0),
       init_shift    => init_conv_shift,
@@ -1220,8 +1220,8 @@ begin
   -- ASPIC 3 and ASPIC 4 have the same SPI link
   aspic_4_spi_link_top_mux_0 : entity lsst_reb.aspic_3_spi_link_top_mux
     port map (
-      clk                => clk_100_Mhz,
-      reset              => sync_res,
+      clk                => sys_clk,
+      reset              => sys_rst,
       start_link_trans   => aspic_start_trans,
       start_reset        => aspic_start_reset,
       miso_ccd1          => ASPIC_miso_ccd_1,
@@ -1253,8 +1253,8 @@ begin
       RD_th => 1632  -- equivalent to x"660"
       )
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_write     => bias_load_start_ccd_1,
       start_ldac      => bias_ldac_start_ccd_1,
       bbs_switch_on   => back_bias_sw_protected_int,
@@ -1277,8 +1277,8 @@ begin
       RD_th => 1632  -- equivalent to x"660"
       )
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_write     => bias_load_start_ccd_2,
       start_ldac      => bias_ldac_start_ccd_2,
       bbs_switch_on   => back_bias_sw_protected_int,
@@ -1301,8 +1301,8 @@ begin
       RD_th => 1632  -- equivalent to x"660"
       )
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_write     => bias_load_start_ccd_3,
       start_ldac      => bias_ldac_start_ccd_3,
       bbs_switch_on   => back_bias_sw_protected_int,
@@ -1320,8 +1320,8 @@ begin
 
   clk_rails_prog : entity lsst_reb.dual_ad53xx_DAC_top
     port map (
-      clk         => clk_100_Mhz,
-      reset       => sync_res,
+      clk         => sys_clk,
+      reset       => sys_rst,
       start_write => clk_rail_load_start,
       start_ldac  => clk_rail_ldac_start,
       d_to_slave  => regDataWr_masked(16 downto 0),
@@ -1334,8 +1334,8 @@ begin
 
   HTR_DAC : entity lsst_reb.ad56xx_DAC_top
     port map (
-      clk         => clk_100_Mhz,
-      reset       => sync_res,
+      clk         => sys_clk,
+      reset       => sys_rst,
       start_write => htr_load_start,
       start_ldac  => htr_ldac_start,
       d_to_slave  => regDataWr_masked(23 downto 0),
@@ -1347,8 +1347,8 @@ begin
 
   ltc2945_V_I_sens : entity lsst_reb.ltc2945_multi_read_top
     port map (
-      clk               => clk_100_Mhz,
-      reset             => sync_res,
+      clk               => sys_clk,
+      reset             => sys_rst,
       start_procedure   => V_I_read_start,
       busy              => V_I_busy,
       error_v6_voltage  => v6_voltage_error,
@@ -1373,8 +1373,8 @@ begin
 
   ltc2945_V_I_sens_n15 : entity lsst_reb.ltc2945_single_read_top
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_procedure => V_I_read_start,
       busy            => V_I_n15_busy,
 
@@ -1388,8 +1388,8 @@ begin
 
   DREB_temp_read : entity lsst_reb.adt7420_temp_multiread_2_top
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_procedure => temp_read_start,
       busy            => DREB_temp_busy,
       error_T1        => T1_dreb_error,
@@ -1402,8 +1402,8 @@ begin
 
   REB_temp_red_gr1 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_procedure => temp_read_start,
       busy            => REB_temp_busy_gr1,
       error_T1        => T1_reb_gr1_error,
@@ -1420,8 +1420,8 @@ begin
 
   REB_temp_red_gr2 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start_procedure => temp_read_start,
       busy            => REB_temp_busy_gr2,
       error_T1        => T1_reb_gr2_error,
@@ -1438,8 +1438,8 @@ begin
 
   bias_and_temp_adc : entity lsst_reb.ads8634_and_mux_top
     port map (
-      clk                  => clk_100_Mhz,
-      reset                => sync_res,
+      clk                  => sys_clk,
+      reset                => sys_rst,
       start_multiread      => start_multiread,
       start_singleread     => start_singleread,
       start_read_adc_reg   => start_regread,
@@ -1459,8 +1459,8 @@ begin
 
   ccd_temperature_sensor : entity lsst_reb.ad7794_top
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       start           => ccd_temp_start,
       start_reset     => ccd_temp_start_reset,
       read_write      => regDataWr_masked(19),
@@ -1474,7 +1474,7 @@ begin
       d_from_slave    => ccd_temp
       );
 
-  sn_edge_detect : FD port map (D => dcm_locked, C => clk_100_Mhz, Q => sn_start_dcm_int);
+  sn_edge_detect : FD port map (D => dcm_locked, C => sys_clk, Q => sn_start_dcm_int);
   sn_start_dcm <= dcm_locked and not sn_start_dcm_int;
   sn_start     <= sn_start_dcm or reb_onewire_reset;
   reb_sn       <= reb_sn_long(55 downto 8);
@@ -1484,7 +1484,7 @@ begin
       main_clk_freq => 100,
       word_2_write  => "00110011")
     port map (
-      clk         => clk_100_Mhz,
+      clk         => sys_clk,
       reset       => '0',
       start_acq   => sn_start,
       dq          => reb_sn_onewire,
@@ -1503,16 +1503,16 @@ begin
 
   back_bias_sw : entity lsst_reb.ff_ce
     port map (
-      reset    => sync_res and not first_reset_done, -- do not reset after POR
-      clk      => clk_100_Mhz,
+      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      clk      => sys_clk,
       data_in  => back_bias_sw_protected,
       ce       => en_back_bias_sw,
       data_out => back_bias_sw_protected_int);
 
   back_bias_error_ff : entity lsst_reb.ff_ce
     port map (
-      reset    => sync_res and not first_reset_done, -- do not reset after POR
-      clk      => clk_100_Mhz,
+      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      clk      => sys_clk,
       data_in  => back_bias_sw_error,
       ce       => en_back_bias_sw,
       data_out => back_bias_sw_error_int);
@@ -1521,16 +1521,16 @@ begin
 
   back_bias_reg : entity lsst_reb.ff_ce
     port map (
-      reset    => sync_res and not first_reset_done, -- do not reset after POR
-      clk      => clk_100_Mhz,
+      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      clk      => sys_clk,
       data_in  => back_bias_sw_protected_int,
       ce       => '1',
       data_out => backbias_ssbe);
 
   back_bias_clamp_reg : entity lsst_reb.ff_ce_pres
     port map (
-      preset   => sync_res and not first_reset_done, -- do not reset after POR
-      clk      => clk_100_Mhz,
+      preset   => sys_rst and not first_reset_done, -- do not reset after POR
+      clk      => sys_clk,
       data_in  => back_bias_clamp_protected_int,
       ce       => '1',
       data_out => backbias_clamp);
@@ -1540,8 +1540,8 @@ begin
   ------------------------------------------------------------------------------
   dcdc_clk_gen : entity lsst_reb.clk_2MHz_generator
     port map (
-      clk             => clk_100_Mhz,
-      reset           => sync_res,
+      clk             => sys_clk,
+      reset           => sys_rst,
       clk_2MHz_en     => dcdc_clk_en,
       clk_2MHz_en_in  => regDataWr_masked(0),
       clk_2MHz_en_out => dcdc_clk_en_out,
@@ -1556,9 +1556,9 @@ begin
 
   Remote_Update_top : entity lsst_reb.multiboot_top
     port map (
-      inBitstreamClk       => clk_100_Mhz,
-      inSpiClk             => clk_25_Mhz,
-      inReset_EnableB      => sync_res,
+      inBitstreamClk       => sys_clk,
+      inSpiClk             => multiboot_clk,
+      inReset_EnableB      => sys_rst,
       inCheckIdOnly        => '0',
       inVerifyOnly         => '0',
       inStartProg          => ru_start,
@@ -1580,10 +1580,10 @@ begin
 
   led_blink_0 : entity lsst_reb.led_blink
     port map (
-      clk_in  => clk_100_Mhz,
+      clk_in  => sys_clk,
       led_out => test_led_int(3));
 
-  dcm_user_clk_0 : entity surf.ClockManager7
+  ClockManager_sys_clk : entity surf.ClockManager7
     generic map (
       TPD_G              => TPD_C,
       TYPE_G             => "MMCM",
@@ -1603,8 +1603,8 @@ begin
     port map (
       clkIn     => usrClk,
       rstIn     => '0',
-      clkOut(0) => clk_100_Mhz_local,
-      clkOut(1) => clk_25_Mhz,
+      clkOut(0) => sys_clk_local,
+      clkOut(1) => multiboot_clk,
       locked    => dcm_locked,
       rstOut(0) => open,
       rstOut(1) => open);
@@ -1617,7 +1617,7 @@ begin
       SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
       ) port map (
         Q  => jc_refclk_out,            -- 1-bit DDR output
-        C  => clk_100_Mhz_local,        -- 1-bit clock input
+        C  => sys_clk_local,        -- 1-bit clock input
         CE => jc_clk_in_en,             -- 1-bit clock enable input
         D1 => '1',                      -- 1-bit data input (positive edge)
         D2 => '0',                      -- 1-bit data input (negative edge)
@@ -1627,8 +1627,8 @@ begin
 
   jitter_cleaner : entity lsst_reb.si5342_jitter_cleaner_top
     port map (
-      clk          => clk_100_Mhz,
-      reset        => sync_res,
+      clk          => sys_clk,
+      reset        => sys_rst,
       start_config => jc_start_config,
       jc_config    => regDataWr_masked(1 downto 0),
       config_busy  => jc_config_busy,
@@ -1653,10 +1653,10 @@ begin
       PRESELECT_I1 => false  -- BUFGCTRL output uses I1 input ($VALUES;)
       )
     port map (
-      O       => clk_100_Mhz,           -- 1-bit output: Clock output
+      O       => sys_clk,           -- 1-bit output: Clock output
       CE0     => '1',                   -- CE not used
       CE1     => '1',                   -- CE not used
-      I0      => clk_100_Mhz_local,     -- local clock generated form OSC
+      I0      => sys_clk_local,     -- local clock generated form OSC
       I1      => jc_refclk_in,          -- clock from Jitter Cleaner
       IGNORE0 => '0',                   -- 1-bit input: Clock ignore input for I0
       IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present
@@ -1669,24 +1669,24 @@ begin
   Ureset : IBUF port map (O => n_rst, I => Pwron_Rst_L);
 
   -- sync reset for the user part (from PGP)
-  flop1_res : FD port map (D => usrRst, C => clk_100_Mhz, Q => sync_res_1);
-  flop2_res : FD port map (D => sync_res_1, C => clk_100_Mhz, Q => sync_res_2);
-  flop3_res : FD port map (D => sync_res_2, C => clk_100_Mhz, Q => sync_res);
+  flop1_res : FD port map (D => usrRst, C => sys_clk, Q => sys_rst_1);
+  flop2_res : FD port map (D => sys_rst_1, C => sys_clk, Q => sys_rst_2);
+  flop3_res : FD port map (D => sys_rst_2, C => sys_clk, Q => sys_rst);
 
   first_reset_done_ff : FDRE
   generic map (
     INIT => '0')
   port map(
-    C => clk_100_Mhz,
-    D => sync_res,
+    C => sys_clk,
+    D => sys_rst,
     R => '0',
     CE => not first_reset_done,
     Q => first_reset_done);
 
   -- reset notice: this ff generates a signal for the reset notice
   reset_notice : FDRE port map (
-    C  => clk_100_Mhz,
-    R  => sync_res,
+    C  => sys_clk,
+    R  => sys_rst,
     CE => '1',
     D  => '1',
     Q  => fe_reset_notice);
