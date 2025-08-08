@@ -9,5 +9,5 @@ set size       "256"
 
 
 set APP_PATH "$::env(IMPL_DIR)/$::env(PROJECT).bit"
-set loadbit "up 0x00000000 ${APP_PATH}" 
-set loaddata "up 0x00FF0000 $::env(IMAGES_DIR)/watchdog_timer_barrier.bin up 0x017F0000 $::env(IMAGES_DIR)/watchdog_timer_barrier.bin up 0x01FF0000 $::env(IMAGES_DIR)/watchdog_timer_barrier.bin"
+set loadbit "up 0x00000000 ${APP_PATH}"
+set loaddata "up 0x00FF0000 $::env(VIVADO_DIR)/watchdog_timer_barrier.bin up 0x017F0000 $::env(VIVADO_DIR)/watchdog_timer_barrier.bin up 0x01FF0000 $::env(VIVADO_DIR)/watchdog_timer_barrier.bin"
