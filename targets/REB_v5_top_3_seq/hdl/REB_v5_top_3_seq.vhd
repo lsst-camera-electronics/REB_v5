@@ -1,26 +1,6 @@
-----------------------------------------------------------------------------------
--- Company:
--- Engineer:
---
--- Create Date:    15:23:28 12/14/2018
--- Design Name:
--- Module Name:    REB_v5_top_3_seq - Behavioral
--- Project Name:
--- Target Devices:
--- Tool versions:
--- Description:
---
--- Dependencies:
---
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
-----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
-use ieee.std_logic_misc.all;            -- for or_reduce
-
+use ieee.std_logic_misc.all;
 use IEEE.NUMERIC_STD.all;
 
 library UNISIM;
@@ -37,144 +17,143 @@ use lsst_reb.basic_elements_pkg.all;
 library common;
 
 entity REB_v5_top_3_seq is
-
   port (
     ------ Clock signals ------
     -- PGP serdes clk
-    PgpRefClk_P : in std_logic;
-    PgpRefClk_M : in std_logic;
+    PgpRefClk_P : in    std_logic;
+    PgpRefClk_M : in    std_logic;
 
     ------ PGP signals ------
-    PgpRx_P : in  std_logic_vector(1 downto 0);
-    PgpRx_M : in  std_logic_vector(1 downto 0);
-    PgpTx_P : out std_logic_vector(1 downto 0);
-    PgpTx_M : out std_logic_vector(1 downto 0);
+    PgpRx_P : in    std_logic_vector(1 downto 0);
+    PgpRx_M : in    std_logic_vector(1 downto 0);
+    PgpTx_P : out   std_logic_vector(1 downto 0);
+    PgpTx_M : out   std_logic_vector(1 downto 0);
 
     ------ Aux 100MHz Clk ------
-    aux_100mhz_clk_in : in std_logic;
+    aux_100mhz_clk_in : in    std_logic;
 
     ------ CCD 1 ------
     -- CCD ADC
-    adc_data_t_ccd_1 : in  std_logic_vector(7 downto 0);
-    adc_data_b_ccd_1 : in  std_logic_vector(7 downto 0);
-    adc_cnv_ccd_1    : out std_logic;
-    adc_sck_ccd_1    : out std_logic;
+    adc_data_t_ccd_1 : in    std_logic_vector(7 downto 0);
+    adc_data_b_ccd_1 : in    std_logic_vector(7 downto 0);
+    adc_cnv_ccd_1    : out   std_logic;
+    adc_sck_ccd_1    : out   std_logic;
 
     -- ASPIC signals
-    ASPIC_r_up_ccd_1_p   : out std_logic;
-    ASPIC_r_up_ccd_1_n   : out std_logic;
-    ASPIC_r_down_ccd_1_p : out std_logic;
-    ASPIC_r_down_ccd_1_n : out std_logic;
-    ASPIC_clamp_ccd_1_p  : out std_logic;
-    ASPIC_clamp_ccd_1_n  : out std_logic;
-    ASPIC_reset_ccd_1_p  : out std_logic;
-    ASPIC_reset_ccd_1_n  : out std_logic;
-    ASPIC_nap_ccd_1      : out std_logic;
-    ASPIC_pwdn_ccd_1     : out std_logic;
+    ASPIC_r_up_ccd_1_p   : out   std_logic;
+    ASPIC_r_up_ccd_1_n   : out   std_logic;
+    ASPIC_r_down_ccd_1_p : out   std_logic;
+    ASPIC_r_down_ccd_1_n : out   std_logic;
+    ASPIC_clamp_ccd_1_p  : out   std_logic;
+    ASPIC_clamp_ccd_1_n  : out   std_logic;
+    ASPIC_reset_ccd_1_p  : out   std_logic;
+    ASPIC_reset_ccd_1_n  : out   std_logic;
+    ASPIC_nap_ccd_1      : out   std_logic;
+    ASPIC_pwdn_ccd_1     : out   std_logic;
 
     -- ASPIC control signals
-    ASPIC_miso_ccd_1      : in  std_logic;
-    ASPIC_ss_t_ccd_1      : out std_logic;
-    ASPIC_ss_b_ccd_1      : out std_logic;
-    ASPIC_spi_reset_ccd_1 : out std_logic;
-    ASPIC_sclk_ccd_1      : out std_logic;
-    ASPIC_mosi_ccd_1      : out std_logic;
+    ASPIC_miso_ccd_1      : in    std_logic;
+    ASPIC_ss_t_ccd_1      : out   std_logic;
+    ASPIC_ss_b_ccd_1      : out   std_logic;
+    ASPIC_spi_reset_ccd_1 : out   std_logic;
+    ASPIC_sclk_ccd_1      : out   std_logic;
+    ASPIC_mosi_ccd_1      : out   std_logic;
 
     -- CCD Clocks signals
-    par_clk_ccd_1_p    : out std_logic_vector(3 downto 0);
-    par_clk_ccd_1_n    : out std_logic_vector(3 downto 0);
-    ser_clk_ccd_1_p    : out std_logic_vector(2 downto 0);
-    ser_clk_ccd_1_n    : out std_logic_vector(2 downto 0);
-    reset_gate_ccd_1_p : out std_logic;
-    reset_gate_ccd_1_n : out std_logic;
+    par_clk_ccd_1_p    : out   std_logic_vector(3 downto 0);
+    par_clk_ccd_1_n    : out   std_logic_vector(3 downto 0);
+    ser_clk_ccd_1_p    : out   std_logic_vector(2 downto 0);
+    ser_clk_ccd_1_n    : out   std_logic_vector(2 downto 0);
+    reset_gate_ccd_1_p : out   std_logic;
+    reset_gate_ccd_1_n : out   std_logic;
 
     -- CCD BIAS DAC
-    ldac_C_BIAS_ccd_1 : out std_logic;
-    din_C_BIAS_ccd_1  : out std_logic;
-    sync_C_BIAS_ccd_1 : out std_logic;
-    sclk_C_BIAS_ccd_1 : out std_logic;
+    ldac_C_BIAS_ccd_1 : out   std_logic;
+    din_C_BIAS_ccd_1  : out   std_logic;
+    sync_C_BIAS_ccd_1 : out   std_logic;
+    sclk_C_BIAS_ccd_1 : out   std_logic;
 
     ------ CCD 2 ------
     -- CCD ADC
-    adc_data_t_ccd_2 : in  std_logic_vector(7 downto 0);
-    adc_data_b_ccd_2 : in  std_logic_vector(7 downto 0);
-    adc_cnv_ccd_2    : out std_logic;
-    adc_sck_ccd_2    : out std_logic;
+    adc_data_t_ccd_2 : in    std_logic_vector(7 downto 0);
+    adc_data_b_ccd_2 : in    std_logic_vector(7 downto 0);
+    adc_cnv_ccd_2    : out   std_logic;
+    adc_sck_ccd_2    : out   std_logic;
 
     -- ASPIC signals
-    ASPIC_r_up_ccd_2_p   : out std_logic;
-    ASPIC_r_up_ccd_2_n   : out std_logic;
-    ASPIC_r_down_ccd_2_p : out std_logic;
-    ASPIC_r_down_ccd_2_n : out std_logic;
-    ASPIC_clamp_ccd_2_p  : out std_logic;
-    ASPIC_clamp_ccd_2_n  : out std_logic;
-    ASPIC_reset_ccd_2_p  : out std_logic;
-    ASPIC_reset_ccd_2_n  : out std_logic;
-    ASPIC_nap_ccd_2      : out std_logic;
-    ASPIC_pwdn_ccd_2     : out std_logic;
+    ASPIC_r_up_ccd_2_p   : out   std_logic;
+    ASPIC_r_up_ccd_2_n   : out   std_logic;
+    ASPIC_r_down_ccd_2_p : out   std_logic;
+    ASPIC_r_down_ccd_2_n : out   std_logic;
+    ASPIC_clamp_ccd_2_p  : out   std_logic;
+    ASPIC_clamp_ccd_2_n  : out   std_logic;
+    ASPIC_reset_ccd_2_p  : out   std_logic;
+    ASPIC_reset_ccd_2_n  : out   std_logic;
+    ASPIC_nap_ccd_2      : out   std_logic;
+    ASPIC_pwdn_ccd_2     : out   std_logic;
 
     -- ASPIC control signals
-    ASPIC_miso_ccd_2      : in  std_logic;
-    ASPIC_ss_t_ccd_2      : out std_logic;
-    ASPIC_ss_b_ccd_2      : out std_logic;
-    ASPIC_spi_reset_ccd_2 : out std_logic;
-    ASPIC_sclk_ccd_2      : out std_logic;
-    ASPIC_mosi_ccd_2      : out std_logic;
+    ASPIC_miso_ccd_2      : in    std_logic;
+    ASPIC_ss_t_ccd_2      : out   std_logic;
+    ASPIC_ss_b_ccd_2      : out   std_logic;
+    ASPIC_spi_reset_ccd_2 : out   std_logic;
+    ASPIC_sclk_ccd_2      : out   std_logic;
+    ASPIC_mosi_ccd_2      : out   std_logic;
 
     -- CCD Clocks signals
-    par_clk_ccd_2_p    : out std_logic_vector(3 downto 0);
-    par_clk_ccd_2_n    : out std_logic_vector(3 downto 0);
-    ser_clk_ccd_2_p    : out std_logic_vector(2 downto 0);
-    ser_clk_ccd_2_n    : out std_logic_vector(2 downto 0);
-    reset_gate_ccd_2_p : out std_logic;
-    reset_gate_ccd_2_n : out std_logic;
+    par_clk_ccd_2_p    : out   std_logic_vector(3 downto 0);
+    par_clk_ccd_2_n    : out   std_logic_vector(3 downto 0);
+    ser_clk_ccd_2_p    : out   std_logic_vector(2 downto 0);
+    ser_clk_ccd_2_n    : out   std_logic_vector(2 downto 0);
+    reset_gate_ccd_2_p : out   std_logic;
+    reset_gate_ccd_2_n : out   std_logic;
 
     -- CCD BIAS DAC
-    ldac_C_BIAS_ccd_2 : out std_logic;
-    din_C_BIAS_ccd_2  : out std_logic;
-    sync_C_BIAS_ccd_2 : out std_logic;
-    sclk_C_BIAS_ccd_2 : out std_logic;
+    ldac_C_BIAS_ccd_2 : out   std_logic;
+    din_C_BIAS_ccd_2  : out   std_logic;
+    sync_C_BIAS_ccd_2 : out   std_logic;
+    sclk_C_BIAS_ccd_2 : out   std_logic;
 
     ------ CCD 3 ------
     -- CCD ADC
-    adc_data_t_ccd_3 : in  std_logic_vector(7 downto 0);
-    adc_data_b_ccd_3 : in  std_logic_vector(7 downto 0);
-    adc_cnv_ccd_3    : out std_logic;
-    adc_sck_ccd_3    : out std_logic;
+    adc_data_t_ccd_3 : in    std_logic_vector(7 downto 0);
+    adc_data_b_ccd_3 : in    std_logic_vector(7 downto 0);
+    adc_cnv_ccd_3    : out   std_logic;
+    adc_sck_ccd_3    : out   std_logic;
 
     -- ASPIC signals
-    ASPIC_r_up_ccd_3_p   : out std_logic;
-    ASPIC_r_up_ccd_3_n   : out std_logic;
-    ASPIC_r_down_ccd_3_p : out std_logic;
-    ASPIC_r_down_ccd_3_n : out std_logic;
-    ASPIC_clamp_ccd_3_p  : out std_logic;
-    ASPIC_clamp_ccd_3_n  : out std_logic;
-    ASPIC_reset_ccd_3_p  : out std_logic;
-    ASPIC_reset_ccd_3_n  : out std_logic;
-    ASPIC_nap_ccd_3      : out std_logic;
-    ASPIC_pwdn_ccd_3     : out std_logic;
+    ASPIC_r_up_ccd_3_p   : out   std_logic;
+    ASPIC_r_up_ccd_3_n   : out   std_logic;
+    ASPIC_r_down_ccd_3_p : out   std_logic;
+    ASPIC_r_down_ccd_3_n : out   std_logic;
+    ASPIC_clamp_ccd_3_p  : out   std_logic;
+    ASPIC_clamp_ccd_3_n  : out   std_logic;
+    ASPIC_reset_ccd_3_p  : out   std_logic;
+    ASPIC_reset_ccd_3_n  : out   std_logic;
+    ASPIC_nap_ccd_3      : out   std_logic;
+    ASPIC_pwdn_ccd_3     : out   std_logic;
 
     -- ASPIC control signals
-    ASPIC_miso_ccd_3      : in  std_logic;
-    ASPIC_ss_t_ccd_3      : out std_logic;
-    ASPIC_ss_b_ccd_3      : out std_logic;
-    ASPIC_spi_reset_ccd_3 : out std_logic;
-    ASPIC_sclk_ccd_3      : out std_logic;
-    ASPIC_mosi_ccd_3      : out std_logic;
+    ASPIC_miso_ccd_3      : in    std_logic;
+    ASPIC_ss_t_ccd_3      : out   std_logic;
+    ASPIC_ss_b_ccd_3      : out   std_logic;
+    ASPIC_spi_reset_ccd_3 : out   std_logic;
+    ASPIC_sclk_ccd_3      : out   std_logic;
+    ASPIC_mosi_ccd_3      : out   std_logic;
 
     -- CCD Clocks signals
-    par_clk_ccd_3_p    : out std_logic_vector(3 downto 0);
-    par_clk_ccd_3_n    : out std_logic_vector(3 downto 0);
-    ser_clk_ccd_3_p    : out std_logic_vector(2 downto 0);
-    ser_clk_ccd_3_n    : out std_logic_vector(2 downto 0);
-    reset_gate_ccd_3_p : out std_logic;
-    reset_gate_ccd_3_n : out std_logic;
+    par_clk_ccd_3_p    : out   std_logic_vector(3 downto 0);
+    par_clk_ccd_3_n    : out   std_logic_vector(3 downto 0);
+    ser_clk_ccd_3_p    : out   std_logic_vector(2 downto 0);
+    ser_clk_ccd_3_n    : out   std_logic_vector(2 downto 0);
+    reset_gate_ccd_3_p : out   std_logic;
+    reset_gate_ccd_3_n : out   std_logic;
 
     -- CCD BIAS DAC
-    ldac_C_BIAS_ccd_3 : out std_logic;
-    din_C_BIAS_ccd_3  : out std_logic;
-    sync_C_BIAS_ccd_3 : out std_logic;
-    sclk_C_BIAS_ccd_3 : out std_logic;
+    ldac_C_BIAS_ccd_3 : out   std_logic;
+    din_C_BIAS_ccd_3  : out   std_logic;
+    sync_C_BIAS_ccd_3 : out   std_logic;
+    sclk_C_BIAS_ccd_3 : out   std_logic;
 
     -- V & I sensors
     LTC2945_SCL : inout std_logic;
@@ -195,87 +174,85 @@ entity REB_v5_top_3_seq is
     scl_temp2 : inout std_logic;
 
     -- CCD temperatures
-    csb_24ADC  : out std_logic;
-    sclk_24ADC : out std_logic;
-    din_24ADC  : out std_logic;
-    dout_24ADC : in  std_logic;
+    csb_24ADC  : out   std_logic;
+    sclk_24ADC : out   std_logic;
+    din_24ADC  : out   std_logic;
+    dout_24ADC : in    std_logic;
 
     ------ bias and Temp ADC ------
-    bias_t_adc_miso         : in  std_logic;
-    bias_t_adc_cs           : out std_logic;
-    bias_t_adc_sclk         : out std_logic;
-    bias_t_adc_mosi         : out std_logic;
-    bias_t_adc_sam_mux_en   : out std_logic;
-    bias_t_adc_bias_mux_en  : out std_logic;
-    bias_t_adc_sam_mux_sel  : out std_logic_vector(2 downto 0);
-    bias_t_adc_bias_mux_sel : out std_logic_vector(2 downto 0);
-    bias_t_adc_shdn         : out std_logic;  -- 0 means Shutdown
+    bias_t_adc_miso         : in    std_logic;
+    bias_t_adc_cs           : out   std_logic;
+    bias_t_adc_sclk         : out   std_logic;
+    bias_t_adc_mosi         : out   std_logic;
+    bias_t_adc_sam_mux_en   : out   std_logic;
+    bias_t_adc_bias_mux_en  : out   std_logic;
+    bias_t_adc_sam_mux_sel  : out   std_logic_vector(2 downto 0);
+    bias_t_adc_bias_mux_sel : out   std_logic_vector(2 downto 0);
+    bias_t_adc_shdn         : out   std_logic; -- 0 means Shutdown
 
     ------ DACs ------
     -- CCD clock rails DAC
-    ldac_RAILS      : out std_logic;
-    din_RAILS       : out std_logic;
-    sclk_RAILS      : out std_logic;
-    sync_RAILS_dac0 : out std_logic;
-    sync_RAILS_dac1 : out std_logic;
+    ldac_RAILS      : out   std_logic;
+    din_RAILS       : out   std_logic;
+    sclk_RAILS      : out   std_logic;
+    sync_RAILS_dac0 : out   std_logic;
+    sync_RAILS_dac1 : out   std_logic;
 
     -- CCD heaters
-    ldac_HTR : out std_logic;
-    din_HTR  : out std_logic;
-    sync_HTR : out std_logic;
-    sclk_HTR : out std_logic;
+    ldac_HTR : out   std_logic;
+    din_HTR  : out   std_logic;
+    sync_HTR : out   std_logic;
+    sclk_HTR : out   std_logic;
 
     -- bacbias sw
-    backbias_clamp : out std_logic;
-    backbias_ssbe  : out std_logic;
+    backbias_clamp : out   std_logic;
+    backbias_ssbe  : out   std_logic;
 
     ------ Jitter Cleaner ------
-    jc_refclk_out_p : out std_logic;
-    jc_refclk_out_n : out std_logic;
-    jc_refclk_in_p  : in  std_logic;
-    jc_refclk_in_n  : in  std_logic;
+    jc_refclk_out_p : out   std_logic;
+    jc_refclk_out_n : out   std_logic;
+    jc_refclk_in_p  : in    std_logic;
+    jc_refclk_in_n  : in    std_logic;
 
-    jc_miso : in  std_logic;
-    jc_mosi : out std_logic;
-    jc_sclk : out std_logic;
-    jc_cs   : out std_logic;
+    jc_miso : in    std_logic;
+    jc_mosi : out   std_logic;
+    jc_sclk : out   std_logic;
+    jc_cs   : out   std_logic;
 
-    jc_los0  : in  std_logic;
-    jc_lol   : in  std_logic;
-    --jc_oe    : out std_logic;
-    jc_reset : out std_logic;
+    jc_los0 : in    std_logic;
+    jc_lol  : in    std_logic;
+    -- jc_oe    : out std_logic;
+    jc_reset : out   std_logic;
 
     ------ Remote Update ------
-    ru_outSpiCsB   : out std_logic;
-    ru_outSpiMosi  : out std_logic;
-    ru_inSpiMiso   : in  std_logic;
-    ru_outSpiWpB   : out std_logic;     -- SPI flash write protect
-    ru_outSpiHoldB : out std_logic;
+    ru_outSpiCsB   : out   std_logic;
+    ru_outSpiMosi  : out   std_logic;
+    ru_inSpiMiso   : in    std_logic;
+    ru_outSpiWpB   : out   std_logic; -- SPI flash write protect
+    ru_outSpiHoldB : out   std_logic;
 
     ------ MISC ------
     -- Resistors
-    r_add          : in    std_logic_vector(7 downto 0);
+    r_add : in    std_logic_vector(7 downto 0);
     -- Test port
-    TEST           : out   std_logic_vector(12 downto 0);
+    TEST : out   std_logic_vector(12 downto 0);
     -- GPIO
-    gpio_p         : out   std_logic;
-    gpio_n         : out   std_logic;
+    gpio_p : out   std_logic;
+    gpio_n : out   std_logic;
     -- Test led
-    TEST_LED       : out   std_logic_vector(5 downto 0);
+    TEST_LED : out   std_logic_vector(5 downto 0);
     -- Power ON reset
-    Pwron_Rst_L    : in    std_logic;
+    Pwron_Rst_L : in    std_logic;
     -- Power down CCD ADC opamp (active low)
-    CCD_OPAMP_PD   : out   std_logic;
+    CCD_OPAMP_PD : out   std_logic;
     -- DC-DC power sync
-    PWR_SYNC1      : out   std_logic;
+    PWR_SYNC1 : out   std_logic;
     -- REB serial number
     reb_sn_onewire : inout std_logic
-    );
-
-end REB_v5_top_3_seq;
+  );
+end entity REB_v5_top_3_seq;
 
 architecture Behavioral of REB_v5_top_3_seq is
-
 
   -- Clocks
   signal pgpRefClk       : std_logic;
@@ -385,7 +362,7 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal seq_op_code_error_reset  : std_logic_vector(2 downto 0);
   signal seq_op_code_error_add    : array310;
 
--- Image handler signals
+  -- Image handler signals
   signal image_patter_read : std_logic_vector(2 downto 0);
   signal image_patter_en   : std_logic;
   signal ADC_trigger       : std_logic_vector(2 downto 0);
@@ -401,9 +378,9 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal aspic_start_trans    : std_logic;
   signal aspic_start_reset    : std_logic;
   signal aspic_busy           : std_logic;
-  signal aspic_config_r_ccd_1 : std_logic_vector (15 downto 0);
-  signal aspic_config_r_ccd_2 : std_logic_vector (15 downto 0);
-  signal aspic_config_r_ccd_3 : std_logic_vector (15 downto 0);
+  signal aspic_config_r_ccd_1 : std_logic_vector(15 downto 0);
+  signal aspic_config_r_ccd_2 : std_logic_vector(15 downto 0);
+  signal aspic_config_r_ccd_3 : std_logic_vector(15 downto 0);
   signal ASPIC_spi_reset_int  : std_logic;
   signal ASPIC_sclk_int       : std_logic;
   signal ASPIC_mosi_int       : std_logic;
@@ -418,23 +395,23 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal bias_load_start_ccd_3 : std_logic;
   signal bias_ldac_start_ccd_3 : std_logic;
 
-  signal bias_gd_thresh_ccd_1  : std_logic_vector(11 downto 0);
-  signal bias_od_thresh_ccd_1  : std_logic_vector(11 downto 0);
-  signal bias_rd_thresh_ccd_1  : std_logic_vector(11 downto 0);
-  signal bias_gd_thresh_ccd_2  : std_logic_vector(11 downto 0);
-  signal bias_od_thresh_ccd_2  : std_logic_vector(11 downto 0);
-  signal bias_rd_thresh_ccd_2  : std_logic_vector(11 downto 0);
-  signal bias_gd_thresh_ccd_3  : std_logic_vector(11 downto 0);
-  signal bias_od_thresh_ccd_3  : std_logic_vector(11 downto 0);
-  signal bias_rd_thresh_ccd_3  : std_logic_vector(11 downto 0);
+  signal bias_gd_thresh_ccd_1 : std_logic_vector(11 downto 0);
+  signal bias_od_thresh_ccd_1 : std_logic_vector(11 downto 0);
+  signal bias_rd_thresh_ccd_1 : std_logic_vector(11 downto 0);
+  signal bias_gd_thresh_ccd_2 : std_logic_vector(11 downto 0);
+  signal bias_od_thresh_ccd_2 : std_logic_vector(11 downto 0);
+  signal bias_rd_thresh_ccd_2 : std_logic_vector(11 downto 0);
+  signal bias_gd_thresh_ccd_3 : std_logic_vector(11 downto 0);
+  signal bias_od_thresh_ccd_3 : std_logic_vector(11 downto 0);
+  signal bias_rd_thresh_ccd_3 : std_logic_vector(11 downto 0);
 
   -- CCD clock rails DAC
   signal clk_rail_load_start : std_logic;
   signal clk_rail_ldac_start : std_logic;
 
   -- Heaters DAC
-  signal htr_load_start   : std_logic;
-  signal htr_ldac_start   : std_logic;
+  signal htr_load_start : std_logic;
+  signal htr_ldac_start : std_logic;
 
   signal adc_write_enable : std_logic_vector(2 downto 0);
 
@@ -515,7 +492,7 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal T2_dreb        : std_logic_vector(15 downto 0);
   signal T2_dreb_error  : std_logic;
 
-  --REB temperature gr1
+  -- REB temperature gr1
   signal REB_temp_busy_gr1 : std_logic;
   signal T1_reb_gr1        : std_logic_vector(15 downto 0);
   signal T1_reb_gr1_error  : std_logic;
@@ -590,7 +567,7 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal jc_refclk_out : std_logic;
   signal jc_refclk_in  : std_logic;
 
-  --dc_dc converter sync
+  -- dc_dc converter sync
   signal dcdc_clk_en_out : std_logic;
   signal dcdc_clk_en     : std_logic;
 
@@ -606,7 +583,6 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal ru_busy                : std_logic;
   signal ru_satatus_reg         : std_logic_vector(15 downto 0);
   signal ru_reboot_status       : std_logic_vector(31 downto 0);
-
 
   signal ASPIC_ss_t_ccd_1_int : std_logic;
   signal ASPIC_ss_t_ccd_2_int : std_logic;
@@ -648,8 +624,8 @@ begin
 
   -- trigger signals
   seq_start       <= (trigger_val_bus(2) and trigger_ce_bus(2)) or sync_cmd_start_seq;
-  V_I_read_start  <=  trigger_val_bus(3) and trigger_ce_bus(3);
-  temp_read_start <=  trigger_val_bus(4) and trigger_ce_bus(4);
+  V_I_read_start  <= trigger_val_bus(3) and trigger_ce_bus(3);
+  temp_read_start <= trigger_val_bus(4) and trigger_ce_bus(4);
 
   seq_step(0) <= seq_step_cmd(0) or sync_cmd_step_seq;
   seq_step(1) <= seq_step_cmd(1) or sync_cmd_step_seq;
@@ -726,21 +702,20 @@ begin
   pattern_reset <= (2 => sequencer_outputs(2)(16), 1 => sequencer_outputs(1)(16), 0 => sequencer_outputs(0)(16));
 
   ------------ Chips NAP mode lines ------------
-  --CCD 1
+  -- CCD 1
   ASPIC_nap_ccd_1 <= '0'; -- ASPIC2 nap mode active low
-  --CCD 2
+  -- CCD 2
   ASPIC_nap_ccd_2 <= '0'; -- ASPIC2 nap mode active low
-  --CCD 3
+  -- CCD 3
   ASPIC_nap_ccd_3 <= '0'; -- ASPIC2 nap mode active low
 
   ------------ Chips Power Down lines ------------
-  --CCD 1
+  -- CCD 1
   ASPIC_pwdn_ccd_1 <= '1'; -- 1 => enabled
-  --CCD 2
+  -- CCD 2
   ASPIC_pwdn_ccd_2 <= '1'; -- 1 => enabled
-  --CCD 3
+  -- CCD 3
   ASPIC_pwdn_ccd_3 <= '1'; -- 1 => enabled
-
 
   ------------ Chips SPI link lines ------------
   ASPIC_sclk_ccd_1 <= ASPIC_sclk_int;
@@ -763,7 +738,7 @@ begin
 
   gpio_int <= sequencer_outputs(0)(16);
 
--- Power down CCD ADC opamp (active low)
+  -- Power down CCD ADC opamp (active low)
   CCD_OPAMP_PD <= '1';
 
   -- chipscope
@@ -779,13 +754,14 @@ begin
   bias_t_adc_sclk <= bias_t_adc_sclk_int;
   bias_t_adc_shdn <= bias_t_adc_shdn_int;
 
-  U_LocRefClkIbufds : IBUFDS_GTE2
+  U_LocRefClkIbufds : component IBUFDS_GTE2
     port map (
       I     => PgpRefClk_P,
       IB    => PgpRefClk_M,
       CEB   => '0',
       O     => PgpRefClk,
-      ODIV2 => open);
+      ODIV2 => open
+    );
 
   ClockManager_stable_clk : entity surf.ClockManager7
     generic map (
@@ -801,47 +777,52 @@ begin
       DIVCLK_DIVIDE_G    => 1,
       CLKFBOUT_MULT_F_G  => 4.000,
       CLKOUT0_DIVIDE_F_G => 10.000,
-      CLKOUT0_RST_HOLD_G => 8)
+      CLKOUT0_RST_HOLD_G => 8
+    )
     port map (
       clkIn     => PgpRefClk,
       rstIn     => '0',
       clkOut(0) => stable_clk,
       locked    => stable_clk_lock,
-      rstOut(0) => open);
+      rstOut(0) => open
+    );
 
   sci_data_oe_reg : entity lsst_reb.generic_reg_ce_init_1
-    generic map (width => 2)
+    generic map (
+      width => 2
+    )
     port map (
       reset    => usrRst,
       clk      => usrClk,
       ce       => CCD_oe_en,
-      init     => '0',  -- signal to reset the reg (active high)
+      init     => '0',
       data_in  => regDataWr_masked(2 downto 0),
-      data_out => CCD_oe);
+      data_out => CCD_oe
+    );
 
   LsstSci_0 : entity lsst_sci.LsstSci
     port map (
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- FPGA Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       StableClk => stable_clk,
-      StableRst => '0', -- not used
+      StableRst => '0',
       FpgaRstL  => n_rst,
       PgpRefClk => PgpRefClk,
       PgpRxP    => PgpRx_P,
       PgpRxM    => PgpRx_M,
       PgpTxP    => PgpTx_P,
       PgpTxM    => PgpTx_M,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Clock/Reset Generator Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       ClkOut => usrClk,
       RstOut => usrRst,
       ClkIn  => sys_clk,
       RstIn  => sys_rst,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- SCI Register Encoder/Decoder Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       RegAddr   => RegAddr,
       RegReq    => regReq,
       RegOp     => regOp,
@@ -850,106 +831,105 @@ begin
       RegAck    => regAck,
       RegFail   => regFail,
       RegDataRd => RegDataRd,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Data Encoder Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       DataIn => SCI_DataIn,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Notification Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       NoticeEn             => interrupt_en_out,
       Notice(59 downto 39) => (others => '0'),
       Notice(38 downto 36) => interrupt_bus_out(17 downto 15),
       Notice(35 downto 29) => (others => '0'),
-      Notice(28 downto 24) => interrupt_bus_out(14 downto 10),  -- seq 2
+      Notice(28 downto 24) => interrupt_bus_out(14 downto 10),
       Notice(23 downto 17) => (others => '0'),
-      Notice(16 downto 12) => interrupt_bus_out(9 downto 5),    -- seq 1
+      Notice(16 downto 12) => interrupt_bus_out(9 downto 5),
       Notice(11 downto 5)  => (others => '0'),
-      Notice(4 downto 0)   => interrupt_bus_out(4 downto 0),    -- seq 0
+      Notice(4 downto 0)   => interrupt_bus_out(4 downto 0),
 
-
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Synchronous Command Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       SyncCmdEn => sync_cmd_en,
       SyncCmd   => sync_cmd_in,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Status Block Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       StatusAddr => StatusAddr,
       StatusReg  => StatusReg,
       StatusRst  => StatusRst,
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       -- Debug Interface
-      -------------------------------------------------------------------------
+      --------------------------------------------------------------------------
       PgpLocLinkReadyOut => pgpLocLinkReady,
       PgpRemLinkReadyOut => pgpRemLinkReady,
       PgpRxPhyReadyOut   => open,
       PgpTxPhyReadyOut   => open
-      );
+    );
 
   REB_v5_cmd_interpreter_0 : entity common.REB_v5_cmd_interpreter_3_seq
     port map (
-      reset                  => sys_rst,
-      clk                    => sys_clk,
+      reset => sys_rst,
+      clk   => sys_clk,
       -- signals from/to SCI
-      regReq                 => regReq,                 -- with this line the master start a read/write procedure (1 to start)
-      regOp                  => regOp,                  -- this line define if the procedure is read or write (1 to write)
-      regAddr                => regAddr,                -- address bus
-      statusReg              => statusReg,              -- status reg bus. The RCI handle this bus and this machine pass it to the sure if he wants to read it
-      regWrEn                => RegWrEn,                -- write enable bus. This bus enables the data write bits
-      regDataWr_masked       => regDataWr_masked,       -- data write bus masked. Is the logical AND of data write bus and write enable bus
-      regAck                 => regAck,                 -- acknowledge line to activate when the read/write procedure is completed
-      regFail                => regFail,                -- line to activate when an error occurs during the read/write procedure
-      regDataRd              => regDataRd,              -- data bus to RCI used to transfer read data
-      StatusReset            => statusRst,              -- status block reset
+      regReq           => regReq,
+      regOp            => regOp,
+      regAddr          => regAddr,
+      statusReg        => statusReg,
+      regWrEn          => RegWrEn,
+      regDataWr_masked => regDataWr_masked,
+      regAck           => regAck,
+      regFail          => regFail,
+      regDataRd        => regDataRd,
+      StatusReset      => statusRst,
       -- Base Register Set signals
-      busy_bus               => busy_bus,               -- busy bus is composed by the different register sets busy
-      time_base_actual_value => time_base_actual_value, -- time base value
-      trig_tm_value_SB       => trig_tm_value_SB,       -- Status Block trigger time
-      trig_tm_value_TB       => trig_tm_value_TB,       -- Time Base trigger time
-      trig_tm_value_seq      => trig_tm_value_seq,      -- Sequencer Trigger time
-      trig_tm_value_V_I      => trig_tm_value_V_I,      -- Voltage and current sens trigger time
-      trig_tm_value_pcb_t    => trig_tm_value_pcb_t,    -- PCB temperature Trigger time
-      trigger_ce_bus         => trigger_ce_bus,         -- bus to enable register sets trigger. To trigger a register set that stops itself use en AND val
-      trigger_val_bus        => trigger_val_bus,        -- bus of register sets trigger values
-      load_time_base_lsw     => load_time_base_lsw,     -- ce signal to load the time base lsw
-      load_time_base_MSW     => load_time_base_MSW,     -- ce signal to load the time base MSW
-      cnt_preset             => cnt_preset,             -- preset value for the time base counter
+      busy_bus               => busy_bus,
+      time_base_actual_value => time_base_actual_value,
+      trig_tm_value_SB       => trig_tm_value_SB,
+      trig_tm_value_TB       => trig_tm_value_TB,
+      trig_tm_value_seq      => trig_tm_value_seq,
+      trig_tm_value_V_I      => trig_tm_value_V_I,
+      trig_tm_value_pcb_t    => trig_tm_value_pcb_t,
+      trigger_ce_bus         => trigger_ce_bus,
+      trigger_val_bus        => trigger_val_bus,
+      load_time_base_lsw     => load_time_base_lsw,
+      load_time_base_MSW     => load_time_base_MSW,
+      cnt_preset             => cnt_preset,
       Mgt_avcc_ok            => '0',
       Mgt_accpll_ok          => '0',
       Mgt_avtt_ok            => '0',
       V3_3v_ok               => '0',
       Switch_addr            => r_add,
       -- sync commands
-      sync_cmd_delay_en      => sync_cmd_delay_en,
-      sync_cmd_delay_read    => sync_cmd_delay_read,
-      sync_cmd_mask_en       => open,
-      sync_cmd_mask_read     => x"00000000",
+      sync_cmd_delay_en   => sync_cmd_delay_en,
+      sync_cmd_delay_read => sync_cmd_delay_read,
+      sync_cmd_mask_en    => open,
+      sync_cmd_mask_read  => x"00000000",
       -- interrupt commands
-      interrupt_mask_wr_en     => mask_bus_in_en,
-      interrupt_mask_read      => mask_bus_out,
+      interrupt_mask_wr_en => mask_bus_in_en,
+      interrupt_mask_read  => mask_bus_out,
       -- Image parameters
-      image_size               => x"00000000",           -- this register contains the image size
-      image_patter_read        => image_patter_read,     -- this register gives the state of image patter gen. 1 is ON
-      ccd_sel_read             => "001",                 -- this register contains the CCD to drive
-      ccd_oe_read              => CCD_oe,                -- this register contains the CCD to drive
-      image_size_en            => open,                  -- this line enables the register where the image size is written
-      image_patter_en          => image_patter_en,       -- this register enable the image patter gen. 1 is ON
-      ccd_sel_en               => open,                  -- register enable for CCD acquisition selector
-      ccd_oe_en                => CCD_oe_en,             -- register enable for CCD acquisition selector
+      image_size        => x"00000000",
+      image_patter_read => image_patter_read,
+      ccd_sel_read      => "001",
+      ccd_oe_read       => CCD_oe,
+      image_size_en     => open,
+      image_patter_en   => image_patter_en,
+      ccd_sel_en        => open,
+      ccd_oe_en         => CCD_oe_en,
       -- Sequencer
-      seq_time_mem_readbk      => seq_time_mem_readbk,   -- time memory read bus
-      seq_out_mem_readbk       => seq_out_mem_readbk,    -- time memory read bus
-      seq_prog_mem_readbk      => seq_prog_mem_readbk,   -- sequencer program memory read
-      seq_time_mem_w_en        => seq_time_mem_w_en,     -- this signal enables the time memory write
-      seq_out_mem_w_en         => seq_out_mem_w_en,      -- this signal enables the output memory write
-      seq_prog_mem_w_en        => seq_prog_mem_w_en,     -- this signal enables the program memory write
-      seq_step                 => seq_step_cmd,          -- this signal send the STEP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-      seq_stop                 => seq_stop_cmd,          -- this signal send the STOP to the sequencer. Valid on in infinite loop (the machine jump out from IL to next function)
-      enable_conv_shift_in     => enable_conv_shift_out, -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-      enable_conv_shift        => enable_conv_shift,     -- this signal enable the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
-      init_conv_shift          => init_conv_shift,       -- this signal initialize the adc_conv shifter (the adc_conv is shifted 1 clk every time is activated)
+      seq_time_mem_readbk      => seq_time_mem_readbk,
+      seq_out_mem_readbk       => seq_out_mem_readbk,
+      seq_prog_mem_readbk      => seq_prog_mem_readbk,
+      seq_time_mem_w_en        => seq_time_mem_w_en,
+      seq_out_mem_w_en         => seq_out_mem_w_en,
+      seq_prog_mem_w_en        => seq_prog_mem_w_en,
+      seq_step                 => seq_step_cmd,
+      seq_stop                 => seq_stop_cmd,
+      enable_conv_shift_in     => enable_conv_shift_out,
+      enable_conv_shift        => enable_conv_shift,
+      init_conv_shift          => init_conv_shift,
       start_add_prog_mem_en    => start_add_prog_mem_en,
       start_add_prog_mem_rbk   => start_add_prog_mem_rbk,
       seq_ind_func_mem_we      => seq_ind_func_mem_we,
@@ -964,33 +944,33 @@ begin
       seq_op_code_error_add    => seq_op_code_error_add,
       seq_op_code_error_reset  => seq_op_code_error_reset,
       -- ASPIC
-      aspic_config_r_ccd_1     => aspic_config_r_ccd_1,
-      aspic_config_r_ccd_2     => aspic_config_r_ccd_2,
-      aspic_config_r_ccd_3     => aspic_config_r_ccd_3,
-      aspic_op_end             => aspic_busy,
-      aspic_start_trans        => aspic_start_trans,
-      aspic_start_reset        => aspic_start_reset,
+      aspic_config_r_ccd_1 => aspic_config_r_ccd_1,
+      aspic_config_r_ccd_2 => aspic_config_r_ccd_2,
+      aspic_config_r_ccd_3 => aspic_config_r_ccd_3,
+      aspic_op_end         => aspic_busy,
+      aspic_start_trans    => aspic_start_trans,
+      aspic_start_reset    => aspic_start_reset,
       -- CCD bias DAC
-      bias_dac_cmd_err         => bias_dac_cmd_err,
-      bias_v_undr_th           => bias_v_undr_th,
-      ccd_1_bias_load_start    => bias_load_start_ccd_1,
-      ccd_1_bias_ldac_start    => bias_ldac_start_ccd_1,
-      ccd_2_bias_load_start    => bias_load_start_ccd_2,
-      ccd_2_bias_ldac_start    => bias_ldac_start_ccd_2,
-      ccd_3_bias_load_start    => bias_load_start_ccd_3,
-      ccd_3_bias_ldac_start    => bias_ldac_start_ccd_3,
-      ccd_1_bias_gd_thresh     => bias_gd_thresh_ccd_1,
-      ccd_1_bias_od_thresh     => bias_od_thresh_ccd_1,
-      ccd_1_bias_rd_thresh     => bias_rd_thresh_ccd_1,
-      ccd_2_bias_gd_thresh     => bias_gd_thresh_ccd_2,
-      ccd_2_bias_od_thresh     => bias_od_thresh_ccd_2,
-      ccd_2_bias_rd_thresh     => bias_rd_thresh_ccd_2,
-      ccd_3_bias_gd_thresh     => bias_gd_thresh_ccd_3,
-      ccd_3_bias_od_thresh     => bias_od_thresh_ccd_3,
-      ccd_3_bias_rd_thresh     => bias_rd_thresh_ccd_3,
+      bias_dac_cmd_err      => bias_dac_cmd_err,
+      bias_v_undr_th        => bias_v_undr_th,
+      ccd_1_bias_load_start => bias_load_start_ccd_1,
+      ccd_1_bias_ldac_start => bias_ldac_start_ccd_1,
+      ccd_2_bias_load_start => bias_load_start_ccd_2,
+      ccd_2_bias_ldac_start => bias_ldac_start_ccd_2,
+      ccd_3_bias_load_start => bias_load_start_ccd_3,
+      ccd_3_bias_ldac_start => bias_ldac_start_ccd_3,
+      ccd_1_bias_gd_thresh  => bias_gd_thresh_ccd_1,
+      ccd_1_bias_od_thresh  => bias_od_thresh_ccd_1,
+      ccd_1_bias_rd_thresh  => bias_rd_thresh_ccd_1,
+      ccd_2_bias_gd_thresh  => bias_gd_thresh_ccd_2,
+      ccd_2_bias_od_thresh  => bias_od_thresh_ccd_2,
+      ccd_2_bias_rd_thresh  => bias_rd_thresh_ccd_2,
+      ccd_3_bias_gd_thresh  => bias_gd_thresh_ccd_3,
+      ccd_3_bias_od_thresh  => bias_od_thresh_ccd_3,
+      ccd_3_bias_rd_thresh  => bias_rd_thresh_ccd_3,
       -- CCD clock rails DAC
-      clk_rail_load_start      => clk_rail_load_start,
-      clk_rail_ldac_start      => clk_rail_ldac_start,
+      clk_rail_load_start => clk_rail_load_start,
+      clk_rail_ldac_start => clk_rail_ldac_start,
       -- Heater DAC
       htr_load_start => htr_load_start,
       htr_ldac_start => htr_ldac_start,
@@ -1016,28 +996,28 @@ begin
       vn15_current       => vn15_current,
       vn15_current_error => vn15_current_error,
       -- DREB temperature
-      T1_dreb            => T1_dreb,
-      T1_dreb_error      => T1_dreb_error,
-      T2_dreb            => T2_dreb,
-      T2_dreb_error      => T2_dreb_error,
+      T1_dreb       => T1_dreb,
+      T1_dreb_error => T1_dreb_error,
+      T2_dreb       => T2_dreb,
+      T2_dreb_error => T2_dreb_error,
       -- REB temperature gr1
-      T1_reb_gr1         => T1_reb_gr1,
-      T1_reb_gr1_error   => T1_reb_gr1_error,
-      T2_reb_gr1         => T2_reb_gr1,
-      T2_reb_gr1_error   => T2_reb_gr1_error,
-      T3_reb_gr1         => T3_reb_gr1,
-      T3_reb_gr1_error   => T3_reb_gr1_error,
-      T4_reb_gr1         => T4_reb_gr1,
-      T4_reb_gr1_error   => T4_reb_gr1_error,
+      T1_reb_gr1       => T1_reb_gr1,
+      T1_reb_gr1_error => T1_reb_gr1_error,
+      T2_reb_gr1       => T2_reb_gr1,
+      T2_reb_gr1_error => T2_reb_gr1_error,
+      T3_reb_gr1       => T3_reb_gr1,
+      T3_reb_gr1_error => T3_reb_gr1_error,
+      T4_reb_gr1       => T4_reb_gr1,
+      T4_reb_gr1_error => T4_reb_gr1_error,
       -- REB temperature gr2
-      T1_reb_gr2         => T1_reb_gr2,
-      T1_reb_gr2_error   => T1_reb_gr2_error,
-      T2_reb_gr2         => T2_reb_gr2,
-      T2_reb_gr2_error   => T2_reb_gr2_error,
-      T3_reb_gr2         => T3_reb_gr2,
-      T3_reb_gr2_error   => T3_reb_gr2_error,
-      T4_reb_gr2         => T4_reb_gr2,
-      T4_reb_gr2_error   => T4_reb_gr2_error,
+      T1_reb_gr2       => T1_reb_gr2,
+      T1_reb_gr2_error => T1_reb_gr2_error,
+      T2_reb_gr2       => T2_reb_gr2,
+      T2_reb_gr2_error => T2_reb_gr2_error,
+      T3_reb_gr2       => T3_reb_gr2,
+      T3_reb_gr2_error => T3_reb_gr2_error,
+      T4_reb_gr2       => T4_reb_gr2,
+      T4_reb_gr2_error => T4_reb_gr2_error,
       -- bias and temp ADC
       bias_t_adc_busy    => bias_t_adc_busy,
       bias_t_adc_data    => bias_t_adc_d_out,
@@ -1050,11 +1030,11 @@ begin
       ccd_temp_start       => ccd_temp_start,
       ccd_temp_start_reset => ccd_temp_start_reset,
       -- REB 1wire serial number
-      reb_onewire_reset  => reb_onewire_reset,
-      reb_sn_crc_ok      => reb_sn_crc_ok,
-      reb_sn_dev_error   => reb_sn_dev_error,
-      reb_sn             => reb_sn,
-      reb_sn_timeout     => '0',
+      reb_onewire_reset => reb_onewire_reset,
+      reb_sn_crc_ok     => reb_sn_crc_ok,
+      reb_sn_dev_error  => reb_sn_dev_error,
+      reb_sn            => reb_sn,
+      reb_sn_timeout    => '0',
       -- back bias switch
       back_bias_sw_rb    => back_bias_sw_protected_int,
       back_bias_cl_rb    => back_bias_clamp_protected_int,
@@ -1075,7 +1055,7 @@ begin
       -- DC/DC clock enable
       dcdc_clk_en_in => dcdc_clk_en_out,
       dcdc_clk_en    => dcdc_clk_en
-      );
+    );
 
   base_reg_set_top_0 : entity lsst_reb.base_reg_set_top
     port map (
@@ -1098,7 +1078,7 @@ begin
       trig_tm_value_seq  => trig_tm_value_seq,
       trig_tm_value_V_I  => trig_tm_value_V_I,
       trig_tm_value_pcb  => trig_tm_value_pcb_t
-      );
+    );
 
   sync_cmd_decoder_top_1 : entity lsst_reb.sync_cmd_decoder_top
     port map (
@@ -1115,11 +1095,12 @@ begin
       sync_cmd_step_seq  => sync_cmd_step_seq,
       sync_cmd_stop_seq  => sync_cmd_stop_seq,
       sync_cmd_main_add  => sync_cmd_main_add
-      );
+    );
 
   REB_interrupt_top_1 : entity lsst_reb.REB_interrupt_top
     generic map (
-      interrupt_bus_width => 32)
+      interrupt_bus_width => 32
+    )
     port map (
       clk               => sys_clk,
       reset             => usrRst,
@@ -1129,114 +1110,112 @@ begin
       mask_bus_in       => regDataWr_masked(31 downto 0),
       mask_bus_out      => mask_bus_out,
       interrupt_en_out  => interrupt_en_out,
-      interrupt_bus_out => interrupt_bus_out);
-
+      interrupt_bus_out => interrupt_bus_out
+    );
 
   SCI_DataIn(0).wrEn <= adc_write_enable(0) and CCD_oe(0);
   SCI_DataIn(1).wrEn <= adc_write_enable(1) and CCD_oe(1);
   SCI_DataIn(2).wrEn <= adc_write_enable(2) and CCD_oe(2);
 
   Image_data_handler_0 : entity lsst_reb.ADC_data_handler_v4
-     port map (
-        reset => sys_rst,
-        clk   => sys_clk,
+    port map (
+      reset => sys_rst,
+      clk   => sys_clk,
 
-        testmode_rst => pattern_reset(0),
-        testmode_col => sequencer_outputs(0)(8),
+      testmode_rst => pattern_reset(0),
+      testmode_col => sequencer_outputs(0)(8),
 
-        start_of_img => start_of_img(0),
-        end_of_img   => end_of_img(0),       -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
-        end_sequence => end_sequence(0),     -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
+      start_of_img => start_of_img(0),
+      end_of_img   => end_of_img(0),
+      end_sequence => end_sequence(0),
 
-        trigger      => ADC_trigger(0),      -- this signal start the operations (ADC conv and send data to PGP)
-        en_test_mode => image_patter_en,     -- register enable for patter test mode
-        test_mode_in => regDataWr_masked(0), -- test mode in
+      trigger      => ADC_trigger(0),
+      en_test_mode => image_patter_en,
+      test_mode_in => regDataWr_masked(0),
 
-        en_load_ccd_sel => '1',              -- register enable for CCD enable
-        ccd_sel_in      => "001",
-        ccd_sel_out     => open,             -- register to select which CCD acquire (1, 2 or 3)
+      en_load_ccd_sel => '1',
+      ccd_sel_in      => "001",
+      ccd_sel_out     => open,
 
-        SOT          => SCI_DataIn(0).sot,   -- Start of Image
-        EOT          => SCI_DataIn(0).eot,   -- End of Image
-        write_enable => adc_write_enable(0), -- signal to write the image in the PGP
-        data_out     => SCI_DataIn(0).data,
+      SOT          => SCI_DataIn(0).sot,
+      EOT          => SCI_DataIn(0).eot,
+      write_enable => adc_write_enable(0),
+      data_out     => SCI_DataIn(0).data,
 
-        test_mode_enb_out => image_patter_read(0),
+      test_mode_enb_out => image_patter_read(0),
 
-        adc_data_ccd_1 => adc_data_int(0),   -- CCD ADC data
-        adc_cnv_ccd_1  => adc_cnv_int(0),    -- ADC conv
-        adc_sck_ccd_1  => adc_sck_int(0)     -- ADC serial clock
-        );
+      adc_data_ccd_1 => adc_data_int(0),
+      adc_cnv_ccd_1  => adc_cnv_int(0),
+      adc_sck_ccd_1  => adc_sck_int(0)
+    );
 
-    Image_data_handler_1 : entity lsst_reb.ADC_data_handler_v4
-     port map (
-        reset => sys_rst,
-        clk   => sys_clk,
+  Image_data_handler_1 : entity lsst_reb.ADC_data_handler_v4
+    port map (
+      reset => sys_rst,
+      clk   => sys_clk,
 
-        testmode_rst => pattern_reset(1),
-        testmode_col => sequencer_outputs(1)(8),
+      testmode_rst => pattern_reset(1),
+      testmode_col => sequencer_outputs(1)(8),
 
-        start_of_img => start_of_img(1),
-        end_of_img   => end_of_img(1),       -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
-        end_sequence => end_sequence(1),     -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
+      start_of_img => start_of_img(1),
+      end_of_img   => end_of_img(1),
+      end_sequence => end_sequence(1),
 
-        trigger      => ADC_trigger(1),      -- this signal start the operations (ADC conv and send data to PGP)
-        en_test_mode => image_patter_en,     -- register enable for patter test mode
-        test_mode_in => regDataWr_masked(1), -- test mode in
+      trigger      => ADC_trigger(1),
+      en_test_mode => image_patter_en,
+      test_mode_in => regDataWr_masked(1),
 
-        en_load_ccd_sel => '1',              -- register enable for CCD enable
-        ccd_sel_in      => "010",
-        ccd_sel_out     => open,             -- register to select which CCD acquire (1, 2 or 3)
+      en_load_ccd_sel => '1',
+      ccd_sel_in      => "010",
+      ccd_sel_out     => open,
 
-        SOT          => SCI_DataIn(1).sot,   -- Start of Image
-        EOT          => SCI_DataIn(1).eot,   -- End of Image
-        write_enable => adc_write_enable(1), -- signal to write the image in the PGP
-        data_out     => SCI_DataIn(1).data,
+      SOT          => SCI_DataIn(1).sot,
+      EOT          => SCI_DataIn(1).eot,
+      write_enable => adc_write_enable(1),
+      data_out     => SCI_DataIn(1).data,
 
-        test_mode_enb_out => image_patter_read(1),
+      test_mode_enb_out => image_patter_read(1),
 
-        adc_data_ccd_2 => adc_data_int(1),   -- CCD ADC data
-        adc_cnv_ccd_2  => adc_cnv_int(1),    -- ADC conv
-        adc_sck_ccd_2  => adc_sck_int(1)     -- ADC serial clock
-        );
+      adc_data_ccd_2 => adc_data_int(1),
+      adc_cnv_ccd_2  => adc_cnv_int(1),
+      adc_sck_ccd_2  => adc_sck_int(1)
+    );
 
-    Image_data_handler_2 : entity lsst_reb.ADC_data_handler_v4
-     port map (
-        reset => sys_rst,
-        clk   => sys_clk,
+  Image_data_handler_2 : entity lsst_reb.ADC_data_handler_v4
+    port map (
+      reset => sys_rst,
+      clk   => sys_clk,
 
-        testmode_rst => pattern_reset(2),
-        testmode_col => sequencer_outputs(2)(8),
+      testmode_rst => pattern_reset(2),
+      testmode_col => sequencer_outputs(2)(8),
 
-        start_of_img => start_of_img(2),
-        end_of_img   => end_of_img(2),       -- this signal is generated by the user (using the sequencer) and has to arrive after the last  ADC trasfer
-        end_sequence => end_sequence(2),     -- this signal is the end of sequence generated by the sequencer and is used as a timeot to generate EOF.
+      start_of_img => start_of_img(2),
+      end_of_img   => end_of_img(2),
+      end_sequence => end_sequence(2),
 
-        trigger      => ADC_trigger(2),      -- this signal start the operations (ADC conv and send data to PGP)
-        en_test_mode => image_patter_en,     -- register enable for patter test mode
-        test_mode_in => regDataWr_masked(2), -- test mode in
+      trigger      => ADC_trigger(2),
+      en_test_mode => image_patter_en,
+      test_mode_in => regDataWr_masked(2),
 
-        en_load_ccd_sel => '1',              -- register enable for CCD enable
-        ccd_sel_in      => "100",
-        ccd_sel_out     => open,             -- register to select which CCD acquire (1, 2 or 3)
+      en_load_ccd_sel => '1',
+      ccd_sel_in      => "100",
+      ccd_sel_out     => open,
 
-        SOT          => SCI_DataIn(2).sot,   -- Start of Image
-        EOT          => SCI_DataIn(2).eot,   -- End of Image
-        write_enable => adc_write_enable(2), -- signal to write the image in the PGP
-        data_out     => SCI_DataIn(2).data,
+      SOT          => SCI_DataIn(2).sot,
+      EOT          => SCI_DataIn(2).eot,
+      write_enable => adc_write_enable(2),
+      data_out     => SCI_DataIn(2).data,
 
-        test_mode_enb_out => image_patter_read(2),
+      test_mode_enb_out => image_patter_read(2),
 
-        adc_data_ccd_3 => adc_data_int(2),   -- CCD ADC data
-        adc_cnv_ccd_3  => adc_cnv_int(2),    -- ADC conv
-        adc_sck_ccd_3  => adc_sck_int(2)     -- ADC serial clock
-        );
+      adc_data_ccd_3 => adc_data_int(2),
+      adc_cnv_ccd_3  => adc_cnv_int(2),
+      adc_sck_ccd_3  => adc_sck_int(2)
+    );
 
+  three_sequencers_generate : for i in 0 to 2 generate
 
-  three_sequencers_generate :
-  for i in 0 to 2 generate
-
-    start_add_prog_mem_in(i) <= "000" & sync_cmd_main_add & "00"             when sync_cmd_start_seq       = '1' else
+    start_add_prog_mem_in(i) <= "000" & sync_cmd_main_add & "00"             when sync_cmd_start_seq = '1'       else
                                 "000" & regDataWr_masked(4 downto 0) & "00"  when start_add_prog_mem_en(i) = '1' else
                                 (others => '0');
 
@@ -1271,10 +1250,12 @@ begin
         sequencer_busy           => sequencer_busy(i),
         sequencer_out            => sequencer_outputs_int(i),
         end_sequence             => end_sequence(i)
-        );
+      );
 
     sequencer_aligner_shifter : entity lsst_reb.sequencer_aligner_shifter_top
-      generic map(start_adc_bit => 12)
+      generic map (
+        start_adc_bit => 12
+      )
       port map (
         clk           => sys_clk,
         reset         => sys_rst,
@@ -1284,9 +1265,9 @@ begin
         sequencer_in  => sequencer_outputs_int(i),
         shift_on_out  => enable_conv_shift_out(i),
         sequencer_out => sequencer_outputs(i)
-        );
+      );
 
-  end generate;
+  end generate three_sequencers_generate;
 
   -- ASPIC 3 and ASPIC 4 have the same SPI link
   aspic_4_spi_link_top_mux_0 : entity lsst_reb.aspic_3_spi_link_top_mux
@@ -1315,14 +1296,14 @@ begin
       d_from_slave_ccd1  => aspic_config_r_ccd_1,
       d_from_slave_ccd2  => aspic_config_r_ccd_2,
       d_from_slave_ccd3  => aspic_config_r_ccd_3
-      );
+    );
 
   bias_DAC_ccd_1 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
-      GD_th => 1138, -- equivalent to x"472"
-      OD_th => 2275, -- equivalent to x"8E3"
-      RD_th => 1632  -- equivalent to x"660"
-      )
+      GD_th => 1138,
+      OD_th => 2275,
+      RD_th => 1632
+    )
     port map (
       clk             => sys_clk,
       reset           => sys_rst,
@@ -1339,14 +1320,14 @@ begin
       gd_thresh       => bias_gd_thresh_ccd_1,
       od_thresh       => bias_od_thresh_ccd_1,
       rd_thresh       => bias_rd_thresh_ccd_1
-      );
+    );
 
   bias_DAC_ccd_2 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
-      GD_th => 1138, -- equivalent to x"472"
-      OD_th => 2275, -- equivalent to x"8E3"
-      RD_th => 1632  -- equivalent to x"660"
-      )
+      GD_th => 1138,
+      OD_th => 2275,
+      RD_th => 1632
+    )
     port map (
       clk             => sys_clk,
       reset           => sys_rst,
@@ -1363,14 +1344,14 @@ begin
       gd_thresh       => bias_gd_thresh_ccd_2,
       od_thresh       => bias_od_thresh_ccd_2,
       rd_thresh       => bias_rd_thresh_ccd_2
-      );
+    );
 
   bias_DAC_ccd_3 : entity lsst_reb.ad53xx_DAC_protection_top
     generic map (
-      GD_th => 1138, -- equivalent to x"472"
-      OD_th => 2275, -- equivalent to x"8E3"
-      RD_th => 1632  -- equivalent to x"660"
-      )
+      GD_th => 1138,
+      OD_th => 2275,
+      RD_th => 1632
+    )
     port map (
       clk             => sys_clk,
       reset           => sys_rst,
@@ -1387,7 +1368,7 @@ begin
       gd_thresh       => bias_gd_thresh_ccd_3,
       od_thresh       => bias_od_thresh_ccd_3,
       rd_thresh       => bias_rd_thresh_ccd_3
-      );
+    );
 
   clk_rails_prog : entity lsst_reb.dual_ad53xx_DAC_top
     port map (
@@ -1401,7 +1382,7 @@ begin
       ss_dac_1    => sync_RAILS_dac1,
       sclk        => sclk_RAILS,
       ldac        => ldac_RAILS
-      );
+    );
 
   HTR_DAC : entity lsst_reb.ad56xx_DAC_top
     port map (
@@ -1414,7 +1395,7 @@ begin
       ss          => sync_HTR,
       sclk        => sclk_HTR,
       ldac        => ldac_HTR
-      );
+    );
 
   ltc2945_V_I_sens : entity lsst_reb.ltc2945_multi_read_top
     port map (
@@ -1438,9 +1419,9 @@ begin
       v40_voltage_out   => v40_voltage,
       error_v40_current => v40_current_error,
       v40_current_out   => v40_current,
-      sda               => LTC2945_SDA,  --serial data output of i2c bus
-      scl               => LTC2945_SCL   --serial clock output of i2c bus
-      );
+      sda               => LTC2945_SDA,
+      scl               => LTC2945_SCL
+    );
 
   ltc2945_V_I_sens_n15 : entity lsst_reb.ltc2945_single_read_top
     port map (
@@ -1453,9 +1434,9 @@ begin
       v1_voltage_out   => vn15_voltage,
       error_v1_current => vn15_current_error,
       v1_current_out   => vn15_current,
-      sda              => LTC2945n15_SDA,  --serial data output of i2c bus
-      scl              => LTC2945n15_SCL   --serial clock output of i2c bus
-      );
+      sda              => LTC2945n15_SDA,
+      scl              => LTC2945n15_SCL
+    );
 
   DREB_temp_read : entity lsst_reb.adt7420_temp_multiread_2_top
     port map (
@@ -1467,9 +1448,9 @@ begin
       T1_out          => T1_dreb,
       error_T2        => T2_dreb_error,
       T2_out          => T2_dreb,
-      sda             => sda_temp0,     --serial data output of i2c bus
-      scl             => scl_temp0      --serial clock output of i2c bus
-      );
+      sda             => sda_temp0,
+      scl             => scl_temp0
+    );
 
   REB_temp_red_gr1 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
@@ -1487,7 +1468,7 @@ begin
       T4_out          => T4_reb_gr1,
       sda             => sda_temp1,
       scl             => scl_temp1
-      );
+    );
 
   REB_temp_red_gr2 : entity lsst_reb.adt7420_temp_multiread_4_top
     port map (
@@ -1505,7 +1486,7 @@ begin
       T4_out          => T4_reb_gr2,
       sda             => sda_temp2,
       scl             => scl_temp2
-      );
+    );
 
   bias_and_temp_adc : entity lsst_reb.ads8634_and_mux_top
     port map (
@@ -1526,7 +1507,8 @@ begin
       mux_bias_en_out      => bias_t_adc_bias_mux_en,
       mux_sam_address_out  => bias_t_adc_sam_mux_sel,
       mux_bias_address_out => bias_t_adc_bias_mux_sel,
-      data_out             => bias_t_adc_d_out);
+      data_out             => bias_t_adc_d_out
+    );
 
   ccd_temperature_sensor : entity lsst_reb.ad7794_top
     port map (
@@ -1543,9 +1525,15 @@ begin
       ad7794_sclk     => sclk_24ADC,
       busy            => ccd_temp_busy,
       d_from_slave    => ccd_temp
-      );
+    );
 
-  sn_edge_detect : FD port map (D => dcm_locked, C => sys_clk, Q => sn_start_dcm_int);
+  sn_edge_detect : component FD
+    port map (
+      D => dcm_locked,
+      C => sys_clk,
+      Q => sn_start_dcm_int
+    );
+
   sn_start_dcm <= dcm_locked and not sn_start_dcm_int;
   sn_start     <= sn_start_dcm or reb_onewire_reset;
   reb_sn       <= reb_sn_long(55 downto 8);
@@ -1553,7 +1541,8 @@ begin
   onewire_master_1 : entity lsst_reb.onewire_master
     generic map (
       main_clk_freq => 100,
-      word_2_write  => "00110011")
+      word_2_write  => "00110011"
+    )
     port map (
       clk         => sys_clk,
       reset       => '0',
@@ -1561,7 +1550,8 @@ begin
       dq          => reb_sn_onewire,
       done        => open,
       d_from_chip => reb_sn_long,
-      error_bus   => sn_error_bus);
+      error_bus   => sn_error_bus
+    );
 
   reb_sn_dev_error <= sn_error_bus(0);
   reb_sn_crc_ok    <= not sn_error_bus(1);
@@ -1574,37 +1564,41 @@ begin
 
   back_bias_sw : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      reset    => sys_rst and not first_reset_done,
       clk      => sys_clk,
       data_in  => back_bias_sw_protected,
       ce       => en_back_bias_sw,
-      data_out => back_bias_sw_protected_int);
+      data_out => back_bias_sw_protected_int
+    );
 
   back_bias_error_ff : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      reset    => sys_rst and not first_reset_done,
       clk      => sys_clk,
       data_in  => back_bias_sw_error,
       ce       => en_back_bias_sw,
-      data_out => back_bias_sw_error_int);
+      data_out => back_bias_sw_error_int
+    );
 
   back_bias_clamp_protected_int <= not back_bias_sw_protected_int;
 
   back_bias_reg : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done, -- do not reset after POR
+      reset    => sys_rst and not first_reset_done,
       clk      => sys_clk,
       data_in  => back_bias_sw_protected_int,
       ce       => '1',
-      data_out => backbias_ssbe);
+      data_out => backbias_ssbe
+    );
 
   back_bias_clamp_reg : entity lsst_reb.ff_ce_pres
     port map (
-      preset   => sys_rst and not first_reset_done, -- do not reset after POR
+      preset   => sys_rst and not first_reset_done,
       clk      => sys_clk,
       data_in  => back_bias_clamp_protected_int,
       ce       => '1',
-      data_out => backbias_clamp);
+      data_out => backbias_clamp
+    );
 
   ------------------------------------------------------------------------------
   -- DC/DC Converter Synchronization
@@ -1617,13 +1611,13 @@ begin
       clk_2MHz_en_in  => regDataWr_masked(0),
       clk_2MHz_en_out => dcdc_clk_en_out,
       clk_2MHz_out    => PWR_SYNC1
-      );
+    );
 
   ------------------------------------------------------------------------------
   -- Remote Update
   ------------------------------------------------------------------------------
-  ru_image_ID_we <= ru_start;           -- this works because ru_start is
-                                        -- internally delayed for sync.
+  ru_image_ID_we <= ru_start; -- this works because ru_start is
+  -- internally delayed for sync.
 
   Remote_Update_top : entity lsst_reb.multiboot_top
     port map (
@@ -1647,12 +1641,14 @@ begin
       outSpiMosi           => ru_outSpiMosi,
       inSpiMiso            => ru_inSpiMiso,
       outSpiWpB            => ru_outSpiWpB,
-      outSpiHoldB          => ru_outSpiHoldB);
+      outSpiHoldB          => ru_outSpiHoldB
+    );
 
   led_blink_0 : entity lsst_reb.led_blink
     port map (
       clk_in  => sys_clk,
-      led_out => test_led_int(3));
+      led_out => test_led_int(3)
+    );
 
   ClockManager_sys_clk : entity surf.ClockManager7
     generic map (
@@ -1670,7 +1666,8 @@ begin
       CLKOUT0_DIVIDE_G   => 10,
       CLKOUT0_RST_HOLD_G => 8,
       CLKOUT1_DIVIDE_G   => 40,
-      CLKOUT1_RST_HOLD_G => 8)
+      CLKOUT1_RST_HOLD_G => 8
+    )
     port map (
       clkIn     => usrClk,
       rstIn     => '0',
@@ -1678,23 +1675,25 @@ begin
       clkOut(1) => multiboot_clk,
       locked    => dcm_locked,
       rstOut(0) => open,
-      rstOut(1) => open);
+      rstOut(1) => open
+    );
 
   -- Jitter cleaner
-  jc_ref_clk_out : ODDR
-    generic map(
-      DDR_CLK_EDGE => "OPPOSITE_EDGE",  -- "OPPOSITE_EDGE" or "SAME_EDGE"
-      INIT         => '1',              -- Initial value for Q port ('1' or '0')
-      SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
-      ) port map (
-        Q  => jc_refclk_out,            -- 1-bit DDR output
-        C  => sys_clk_local,        -- 1-bit clock input
-        CE => jc_clk_in_en,             -- 1-bit clock enable input
-        D1 => '1',                      -- 1-bit data input (positive edge)
-        D2 => '0',                      -- 1-bit data input (negative edge)
-        R  => '0',                      -- 1-bit reset input
-        S  => '0'                       -- 1-bit set input
-        );
+  jc_ref_clk_out : component ODDR
+    generic map (
+      DDR_CLK_EDGE => "OPPOSITE_EDGE",
+      INIT         => '1',
+      SRTYPE       => "SYNC"
+    )
+    port map (
+      Q  => jc_refclk_out,
+      C  => sys_clk_local,
+      CE => jc_clk_in_en,
+      D1 => '1',
+      D2 => '0',
+      R  => '0',
+      S  => '0'
+    );
 
   jitter_cleaner : entity lsst_reb.si5342_jitter_cleaner_top
     port map (
@@ -1708,230 +1707,418 @@ begin
       miso         => jc_miso,
       mosi         => jc_mosi,
       chip_select  => jc_cs,
-      sclk         => jc_sclk);
+      sclk         => jc_sclk
+    );
 
-  jc_reset <= '1';                      -- NO reset
-  --jc_oe    <= '0';                      -- Outputs Enabled
+  jc_reset <= '1'; -- NO reset
+  -- jc_oe    <= '0';                      -- Outputs Enabled
 
   jc_clk_ready     <= jc_config_done and jc_lol and jc_los0;
   not_jc_clk_ready <= not jc_clk_ready;
 
   jc_status_bus <= '0' & '0' & jc_clk_ready & jc_config_done & jc_lol & jc_los0;
 
-  BUFGCTRL_mux_100Mhz_clk : BUFGCTRL
+  BUFGCTRL_mux_100Mhz_clk : component BUFGCTRL
     generic map (
-      INIT_OUT     => 0,     -- Initial value of BUFGCTRL output ($VALUES;)
-      PRESELECT_I0 => true,  -- BUFGCTRL output uses I0 input ($VALUES;)
-      PRESELECT_I1 => false  -- BUFGCTRL output uses I1 input ($VALUES;)
-      )
+      INIT_OUT     => 0,
+      PRESELECT_I0 => true,
+      PRESELECT_I1 => false
+    )
     port map (
-      O       => sys_clk,           -- 1-bit output: Clock output
-      CE0     => '1',                   -- CE not used
-      CE1     => '1',                   -- CE not used
-      I0      => sys_clk_local,     -- local clock generated form OSC
-      I1      => jc_refclk_in,          -- clock from Jitter Cleaner
-      IGNORE0 => '0',                   -- 1-bit input: Clock ignore input for I0
-      IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present
-      S0      => not_jc_clk_ready,      -- 1-bit input: Clock select for I0
-      S1      => jc_clk_ready           -- 1-bit input: Clock select for I1
-      );
+      O       => sys_clk,
+      CE0     => '1',
+      CE1     => '1',
+      I0      => sys_clk_local,
+      I1      => jc_refclk_in,
+      IGNORE0 => '0',
+      IGNORE1 => '0',
+      S0      => not_jc_clk_ready,
+      S1      => jc_clk_ready
+    );
 
   -- Resets
   -- Power on reset (goes to PGP part)
-  Ureset : IBUF port map (O => n_rst, I => Pwron_Rst_L);
+  Ureset : component IBUF
+    port map (
+      O => n_rst,
+      I => Pwron_Rst_L
+    );
 
   -- sync reset for the user part (from PGP)
-  flop1_res : FD port map (D => usrRst, C => sys_clk, Q => sys_rst_1);
-  flop2_res : FD port map (D => sys_rst_1, C => sys_clk, Q => sys_rst_2);
-  flop3_res : FD port map (D => sys_rst_2, C => sys_clk, Q => sys_rst);
+  flop1_res : component FD
+    port map (
+      D => usrRst,
+      C => sys_clk,
+      Q => sys_rst_1
+    );
 
-  first_reset_done_ff : FDRE
-  generic map (
-    INIT => '0')
-  port map(
-    C => sys_clk,
-    D => sys_rst,
-    R => '0',
-    CE => not first_reset_done,
-    Q => first_reset_done);
+  flop2_res : component FD
+    port map (
+      D => sys_rst_1,
+      C => sys_clk,
+      Q => sys_rst_2
+    );
+
+  flop3_res : component FD
+    port map (
+      D => sys_rst_2,
+      C => sys_clk,
+      Q => sys_rst
+    );
+
+  first_reset_done_ff : component FDRE
+    generic map (
+      INIT => '0'
+    )
+    port map (
+      C  => sys_clk,
+      D  => sys_rst,
+      R  => '0',
+      CE => not first_reset_done,
+      Q  => first_reset_done
+    );
 
   -- reset notice: this ff generates a signal for the reset notice
-  reset_notice : FDRE port map (
-    C  => sys_clk,
-    R  => sys_rst,
-    CE => '1',
-    D  => '1',
-    Q  => fe_reset_notice);
-
+  reset_notice : component FDRE
+    port map (
+      C  => sys_clk,
+      R  => sys_rst,
+      CE => '1',
+      D  => '1',
+      Q  => fe_reset_notice
+    );
 
   -- CCD 1
-  U_ASPIC_r_up_ccd_1 : OBUFDS port map (I  => ASPIC_r_up_ccd_1,
-                                        O  => ASPIC_r_up_ccd_1_p,
-                                        OB => ASPIC_r_up_ccd_1_n);
+  U_ASPIC_r_up_ccd_1 : component OBUFDS
+    port map (
+      I  => ASPIC_r_up_ccd_1,
+      O  => ASPIC_r_up_ccd_1_p,
+      OB => ASPIC_r_up_ccd_1_n
+    );
 
-  U_ASPIC_r_down_ccd_1 : OBUFDS port map (I  => ASPIC_r_down_ccd_1,
-                                          O  => ASPIC_r_down_ccd_1_p,
-                                          OB => ASPIC_r_down_ccd_1_n);
+  U_ASPIC_r_down_ccd_1 : component OBUFDS
+    port map (
+      I  => ASPIC_r_down_ccd_1,
+      O  => ASPIC_r_down_ccd_1_p,
+      OB => ASPIC_r_down_ccd_1_n
+    );
 
-  U_ASPIC_clamp_ccd_1 : OBUFDS port map (I  => ASPIC_clamp_ccd_1,
-                                         O  => ASPIC_clamp_ccd_1_p,
-                                         OB => ASPIC_clamp_ccd_1_n);
+  U_ASPIC_clamp_ccd_1 : component OBUFDS
+    port map (
+      I  => ASPIC_clamp_ccd_1,
+      O  => ASPIC_clamp_ccd_1_p,
+      OB => ASPIC_clamp_ccd_1_n
+    );
 
-  U_ASPIC_reset_ccd_1 : OBUFDS port map (I  => ASPIC_reset_ccd_1,
-                                         O  => ASPIC_reset_ccd_1_p,
-                                         OB => ASPIC_reset_ccd_1_n);
+  U_ASPIC_reset_ccd_1 : component OBUFDS
+    port map (
+      I  => ASPIC_reset_ccd_1,
+      O  => ASPIC_reset_ccd_1_p,
+      OB => ASPIC_reset_ccd_1_n
+    );
 
-  par_clk_ccd_1_generate :
-  for I in 0 to 3 generate
-    U_par_clk_ccd_1 : OBUFDS
-      port map (I  => par_clk_ccd_1(I),
-                O  => par_clk_ccd_1_p(I),
-                OB => par_clk_ccd_1_n(I));
-  end generate;
+  par_clk_ccd_1_generate : for I in 0 to 3 generate
 
-  ser_clk_ccd_1_generate :
-  for I in 0 to 2 generate
-    U_ser_clk_ccd_1 : OBUFDS
-      port map (I  => ser_clk_ccd_1(I),
-                O  => ser_clk_ccd_1_p(I),
-                OB => ser_clk_ccd_1_n(I));
-  end generate;
+    U_par_clk_ccd_1 : component OBUFDS
+      port map (
+        I  => par_clk_ccd_1(I),
+        O  => par_clk_ccd_1_p(I),
+        OB => par_clk_ccd_1_n(I)
+      );
 
-  U_reset_gate_ccd_1 : OBUFDS port map (I  => reset_gate_ccd_1,
-                                        O  => reset_gate_ccd_1_p,
-                                        OB => reset_gate_ccd_1_n);
+  end generate par_clk_ccd_1_generate;
 
+  ser_clk_ccd_1_generate : for I in 0 to 2 generate
+
+    U_ser_clk_ccd_1 : component OBUFDS
+      port map (
+        I  => ser_clk_ccd_1(I),
+        O  => ser_clk_ccd_1_p(I),
+        OB => ser_clk_ccd_1_n(I)
+      );
+
+  end generate ser_clk_ccd_1_generate;
+
+  U_reset_gate_ccd_1 : component OBUFDS
+    port map (
+      I  => reset_gate_ccd_1,
+      O  => reset_gate_ccd_1_p,
+      OB => reset_gate_ccd_1_n
+    );
 
   -- CCD 2
-  U_ASPIC_r_up_ccd_2 : OBUFDS port map (I  => ASPIC_r_up_ccd_2,
-                                        O  => ASPIC_r_up_ccd_2_p,
-                                        OB => ASPIC_r_up_ccd_2_n);
+  U_ASPIC_r_up_ccd_2 : component OBUFDS
+    port map (
+      I  => ASPIC_r_up_ccd_2,
+      O  => ASPIC_r_up_ccd_2_p,
+      OB => ASPIC_r_up_ccd_2_n
+    );
 
-  U_ASPIC_r_down_ccd_2 : OBUFDS port map (I  => ASPIC_r_down_ccd_2,
-                                          O  => ASPIC_r_down_ccd_2_p,
-                                          OB => ASPIC_r_down_ccd_2_n);
+  U_ASPIC_r_down_ccd_2 : component OBUFDS
+    port map (
+      I  => ASPIC_r_down_ccd_2,
+      O  => ASPIC_r_down_ccd_2_p,
+      OB => ASPIC_r_down_ccd_2_n
+    );
 
-  U_ASPIC_clamp_ccd_2 : OBUFDS port map (I  => ASPIC_clamp_ccd_2,
-                                         O  => ASPIC_clamp_ccd_2_p,
-                                         OB => ASPIC_clamp_ccd_2_n);
+  U_ASPIC_clamp_ccd_2 : component OBUFDS
+    port map (
+      I  => ASPIC_clamp_ccd_2,
+      O  => ASPIC_clamp_ccd_2_p,
+      OB => ASPIC_clamp_ccd_2_n
+    );
 
-  U_ASPIC_reset_ccd_2 : OBUFDS port map (I  => ASPIC_reset_ccd_2,
-                                         O  => ASPIC_reset_ccd_2_p,
-                                         OB => ASPIC_reset_ccd_2_n);
+  U_ASPIC_reset_ccd_2 : component OBUFDS
+    port map (
+      I  => ASPIC_reset_ccd_2,
+      O  => ASPIC_reset_ccd_2_p,
+      OB => ASPIC_reset_ccd_2_n
+    );
 
-  par_clk_ccd_2_generate :
-  for I in 0 to 3 generate
-    U_par_clk_ccd_2 : OBUFDS
-      port map (I  => par_clk_ccd_2(I),
-                O  => par_clk_ccd_2_p(I),
-                OB => par_clk_ccd_2_n(I));
-  end generate;
+  par_clk_ccd_2_generate : for I in 0 to 3 generate
 
-  ser_clk_ccd_2_generate :
-  for I in 0 to 2 generate
-    U_ser_clk_ccd_2 : OBUFDS
-      port map (I  => ser_clk_ccd_2(I),
-                O  => ser_clk_ccd_2_p(I),
-                OB => ser_clk_ccd_2_n(I));
-  end generate;
+    U_par_clk_ccd_2 : component OBUFDS
+      port map (
+        I  => par_clk_ccd_2(I),
+        O  => par_clk_ccd_2_p(I),
+        OB => par_clk_ccd_2_n(I)
+      );
 
-  U_reset_gate_ccd_2 : OBUFDS port map (I  => reset_gate_ccd_2,
-                                        O  => reset_gate_ccd_2_p,
-                                        OB => reset_gate_ccd_2_n);
+  end generate par_clk_ccd_2_generate;
+
+  ser_clk_ccd_2_generate : for I in 0 to 2 generate
+
+    U_ser_clk_ccd_2 : component OBUFDS
+      port map (
+        I  => ser_clk_ccd_2(I),
+        O  => ser_clk_ccd_2_p(I),
+        OB => ser_clk_ccd_2_n(I)
+      );
+
+  end generate ser_clk_ccd_2_generate;
+
+  U_reset_gate_ccd_2 : component OBUFDS
+    port map (
+      I  => reset_gate_ccd_2,
+      O  => reset_gate_ccd_2_p,
+      OB => reset_gate_ccd_2_n
+    );
 
   -- CCD 3
-  U_ASPIC_r_up_ccd_3 : OBUFDS port map (I  => ASPIC_r_up_ccd_3,
-                                        O  => ASPIC_r_up_ccd_3_p,
-                                        OB => ASPIC_r_up_ccd_3_n);
+  U_ASPIC_r_up_ccd_3 : component OBUFDS
+    port map (
+      I  => ASPIC_r_up_ccd_3,
+      O  => ASPIC_r_up_ccd_3_p,
+      OB => ASPIC_r_up_ccd_3_n
+    );
 
-  U_ASPIC_r_down_ccd_3 : OBUFDS port map (I  => ASPIC_r_down_ccd_3,
-                                          O  => ASPIC_r_down_ccd_3_p,
-                                          OB => ASPIC_r_down_ccd_3_n);
+  U_ASPIC_r_down_ccd_3 : component OBUFDS
+    port map (
+      I  => ASPIC_r_down_ccd_3,
+      O  => ASPIC_r_down_ccd_3_p,
+      OB => ASPIC_r_down_ccd_3_n
+    );
 
-  U_ASPIC_clamp_ccd_3 : OBUFDS port map (I  => ASPIC_clamp_ccd_3,
-                                         O  => ASPIC_clamp_ccd_3_p,
-                                         OB => ASPIC_clamp_ccd_3_n);
+  U_ASPIC_clamp_ccd_3 : component OBUFDS
+    port map (
+      I  => ASPIC_clamp_ccd_3,
+      O  => ASPIC_clamp_ccd_3_p,
+      OB => ASPIC_clamp_ccd_3_n
+    );
 
-  U_ASPIC_reset_ccd_3 : OBUFDS port map (I  => ASPIC_reset_ccd_3,
-                                         O  => ASPIC_reset_ccd_3_p,
-                                         OB => ASPIC_reset_ccd_3_n);
+  U_ASPIC_reset_ccd_3 : component OBUFDS
+    port map (
+      I  => ASPIC_reset_ccd_3,
+      O  => ASPIC_reset_ccd_3_p,
+      OB => ASPIC_reset_ccd_3_n
+    );
 
-  par_clk_ccd_3_generate :
-  for I in 0 to 3 generate
-    U_par_clk_ccd_3 : OBUFDS
-      port map (I  => par_clk_ccd_3(I),
-                O  => par_clk_ccd_3_p(I),
-                OB => par_clk_ccd_3_n(I));
-  end generate;
+  par_clk_ccd_3_generate : for I in 0 to 3 generate
 
-  ser_clk_ccd_3_generate :
-  for I in 0 to 2 generate
-    U_ser_clk_ccd_3 : OBUFDS
-      port map (I  => ser_clk_ccd_3(I),
-                O  => ser_clk_ccd_3_p(I),
-                OB => ser_clk_ccd_3_n(I));
-  end generate;
+    U_par_clk_ccd_3 : component OBUFDS
+      port map (
+        I  => par_clk_ccd_3(I),
+        O  => par_clk_ccd_3_p(I),
+        OB => par_clk_ccd_3_n(I)
+      );
 
-  U_reset_gate_ccd_3 : OBUFDS port map (I  => reset_gate_ccd_3,
-                                        O  => reset_gate_ccd_3_p,
-                                        OB => reset_gate_ccd_3_n);
+  end generate par_clk_ccd_3_generate;
+
+  ser_clk_ccd_3_generate : for I in 0 to 2 generate
+
+    U_ser_clk_ccd_3 : component OBUFDS
+      port map (
+        I  => ser_clk_ccd_3(I),
+        O  => ser_clk_ccd_3_p(I),
+        OB => ser_clk_ccd_3_n(I)
+      );
+
+  end generate ser_clk_ccd_3_generate;
+
+  U_reset_gate_ccd_3 : component OBUFDS
+    port map (
+      I  => reset_gate_ccd_3,
+      O  => reset_gate_ccd_3_p,
+      OB => reset_gate_ccd_3_n
+    );
 
   -- Jitter Cleaner
-  U_jc_refclk_out_buf : OBUFDS
+  U_jc_refclk_out_buf : component OBUFDS
     generic map (
-      IOSTANDARD => "DEFAULT",          -- Specify the output I/O standard
-      SLEW       => "FAST")             -- Specify the output slew rate
+      IOSTANDARD => "DEFAULT",
+      SLEW       => "FAST"
+    )
 
-    port map (I  => jc_refclk_out,
-              O  => jc_refclk_out_p,
-              OB => jc_refclk_out_n);
-
-  jc_clock_in_buf : IBUFDS
-    generic map (
-      DIFF_TERM    => true,   -- Differential Termination
-      IBUF_LOW_PWR => false,  -- Low power (TRUE) vs. performance (FALSE) setting for referenced I/O standards
-      IOSTANDARD   => "DEFAULT")
     port map (
-      O  => jc_refclk_in,   -- Buffer output
-      I  => jc_refclk_in_p, -- Diff_p buffer input (connect directly to top-level port)
-      IB => jc_refclk_in_n  -- Diff_n buffer input (connect directly to top-level port)
-      );
+      I  => jc_refclk_out,
+      O  => jc_refclk_out_p,
+      OB => jc_refclk_out_n
+    );
 
-  IBUFG_inst : IBUFG
+  jc_clock_in_buf : component IBUFDS
     generic map (
-      IBUF_LOW_PWR => true,   -- Low power (TRUE) vs. performance (FALSE) setting for referenced I/O standards
-      IOSTANDARD   => "DEFAULT")
+      DIFF_TERM    => true,
+      IBUF_LOW_PWR => false,
+      IOSTANDARD   => "DEFAULT"
+    )
     port map (
-      O => aux_100mhz_clk,    -- Clock buffer output
-      I => aux_100mhz_clk_in  -- Clock buffer input (connect directly to top-level port)
-      );
+      O  => jc_refclk_in,
+      I  => jc_refclk_in_p,
+      IB => jc_refclk_in_n
+    );
+
+  IBUFG_inst : component IBUFG
+    generic map (
+      IBUF_LOW_PWR => true,
+      IOSTANDARD   => "DEFAULT"
+    )
+    port map (
+      O => aux_100mhz_clk,
+      I => aux_100mhz_clk_in
+    );
 
   ------ MISC ------
   -- leds
-  Utest_led0 : OBUF port map (O => TEST_LED(0), I => test_led_int(0));
-  Utest_led1 : OBUF port map (O => TEST_LED(1), I => test_led_int(1));
-  Utest_led2 : OBUF port map (O => TEST_LED(2), I => test_led_int(2));
-  Utest_led3 : OBUF port map (O => TEST_LED(3), I => test_led_int(3));
-  Utest_led4 : OBUF port map (O => TEST_LED(4), I => test_led_int(4));
-  Utest_led5 : OBUF port map (O => TEST_LED(5), I => test_led_int(5));
+  Utest_led0 : component OBUF
+    port map (
+      O => TEST_LED(0),
+      I => test_led_int(0)
+    );
+
+  Utest_led1 : component OBUF
+    port map (
+      O => TEST_LED(1),
+      I => test_led_int(1)
+    );
+
+  Utest_led2 : component OBUF
+    port map (
+      O => TEST_LED(2),
+      I => test_led_int(2)
+    );
+
+  Utest_led3 : component OBUF
+    port map (
+      O => TEST_LED(3),
+      I => test_led_int(3)
+    );
+
+  Utest_led4 : component OBUF
+    port map (
+      O => TEST_LED(4),
+      I => test_led_int(4)
+    );
+
+  Utest_led5 : component OBUF
+    port map (
+      O => TEST_LED(5),
+      I => test_led_int(5)
+    );
 
   -- test points
-  Utest0  : OBUF port map (O => TEST(0),  I => test_port(0));
-  Utest1  : OBUF port map (O => TEST(1),  I => test_port(1));
-  Utest2  : OBUF port map (O => TEST(2),  I => test_port(2));
-  Utest3  : OBUF port map (O => TEST(3),  I => test_port(3));
-  Utest4  : OBUF port map (O => TEST(4),  I => test_port(4));
-  Utest5  : OBUF port map (O => TEST(5),  I => test_port(5));
-  Utest6  : OBUF port map (O => TEST(6),  I => test_port(6));
-  Utest7  : OBUF port map (O => TEST(7),  I => test_port(7));
-  Utest8  : OBUF port map (O => TEST(8),  I => test_port(8));
-  Utest9  : OBUF port map (O => TEST(9),  I => test_port(9));
-  Utest10 : OBUF port map (O => TEST(10), I => test_port(10));
-  Utest11 : OBUF port map (O => TEST(11), I => test_port(11));
-  Utest12 : OBUF port map (O => TEST(12), I => test_port(12));
+  Utest0 : component OBUF
+    port map (
+      O => TEST(0),
+      I => test_port(0)
+    );
 
-  U_GPIO : OBUFDS port map (I  => gpio_int,
-                            O  => gpio_p,
-                            OB => gpio_n);
+  Utest1 : component OBUF
+    port map (
+      O => TEST(1),
+      I => test_port(1)
+    );
 
-end Behavioral;
+  Utest2 : component OBUF
+    port map (
+      O => TEST(2),
+      I => test_port(2)
+    );
+
+  Utest3 : component OBUF
+    port map (
+      O => TEST(3),
+      I => test_port(3)
+    );
+
+  Utest4 : component OBUF
+    port map (
+      O => TEST(4),
+      I => test_port(4)
+    );
+
+  Utest5 : component OBUF
+    port map (
+      O => TEST(5),
+      I => test_port(5)
+    );
+
+  Utest6 : component OBUF
+    port map (
+      O => TEST(6),
+      I => test_port(6)
+    );
+
+  Utest7 : component OBUF
+    port map (
+      O => TEST(7),
+      I => test_port(7)
+    );
+
+  Utest8 : component OBUF
+    port map (
+      O => TEST(8),
+      I => test_port(8)
+    );
+
+  Utest9 : component OBUF
+    port map (
+      O => TEST(9),
+      I => test_port(9)
+    );
+
+  Utest10 : component OBUF
+    port map (
+      O => TEST(10),
+      I => test_port(10)
+    );
+
+  Utest11 : component OBUF
+    port map (
+      O => TEST(11),
+      I => test_port(11)
+    );
+
+  Utest12 : component OBUF
+    port map (
+      O => TEST(12),
+      I => test_port(12)
+    );
+
+  U_GPIO : component OBUFDS
+    port map (
+      I  => gpio_int,
+      O  => gpio_p,
+      OB => gpio_n
+    );
+
+end architecture Behavioral;

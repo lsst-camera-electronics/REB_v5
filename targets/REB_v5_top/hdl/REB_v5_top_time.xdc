@@ -31,5 +31,5 @@ set_clock_groups -logically_exclusive -group RXOUTCLK_B -group {sys_clk_local_fr
 
 
 #### Set asynchronous clocks ####
-set_clock_groups -asynchronous -group stable_clk -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B -group {sys_clk_local_from_A sys_clk_local_from_B multiboot_clk_from_A multiboot_clk_from_B}
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B -group {sys_clk_local_from_A sys_clk_local_from_B multiboot_clk_from_A multiboot_clk_from_B}
 

@@ -1,23 +1,15 @@
---
---      Package File Template
---
---      Purpose: This package defines supplemental types, subtypes,
---               constants, and functions
---
---   To use any of the example code shown below, uncomment the lines and modify as necessary
---
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
 package REB_v5_commands_package is
 
-  constant schema_value      :std_logic_vector(31 downto 0)  := x"00000002"; -- address map version
-  constant version_dev_level :std_logic_vector( 3 downto 0)  := x"3";        -- Board tipe: 3: Science Raft, 2: GREB, 1: WREB
-  constant REB_vhdl_version  :std_logic_vector(15 downto 0)  := x"5013";     -- REB vhdl version
-  constant reserved_1_value  :std_logic_vector(31 downto 0)  := x"deadbeef";
-  constant reserved_2_value  :std_logic_vector(31 downto 0)  := x"00000000";
-  constant reserved_3_value  :std_logic_vector(31 downto 0)  := x"00000000";
+  constant schema_value      : std_logic_vector(31 downto 0) := x"00000002"; -- address map version
+  constant version_dev_level : std_logic_vector( 3 downto 0) := x"3";        -- Board tipe: 3: Science Raft
+  constant REB_vhdl_version  : std_logic_vector(15 downto 0) := x"5013";     -- REB vhdl version
+  constant reserved_1_value  : std_logic_vector(31 downto 0) := x"deadbeef";
+  constant reserved_2_value  : std_logic_vector(31 downto 0) := x"00000000";
+  constant reserved_3_value  : std_logic_vector(31 downto 0) := x"00000000";
 
   -- Base Register Set
   constant read_schema_cmd              : std_logic_vector(23 downto 0) := x"000000";
@@ -95,7 +87,6 @@ package REB_v5_commands_package is
 
   constant seq_op_code_error_rd_cmd    : std_logic_vector(23 downto 0) := x"390000";
   constant seq_op_code_error_reset_cmd : std_logic_vector(23 downto 0) := x"390001";
-
 
   -- CABAC (top 0 to 4 - bottom 5 to 9) 500000 DAC @ 501000
   -- ASPIC
@@ -194,8 +185,8 @@ package REB_v5_commands_package is
   -- back bias switch
   constant back_bias_sw_cmd : std_logic_vector(23 downto 0) := x"D00000";
 
-end REB_v5_commands_package;
+end package REB_v5_commands_package;
 
 package body REB_v5_commands_package is
 
-end REB_v5_commands_package;
+end package body REB_v5_commands_package;

@@ -1,0 +1,65 @@
+# To check the VHDL formatting:
+# find . -name "*.vhd" -exec vsg -c vsg_cfg.yaml -f {} \;
+# To fix what can be:
+# find . -name "*.vhd" -exec vsg -c vsg_cfg.yaml -f {} --fix \;
+
+indent :
+  options :
+    comment :
+      align_with_end_of_declarative_part: true
+      align_with_end_of_statement_part: true
+  tokens:
+    use_clause:
+      keyword:
+        token_after_library_clause: '+0'
+        token_if_no_matching_library_clause: '+0'
+rule:
+  global :
+    open_paren_new_line : 'no'
+    align_left : 'no'
+    align_paren : 'yes'
+    align_when_keywords : 'yes'
+    wrap_at_when : 'yes'
+    align_else_keywords : 'yes'
+  group :
+    case:
+      disable : true
+  instantiation_036:
+     action: 'remove'
+  block_comment_001 :
+    disable : false
+    max_header_column : 80
+  block_comment_002 :
+    disable : false
+    comment_left : null
+  block_comment_003 :
+    disable : false
+    max_footer_column : 80
+  conditional_waveforms_102:
+    disable: true
+  conditional_waveforms_100:
+    disable: true
+  port_012 :
+    disable : true
+  length_002 :
+    disable : true
+  length_003 :
+    disable : true
+  process_016 :
+    disable : true
+  process_018 :
+    disable : true
+  process_029 :
+    disable : false
+    clock : 'edge'
+  signal_200 :
+    disable : false
+  signal_007 :
+    disable : true
+  type_200 :
+    disable : false
+  instantiation_034:
+    disable: true
+    method: 'entity'
+  whitespace_011:
+    disable : true

@@ -1,20 +1,11 @@
---
---      Package File Template
---
---      Purpose: This package defines supplemental types, subtypes,
---               constants, and functions
---
---   To use any of the example code shown below, uncomment the lines and modify as necessary
---
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 
 package REB_v5_commands_package_3_seq is
 
-  constant schema_value      : std_logic_vector(31 downto 0) := x"00000002";  -- address map version
-  constant version_dev_level : std_logic_vector(3 downto 0)  := x"3";         -- Board tipe: 3: Science Raft, 2: GREB, 1: WREB
-  constant REB_vhdl_version  : std_logic_vector(15 downto 0) := x"5113";      -- REB vhdl version
+  constant schema_value      : std_logic_vector(31 downto 0) := x"00000002"; -- address map version
+  constant version_dev_level : std_logic_vector(3 downto 0)  := x"3";        -- Board tipe: 3: Science Raft
+  constant REB_vhdl_version  : std_logic_vector(15 downto 0) := x"5113";     -- REB vhdl version
   constant reserved_1_value  : std_logic_vector(31 downto 0) := x"deadbeef";
   constant reserved_2_value  : std_logic_vector(31 downto 0) := x"00000000";
   constant reserved_3_value  : std_logic_vector(31 downto 0) := x"00000000";
@@ -146,7 +137,6 @@ package REB_v5_commands_package_3_seq is
   constant seq_op_code_error_rd_cmd_2    : std_logic_vector(23 downto 0) := x"392000";
   constant seq_op_code_error_reset_cmd_2 : std_logic_vector(23 downto 0) := x"392001";
 
-
   -- CABAC (top 0 to 4 - bottom 5 to 9) 500000 DAC @ 501000
   -- ASPIC
   constant aspic_start_trans_cmd    : std_logic_vector(23 downto 0) := x"B00000";
@@ -248,9 +238,8 @@ package REB_v5_commands_package_3_seq is
   -- back bias switch
   constant back_bias_sw_cmd : std_logic_vector(23 downto 0) := x"D00000";
 
-
-end REB_v5_commands_package_3_seq;
+end package REB_v5_commands_package_3_seq;
 
 package body REB_v5_commands_package_3_seq is
 
-end REB_v5_commands_package_3_seq;
+end package body REB_v5_commands_package_3_seq;
