@@ -220,7 +220,6 @@ entity REB_v5_top is
 
     jc_los0 : in    std_logic;
     jc_lol  : in    std_logic;
-    -- jc_oe    : out std_logic;
     jc_reset : out   std_logic;
 
     ------ Remote Update ------
@@ -256,25 +255,21 @@ architecture Behavioral of REB_v5_top is
   -- Clocks
   signal pgpRefClk       : std_logic;
   signal stable_clk      : std_logic;
-  signal stable_clk_int  : std_logic;
   signal stable_reset    : std_logic;
   signal stable_clk_lock : std_logic;
   signal usrClk          : std_logic;
   signal sys_clk_local   : std_logic;
   signal sys_clk         : std_logic;
   signal multiboot_clk   : std_logic;
-
   signal aux_100mhz_clk : std_logic;
 
   -- Reset
-  signal n_rst                : std_logic;
-  signal usrRst               : std_logic;
-  signal sys_rst              : std_logic;
-  signal sys_rst_1            : std_logic;
-  signal sys_rst_2            : std_logic;
-  signal first_reset          : std_logic;
-  signal first_reset_done     : std_logic;
-  signal first_reset_not_done : std_logic;
+  signal n_rst            : std_logic;
+  signal usrRst           : std_logic;
+  signal sys_rst          : std_logic;
+  signal first_reset_done : std_logic;
+  signal first_reset      : std_logic;
+  signal prev_sys_rst     : std_logic;
 
   -- SCI signals
   signal pgpLocLinkReady : std_logic;
@@ -609,6 +604,7 @@ begin
   test_led_int(1)          <= pgpRemLinkReady;
   test_led_int(5)          <= dcm_locked;
   busy_bus                 <= x"000000" & "000" & temp_busy & V_I_busy_or & sequencer_busy & time_base_busy & '0';
+
   adc_data_ccd_1           <= adc_data_t_ccd_1 & adc_data_b_ccd_1;
   adc_data_ccd_2           <= adc_data_t_ccd_2 & adc_data_b_ccd_2;
   adc_data_ccd_3           <= adc_data_t_ccd_3 & adc_data_b_ccd_3;
@@ -1189,11 +1185,24 @@ begin
       adc_sck_ccd_3     => adc_sck_ccd_3
     );
 
-  start_add_prog_mem_in <= "000" & sync_cmd_main_add & "00"            when sync_cmd_start_seq = '1'    else
-                           "000" & regDataWr_masked(4 downto 0) & "00" when start_add_prog_mem_en = '1' else
-                           (others => '0');
+  process (sys_clk) is
+  begin
 
-  sequencer_start <= sync_cmd_start_seq or start_add_prog_mem_en;
+    if rising_edge(sys_clk) then
+      -- Default state (no trigger)
+      sequencer_start <= '0';
+      -- Handle first trigger source
+      if (sync_cmd_start_seq = '1') then
+        start_add_prog_mem_in <= "000" & sync_cmd_main_add & "00";
+        sequencer_start       <= '1';
+      -- Handle second trigger source
+      elsif (start_add_prog_mem_en = '1') then
+        start_add_prog_mem_in <= "000" & regDataWr_masked(4 downto 0) & "00";
+        sequencer_start       <= '1';
+      end if;
+    end if;
+
+  end process;
 
   sequencer_v4_0 : entity lsst_reb.sequencer_v4_top
     port map (
@@ -1536,9 +1545,6 @@ begin
   back_bias_sw_protected <= regDataWr_masked(0) and not (or_reduce(bias_v_undr_th));
   back_bias_sw_error     <= regDataWr_masked(0) and (or_reduce(bias_v_undr_th));
 
-  first_reset_not_done <= not first_reset_done;
-  first_reset          <= sys_rst and first_reset_not_done;
-
   back_bias_sw : entity lsst_reb.ff_ce
     port map (
       reset    => first_reset,
@@ -1720,38 +1726,40 @@ begin
     );
 
   -- sync reset for the user part (from PGP)
-  flop1_res : component FD
-    port map (
-      D => usrRst,
-      C => sys_clk,
-      Q => sys_rst_1
-    );
-
-  flop2_res : component FD
-    port map (
-      D => sys_rst_1,
-      C => sys_clk,
-      Q => sys_rst_2
-    );
-
-  flop3_res : component FD
-    port map (
-      D => sys_rst_2,
-      C => sys_clk,
-      Q => sys_rst
-    );
-
-  first_reset_done_ff : component FDRE
+  reset_sync : entity surf.Synchronizer
     generic map (
-      INIT => '0'
+      STAGES_G => 3
     )
     port map (
-      C  => sys_clk,
-      D  => sys_rst,
-      R  => '0',
-      CE => first_reset_not_done,
-      Q  => first_reset_done
+      clk     => sys_clk,
+      dataIn  => usrRst,
+      dataOut => sys_rst
     );
+
+  -- latch the first reset
+  process (sys_clk) is
+  begin
+
+    if rising_edge(sys_clk) then
+      -- Before we've completed the first reset sequence
+      if (first_reset_done = '0') then
+        -- Mirror sys_rst to first_reset
+        first_reset <= sys_rst;
+
+        -- Detect the falling edge of the first reset
+        if (prev_sys_rst = '1' and sys_rst = '0') then
+          first_reset_done <= '1';  -- Lock after first reset completes
+        end if;
+
+        -- Keep track of previous sys_rst value for edge detection
+        prev_sys_rst <= sys_rst;
+      else
+        -- After first reset sequence is complete, keep first_reset low
+        first_reset <= '0';
+      end if;
+    end if;
+
+  end process;
 
   -- reset notice: this ff generates a signal for the reset notice
   reset_notice : component FDRE

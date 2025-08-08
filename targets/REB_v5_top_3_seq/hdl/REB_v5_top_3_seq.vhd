@@ -221,7 +221,6 @@ entity REB_v5_top_3_seq is
 
     jc_los0 : in    std_logic;
     jc_lol  : in    std_logic;
-    -- jc_oe    : out std_logic;
     jc_reset : out   std_logic;
 
     ------ Remote Update ------
@@ -269,9 +268,9 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal n_rst            : std_logic;
   signal usrRst           : std_logic;
   signal sys_rst          : std_logic;
-  signal sys_rst_1        : std_logic;
-  signal sys_rst_2        : std_logic;
   signal first_reset_done : std_logic;
+  signal first_reset      : std_logic;
+  signal prev_sys_rst     : std_logic;
 
   -- SCI signals
   signal pgpLocLinkReady : std_logic;
@@ -329,6 +328,7 @@ architecture Behavioral of REB_v5_top_3_seq is
 
   -- sequencer signals
   signal sequencer_busy           : std_logic_vector(2 downto 0);
+  signal sequencer_start          : std_logic_vector(2 downto 0);
   signal sequencer_busy_or        : std_logic;
   signal seq_time_mem_readbk      : array316;
   signal seq_out_mem_readbk       : array332;
@@ -537,7 +537,6 @@ architecture Behavioral of REB_v5_top_3_seq is
   signal back_bias_sw_protected        : std_logic;
   signal back_bias_sw_protected_int    : std_logic;
   signal back_bias_clamp_protected_int : std_logic;
-  signal back_bias_clamp_int           : std_logic;
   signal back_bias_sw_error            : std_logic;
   signal back_bias_sw_error_int        : std_logic;
 
@@ -1215,15 +1214,30 @@ begin
 
   three_sequencers_generate : for i in 0 to 2 generate
 
-    start_add_prog_mem_in(i) <= "000" & sync_cmd_main_add & "00"             when sync_cmd_start_seq = '1'       else
-                                "000" & regDataWr_masked(4 downto 0) & "00"  when start_add_prog_mem_en(i) = '1' else
-                                (others => '0');
+    process (sys_clk) is
+    begin
+
+      if rising_edge(sys_clk) then
+        -- Default state (no trigger)
+        sequencer_start(i) <= '0';
+        -- Handle first trigger source
+        if (sync_cmd_start_seq = '1') then
+          start_add_prog_mem_in(i) <= "000" & sync_cmd_main_add & "00";
+          sequencer_start(i)       <= '1';
+        -- Handle second trigger source
+        elsif (start_add_prog_mem_en(i) = '1') then
+          start_add_prog_mem_in(i) <= "000" & regDataWr_masked(4 downto 0) & "00";
+          sequencer_start(i)       <= '1';
+        end if;
+      end if;
+
+    end process;
 
     sequencer_v4_0 : entity lsst_reb.sequencer_v4_top
       port map (
         reset                    => sys_rst,
         clk                      => sys_clk,
-        start_sequence           => sync_cmd_start_seq or start_add_prog_mem_en(i),
+        start_sequence           => sequencer_start(i),
         program_mem_we           => seq_prog_mem_w_en(i),
         seq_mem_w_add            => regAddr(9 downto 0),
         seq_mem_data_in          => regDataWr_masked,
@@ -1564,7 +1578,7 @@ begin
 
   back_bias_sw : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done,
+      reset    => first_reset,
       clk      => sys_clk,
       data_in  => back_bias_sw_protected,
       ce       => en_back_bias_sw,
@@ -1573,7 +1587,7 @@ begin
 
   back_bias_error_ff : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done,
+      reset    => first_reset,
       clk      => sys_clk,
       data_in  => back_bias_sw_error,
       ce       => en_back_bias_sw,
@@ -1584,7 +1598,7 @@ begin
 
   back_bias_reg : entity lsst_reb.ff_ce
     port map (
-      reset    => sys_rst and not first_reset_done,
+      reset    => first_reset,
       clk      => sys_clk,
       data_in  => back_bias_sw_protected_int,
       ce       => '1',
@@ -1593,7 +1607,7 @@ begin
 
   back_bias_clamp_reg : entity lsst_reb.ff_ce_pres
     port map (
-      preset   => sys_rst and not first_reset_done,
+      preset   => first_reset,
       clk      => sys_clk,
       data_in  => back_bias_clamp_protected_int,
       ce       => '1',
@@ -1745,38 +1759,40 @@ begin
     );
 
   -- sync reset for the user part (from PGP)
-  flop1_res : component FD
-    port map (
-      D => usrRst,
-      C => sys_clk,
-      Q => sys_rst_1
-    );
-
-  flop2_res : component FD
-    port map (
-      D => sys_rst_1,
-      C => sys_clk,
-      Q => sys_rst_2
-    );
-
-  flop3_res : component FD
-    port map (
-      D => sys_rst_2,
-      C => sys_clk,
-      Q => sys_rst
-    );
-
-  first_reset_done_ff : component FDRE
+  reset_sync : entity surf.Synchronizer
     generic map (
-      INIT => '0'
+      STAGES_G => 3
     )
     port map (
-      C  => sys_clk,
-      D  => sys_rst,
-      R  => '0',
-      CE => not first_reset_done,
-      Q  => first_reset_done
+      clk     => sys_clk,
+      dataIn  => usrRst,
+      dataOut => sys_rst
     );
+
+  -- latch the first reset
+  process (sys_clk) is
+  begin
+
+    if rising_edge(sys_clk) then
+      -- Before we've completed the first reset sequence
+      if (first_reset_done = '0') then
+        -- Mirror sys_rst to first_reset
+        first_reset <= sys_rst;
+
+        -- Detect the falling edge of the first reset
+        if (prev_sys_rst = '1' and sys_rst = '0') then
+          first_reset_done <= '1';  -- Lock after first reset completes
+        end if;
+
+        -- Keep track of previous sys_rst value for edge detection
+        prev_sys_rst <= sys_rst;
+      else
+        -- After first reset sequence is complete, keep first_reset low
+        first_reset <= '0';
+      end if;
+    end if;
+
+  end process;
 
   -- reset notice: this ff generates a signal for the reset notice
   reset_notice : component FDRE
