@@ -3,8 +3,8 @@
 
 ## pgp reference clock
 
-set_property PACKAGE_PIN F6 [get_ports {PgpRefClk_P}]
-set_property PACKAGE_PIN F5 [get_ports {PgpRefClk_M}]
+set_property PACKAGE_PIN F6 [get_ports PgpRefClk_P]
+set_property PACKAGE_PIN F5 [get_ports PgpRefClk_M]
 
 ## PGP serial com lines (Bank 116)
 
@@ -21,7 +21,7 @@ set_property PACKAGE_PIN A3 [get_ports {PgpTx_M[1]}]
 set_property PACKAGE_PIN A4 [get_ports {PgpTx_P[1]}]
 
 #Aux clk
-set_property PACKAGE_PIN F17 [get_ports {aux_100mhz_clk_in}]
+set_property PACKAGE_PIN F17 [get_ports aux_100mhz_clk_in]
 #set_property PACKAGE_PIN E17 [get_ports aux_100mhz_clk_in]
 
 #### signals for CCD 1 ####
@@ -244,33 +244,33 @@ set_property PACKAGE_PIN AB22 [get_ports {sync_C_BIAS_ccd[2]}]
 set_property PACKAGE_PIN AC22 [get_ports {sclk_C_BIAS_ccd[2]}]
 
 ##### DREB V & I sensors (Bank 14)  #####
-set_property PACKAGE_PIN G24 [get_ports {LTC2945_SCL}]
-set_property PACKAGE_PIN F24 [get_ports {LTC2945_SDA}]
+set_property PACKAGE_PIN G24 [get_ports LTC2945_SCL]
+set_property PACKAGE_PIN F24 [get_ports LTC2945_SDA]
 #assigned to unconnected pin
-set_property PACKAGE_PIN E25 [get_ports {LTC2945n15_SCL}]
+set_property PACKAGE_PIN E25 [get_ports LTC2945n15_SCL]
 #assigned to unconnected pin
-set_property PACKAGE_PIN D25 [get_ports {LTC2945n15_SDA}]
+set_property PACKAGE_PIN D25 [get_ports LTC2945n15_SDA]
 
 #####Temperature ####
 ##DREB PCB temperature (Bank 14)
-set_property PACKAGE_PIN G26 [get_ports {sda_temp0}]
-set_property PACKAGE_PIN G25 [get_ports {scl_temp0}]
+set_property PACKAGE_PIN G26 [get_ports sda_temp0]
+set_property PACKAGE_PIN G25 [get_ports scl_temp0]
 
 ##REB PCB temperature (Bank 16)
-set_property PACKAGE_PIN B11 [get_ports {sda_temp1}]
-set_property PACKAGE_PIN B12 [get_ports {scl_temp1}]
-set_property PACKAGE_PIN A14 [get_ports {sda_temp2}]
-set_property PACKAGE_PIN B14 [get_ports {scl_temp2}]
+set_property PACKAGE_PIN B11 [get_ports sda_temp1]
+set_property PACKAGE_PIN B12 [get_ports scl_temp1]
+set_property PACKAGE_PIN A14 [get_ports sda_temp2]
+set_property PACKAGE_PIN B14 [get_ports scl_temp2]
 
 ##bias and Temp ADC## Bank 12
-set_property PACKAGE_PIN V22 [get_ports {bias_t_adc_miso}]
-set_property PACKAGE_PIN U21 [get_ports {bias_t_adc_cs}]
-set_property PACKAGE_PIN U24 [get_ports {bias_t_adc_sclk}]
-set_property PACKAGE_PIN U22 [get_ports {bias_t_adc_mosi}]
-set_property PACKAGE_PIN U25 [get_ports {bias_t_adc_shdn}]
+set_property PACKAGE_PIN V22 [get_ports bias_t_adc_miso]
+set_property PACKAGE_PIN U21 [get_ports bias_t_adc_cs]
+set_property PACKAGE_PIN U24 [get_ports bias_t_adc_sclk]
+set_property PACKAGE_PIN U22 [get_ports bias_t_adc_mosi]
+set_property PACKAGE_PIN U25 [get_ports bias_t_adc_shdn]
 
-set_property PACKAGE_PIN W23 [get_ports {bias_t_adc_sam_mux_en}]
-set_property PACKAGE_PIN V23 [get_ports {bias_t_adc_bias_mux_en}]
+set_property PACKAGE_PIN W23 [get_ports bias_t_adc_sam_mux_en]
+set_property PACKAGE_PIN V23 [get_ports bias_t_adc_bias_mux_en]
 
 set_property PACKAGE_PIN V24 [get_ports {bias_t_adc_bias_mux_sel[0]}]
 set_property PACKAGE_PIN U26 [get_ports {bias_t_adc_bias_mux_sel[1]}]
@@ -281,58 +281,58 @@ set_property PACKAGE_PIN C22 [get_ports {bias_t_adc_sam_mux_sel[2]}]
 
 ##CCD temperatures (Bank 14)
 # mod to correct a name inversion on the schematics
-set_property PACKAGE_PIN D26 [get_ports {csb_24ADC}]
-set_property PACKAGE_PIN A24 [get_ports {sclk_24ADC}]
-set_property PACKAGE_PIN A23 [get_ports {din_24ADC}]
-set_property PACKAGE_PIN B26 [get_ports {dout_24ADC}]
+set_property PACKAGE_PIN D26 [get_ports csb_24ADC]
+set_property PACKAGE_PIN A24 [get_ports sclk_24ADC]
+set_property PACKAGE_PIN A23 [get_ports din_24ADC]
+set_property PACKAGE_PIN B26 [get_ports dout_24ADC]
 
 ##### DAC ####
 ##clock rails DAC (Bank 12)
-set_property PACKAGE_PIN AA25 [get_ports {ldac_RAILS}]
-set_property PACKAGE_PIN AB25 [get_ports {din_RAILS}]
-set_property PACKAGE_PIN W26 [get_ports {sync_RAILS_dac0}]
-set_property PACKAGE_PIN V21 [get_ports {sync_RAILS_dac1}]
-set_property PACKAGE_PIN W21 [get_ports {sclk_RAILS}]
+set_property PACKAGE_PIN AA25 [get_ports ldac_RAILS]
+set_property PACKAGE_PIN AB25 [get_ports din_RAILS]
+set_property PACKAGE_PIN W26 [get_ports sync_RAILS_dac0]
+set_property PACKAGE_PIN V21 [get_ports sync_RAILS_dac1]
+set_property PACKAGE_PIN W21 [get_ports sclk_RAILS]
 
 
 ##Heaters (bank 12)
 
-set_property PACKAGE_PIN AC26 [get_ports {ldac_HTR}]
-set_property PACKAGE_PIN Y25 [get_ports {din_HTR}]
-set_property PACKAGE_PIN W24 [get_ports {sync_HTR}]
-set_property PACKAGE_PIN AB26 [get_ports {sclk_HTR}]
+set_property PACKAGE_PIN AC26 [get_ports ldac_HTR]
+set_property PACKAGE_PIN Y25 [get_ports din_HTR]
+set_property PACKAGE_PIN W24 [get_ports sync_HTR]
+set_property PACKAGE_PIN AB26 [get_ports sclk_HTR]
 
 
 ### Backbias sw
 #(Bank15)
-set_property PACKAGE_PIN L19 [get_ports {backbias_clamp}]
-set_property PACKAGE_PIN J19 [get_ports {backbias_ssbe}]
+set_property PACKAGE_PIN L19 [get_ports backbias_clamp]
+set_property PACKAGE_PIN J19 [get_ports backbias_ssbe]
 
 ### Jitter Cleaner
 #(Bank14)
-set_property PACKAGE_PIN C21 [get_ports {jc_miso}]
-set_property PACKAGE_PIN B20 [get_ports {jc_mosi}]
-set_property PACKAGE_PIN A20 [get_ports {jc_sclk}]
-set_property PACKAGE_PIN B21 [get_ports {jc_cs}]
+set_property PACKAGE_PIN C21 [get_ports jc_miso]
+set_property PACKAGE_PIN B20 [get_ports jc_mosi]
+set_property PACKAGE_PIN A20 [get_ports jc_sclk]
+set_property PACKAGE_PIN B21 [get_ports jc_cs]
 #set_property PACKAGE_PIN F25 [get_ports jc_oe]
-set_property PACKAGE_PIN E26 [get_ports {jc_reset}]
+set_property PACKAGE_PIN E26 [get_ports jc_reset]
 #set_property PACKAGE_PIN E21 [get_ports jc_sel0]
 #set_property PACKAGE_PIN E22 [get_ports jc_sel1]
-set_property PACKAGE_PIN J26 [get_ports {jc_lol}]
-set_property PACKAGE_PIN H26 [get_ports {jc_los0}]
+set_property PACKAGE_PIN J26 [get_ports jc_lol]
+set_property PACKAGE_PIN H26 [get_ports jc_los0]
 
-set_property PACKAGE_PIN AC18 [get_ports {jc_refclk_out_p}]
-set_property PACKAGE_PIN AD18 [get_ports {jc_refclk_out_n}]
-set_property PACKAGE_PIN AB11 [get_ports {jc_refclk_in_p}]
-set_property PACKAGE_PIN AC11 [get_ports {jc_refclk_in_n}]
+set_property PACKAGE_PIN AC18 [get_ports jc_refclk_out_p]
+set_property PACKAGE_PIN AD18 [get_ports jc_refclk_out_n]
+set_property PACKAGE_PIN AB11 [get_ports jc_refclk_in_p]
+set_property PACKAGE_PIN AC11 [get_ports jc_refclk_in_n]
 
 #### Remote Update
 #Bank 14
-set_property PACKAGE_PIN C23 [get_ports {ru_outSpiCsB}]
-set_property PACKAGE_PIN B24 [get_ports {ru_outSpiMosi}]
-set_property PACKAGE_PIN A25 [get_ports {ru_inSpiMiso}]
-set_property PACKAGE_PIN B22 [get_ports {ru_outSpiWpB}]
-set_property PACKAGE_PIN A22 [get_ports {ru_outSpiHoldB}]
+set_property PACKAGE_PIN C23 [get_ports ru_outSpiCsB]
+set_property PACKAGE_PIN B24 [get_ports ru_outSpiMosi]
+set_property PACKAGE_PIN A25 [get_ports ru_inSpiMiso]
+set_property PACKAGE_PIN B22 [get_ports ru_outSpiWpB]
+set_property PACKAGE_PIN A22 [get_ports ru_outSpiHoldB]
 
 
 #### MISC ####
@@ -378,19 +378,19 @@ set_property PACKAGE_PIN T19 [get_ports {TEST_LED[4]}]
 set_property PACKAGE_PIN P16 [get_ports {TEST_LED[5]}]
 
 # Power on reset (Bank 16)
-set_property PACKAGE_PIN A15 [get_ports {Pwron_Rst_L}]
+set_property PACKAGE_PIN A15 [get_ports Pwron_Rst_L]
 
 # Power down CCD ADC opamp (Bank 2)
-set_property PACKAGE_PIN J14 [get_ports {CCD_OPAMP_PD}]
+set_property PACKAGE_PIN J14 [get_ports CCD_OPAMP_PD]
 
 # sync for power supply (Bank 34)
-set_property PACKAGE_PIN AC6 [get_ports {PWR_SYNC1}]
+set_property PACKAGE_PIN AC6 [get_ports PWR_SYNC1]
 
 #REB serial number (Bank 12)
-set_property PACKAGE_PIN A12 [get_ports {reb_sn_onewire}]
+set_property PACKAGE_PIN A12 [get_ports reb_sn_onewire]
 
-set_property PACKAGE_PIN AA4 [get_ports {gpio_p}]
-set_property PACKAGE_PIN AB4 [get_ports {gpio_n}]
+set_property PACKAGE_PIN AA4 [get_ports gpio_p]
+set_property PACKAGE_PIN AB4 [get_ports gpio_n]
 
 
 #### set voltages ####
@@ -464,6 +464,7 @@ set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design]
 ## setting to avoid warning CFGBVS in vivado DRC
 set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
+
 
 
 

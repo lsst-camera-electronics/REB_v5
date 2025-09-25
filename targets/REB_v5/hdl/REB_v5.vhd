@@ -1,10 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
-use IEEE.std_logic_misc.all;
 use IEEE.NUMERIC_STD.all;
-
-library UNISIM;
-use UNISIM.VComponents.all;
 
 library surf;
 use surf.StdRtlPkg.all;
@@ -164,6 +160,7 @@ architecture Behavioral of REB_v5 is
 
   constant TARGET_CONFIG : RebConfigType := (
     numSequencers => 1,
+    sysClkPer     => 10.0E-9,
     gdAddr        => x"0",
     odAddr        => x"1",
     rdAddr        => x"4",
@@ -176,7 +173,7 @@ architecture Behavioral of REB_v5 is
   constant VERSION : RebVersionType := (
     schema        => x"00000002",
     board_type    => x"3",
-    vhdl_version  => x"5014",
+    vhdl_version  => x"5015",
     reserved_1    => x"00000000",
     reserved_2    => x"00000000",
     reserved_3    => x"00000000"

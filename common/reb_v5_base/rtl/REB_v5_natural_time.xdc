@@ -13,16 +13,5 @@ create_clock -period 6.400 -name TXOUTCLK_B -waveform {0.000 3.200} [get_pins {U
 create_generated_clock -name stable_clk -source [get_pins U_REB_v5/SystemClock_0/ClockManager_stable_clk/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks PgpRefClk_P] [get_pins U_REB_v5/SystemClock_0/ClockManager_stable_clk/MmcmGen.U_Mmcm/CLKOUT0]
 create_generated_clock -name stable_slow_clk -source [get_pins U_REB_v5/SystemClock_0/ClockManager_stable_clk/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks PgpRefClk_P] [get_pins U_REB_v5/SystemClock_0/ClockManager_stable_clk/MmcmGen.U_Mmcm/CLKOUT1]
 
-create_generated_clock -name sys_clk_local_from_A -source [get_pins U_REB_v5/SystemClock_0/U_10ns_clock.ClockManager_sys_clk/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_A] [get_pins U_REB_v5/SystemClock_0/U_10ns_clock.ClockManager_sys_clk/MmcmGen.U_Mmcm/CLKOUT0]
-create_generated_clock -name sys_clk_local_from_B -source [get_pins U_REB_v5/SystemClock_0/U_10ns_clock.ClockManager_sys_clk/MmcmGen.U_Mmcm/CLKIN1] -master_clock [get_clocks RXOUTCLK_B] [get_pins U_REB_v5/SystemClock_0/U_10ns_clock.ClockManager_sys_clk/MmcmGen.U_Mmcm/CLKOUT0]
-
-#### Set clock interactions ####
-# Ensure mutual exclusivity for the RXOUT and derived clocks
-set_clock_groups -logically_exclusive -group sys_clk_local_from_A -group sys_clk_local_from_B
-
 #### Set asynchronous clocks ####
-set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B -group {sys_clk_local_from_A sys_clk_local_from_B}
-
-
-
-
+set_clock_groups -asynchronous -group [get_clocks PgpRefClk_P -include_generated_clocks] -group aux_100mhz_clk -group jc_100mhz_clk -group RXOUTCLK_A -group RXOUTCLK_B -group TXOUTCLK_A -group TXOUTCLK_B

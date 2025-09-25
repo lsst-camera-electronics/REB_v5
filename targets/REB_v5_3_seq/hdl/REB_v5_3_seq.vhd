@@ -164,6 +164,7 @@ architecture Behavioral of REB_v5_3_seq is
 
   constant TARGET_CONFIG : RebConfigType := (
     numSequencers => 3,
+    sysClkPer     => 10.0E-9,
     gdAddr        => x"0",
     odAddr        => x"1",
     rdAddr        => x"4",
@@ -176,7 +177,7 @@ architecture Behavioral of REB_v5_3_seq is
   constant VERSION : RebVersionType := (
     schema        => x"00000002",
     board_type    => x"3",
-    vhdl_version  => x"5114",
+    vhdl_version  => x"5115",
     reserved_1    => x"00000000",
     reserved_2    => x"00000000",
     reserved_3    => x"00000000"

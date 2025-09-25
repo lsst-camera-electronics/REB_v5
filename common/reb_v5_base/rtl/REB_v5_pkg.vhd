@@ -20,6 +20,7 @@ package REB_v5_pkg is
 
   type RebConfigType is record
     numSequencers : integer range 1 to NUM_SENSORS_C;
+    sysClkPer     : real;
     gdAddr        : std_logic_vector(3 downto 0);
     odAddr        : std_logic_vector(3 downto 0);
     rdAddr        : std_logic_vector(3 downto 0);
@@ -30,9 +31,10 @@ package REB_v5_pkg is
 
   constant REB_CONFIG_DEFAULT_C : RebConfigType := (
     numSequencers => 1,
-    gdAddr => x"0",
-    odAddr => x"1",
-    rdAddr => x"4",
+    sysClkPer     => 10.0E-9, -- 100MHz=10ns, 156.25=6.4ns
+    gdAddr        => x"0",
+    odAddr        => x"1",
+    rdAddr        => x"4",
     gdThresh      => (1138, 1138, 1138),
     odThresh      => (2275, 2275, 2275),
     rdThresh      => (1632, 1632, 1632)

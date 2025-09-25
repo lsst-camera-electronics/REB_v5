@@ -30,12 +30,13 @@
 # -- 31395012 Version that fixes reset to not cause CCS to power down sensors or open bias switch.
 # -- 313A5013 Nominally same as version 12, but refactored to use new build system and modern Vivado
 # -- 313A5014 Major code refactor and bugfix for version 12 register address contention
+# -- 313A5015 Update to support 6.4ns and 10ns system clocks
 # -------------------------------------------------------------------------------
 
 # Define Firmware Version Number (and don't forget to change the register values! :facepalm:)
-export PRJ_VERSION = 0x313A5014
+export PRJ_VERSION = 0x313A5015
 
-export GIT_BYPASS=0
+export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
 
 export GEN_BIT_IMAGE=0

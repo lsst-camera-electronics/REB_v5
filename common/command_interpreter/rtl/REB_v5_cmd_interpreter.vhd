@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use IEEE.NUMERIC_STD.all;
+use ieee.math_real.all;
 
 library surf;
 use surf.StdRtlPkg.all;
@@ -17,8 +18,9 @@ use lsst_reb.basic_elements_pkg.all;
 
 entity REB_v5_cmd_interpreter is
   generic (
-    VERSION_G : RebVersionType;
-    NUM_SEQUENCERS_G : integer
+    VERSION_G        : RebVersionType;
+    NUM_SEQUENCERS_G : integer;
+    CLK_PERIOD_G     : real
   );
   port (
     reset : in    std_logic;
@@ -248,7 +250,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
 
     -- BRS states
     schema, hdl_version, SCI_ID, reserved_1, time_base_read_lsw, time_base_read_MSW,
-    reserved_2, reserved_3, state_busy, trigger_time_SB_lsw, trigger_time_SB_MSW,
+    reserved_2, reserved_3, sys_clock_rate, state_busy, trigger_time_SB_lsw, trigger_time_SB_MSW,
     trigger_time_TB_lsw, trigger_time_TB_MSW, trigger_time_seq_lsw, trigger_time_seq_MSW,
     trigger_time_V_I_lsw, trigger_time_V_I_MSW, trigger_time_pcb_t_lsw, trigger_time_pcb_t_MSW,
     v_ok_state, time_base_set_lsw, time_base_set_MSW, trigger_state, statusReg_rd,
@@ -274,9 +276,7 @@ architecture Behavioral of REB_v5_cmd_interpreter is
     ccd_1_seq_override_rd_state, ccd_2_seq_override_rd_state, ccd_3_seq_override_rd_state,
     -- ASPIC
     aspic_start_trans_state,
-    aspic_start_trans_state_1, aspic_start_trans_state_2, aspic_start_trans_state_3,
     aspic_start_reset_state,
-    aspic_start_reset_state_1, aspic_start_reset_state_2, aspic_start_reset_state_3,
     aspic_read_conf_ccd_1_state, aspic_read_conf_ccd_2_state,
     aspic_read_conf_ccd_3_state,
 
@@ -835,6 +835,10 @@ begin
             -- reserved 3
             elsif (regAddr = read_reserved_3_cmd) then
               next_state <= reserved_3;
+
+            -- sys_clock_rate
+            elsif (regAddr = sys_clock_rate_cmd) then
+              next_state <= sys_clock_rate;
 
             -- read busy state
             elsif (regAddr = read_state_busy_cmd) then
@@ -1536,6 +1540,13 @@ begin
         next_regAck    <= '1';
         next_regDataRd <= ver.reserved_3;
 
+      -- sys_clock_rate
+      when sys_clock_rate =>
+
+        next_state     <= wait_end_cmd;
+        next_regAck    <= '1';
+        next_regDataRd <= std_logic_vector(to_unsigned(integer(CLK_PERIOD_G*1.0E12),32));
+
       -- STATE (add 8)
       when state_busy =>
 
@@ -1939,24 +1950,10 @@ begin
         next_regDataRd <= x"0000" & aspic_config_r_ccd_3;
         next_regAck    <= '1';
 
-      -- following stses are necessariy to wait ASPIC spi fsm to start and activate busy
-      -- ASPIC start transaction
       when aspic_start_trans_state =>
 
-        next_state <= aspic_start_trans_state_1;
-
-      when aspic_start_trans_state_1 =>
-
-        next_state <= aspic_start_trans_state_2;
-
-      when aspic_start_trans_state_2 =>
-
-        next_state <= aspic_start_trans_state_3;
-
-      when aspic_start_trans_state_3 =>
-
         if (aspic_op_end = '1') then
-          next_state <= aspic_start_trans_state_3;
+          next_state <= aspic_start_trans_state;
         else
           next_state <= ack_del_1;
         end if;
@@ -1964,20 +1961,8 @@ begin
       -- ASPIC start reset
       when aspic_start_reset_state =>
 
-        next_state <= aspic_start_reset_state_1;
-
-      when aspic_start_reset_state_1 =>
-
-        next_state <= aspic_start_reset_state_2;
-
-      when aspic_start_reset_state_2 =>
-
-        next_state <= aspic_start_reset_state_3;
-
-      when aspic_start_reset_state_3 =>
-
         if (aspic_op_end = '1') then
-          next_state <= aspic_start_reset_state_3;
+          next_state <= aspic_start_reset_state;
         else
           next_state <= ack_del_1;
         end if;

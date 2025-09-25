@@ -35,6 +35,8 @@ package REB_v5_commands_package is
 
   constant interrupt_mask_cmd : std_logic_vector(23 downto 0) := x"000017";
 
+  constant sys_clock_rate_cmd : std_logic_vector(23 downto 0) := x"000020";
+
   -- Bitstream Remote Update
   constant ru_start_cmd              : std_logic_vector(23 downto 0) := x"000100";
   constant ru_bitstream_we_cmd       : std_logic_vector(23 downto 0) := x"000101";

@@ -7,3 +7,4 @@ loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lsst_reb
 loadRuckusTcl $::env(PROJ_DIR)/../../common
 
 loadSource -path "$::DIR_PATH/hdl/REB_v5_3_seq.vhd"
+loadConstraints -path $::env(PROJ_DIR)/../../common/reb_v5_base/rtl/REB_v5_time.xdc
