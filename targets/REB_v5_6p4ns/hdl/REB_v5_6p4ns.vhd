@@ -1,10 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
-use IEEE.std_logic_misc.all;
 use IEEE.NUMERIC_STD.all;
-
-library UNISIM;
-use UNISIM.VComponents.all;
 
 library surf;
 use surf.StdRtlPkg.all;
@@ -12,7 +8,7 @@ use surf.StdRtlPkg.all;
 library common;
 use common.REB_v5_pkg.all;
 
-entity REB_v5_3_seq is
+entity REB_v5_6p4ns is
   generic (
     BUILD_INFO_G : BuildInfoType
   );
@@ -33,44 +29,44 @@ entity REB_v5_3_seq is
 
     -- CCD Signals --
     -- ADC
-    adc_data_t_ccd : in    Slv8Array(2 downto 0);
-    adc_data_b_ccd : in    Slv8Array(2 downto 0);
-    adc_cnv_ccd    : out   std_logic_vector(2 downto 0);
-    adc_sck_ccd    : out   std_logic_vector(2 downto 0);
+    adc_data_t_ccd : in    Slv8Array(NUM_SENSORS_C-1 downto 0);
+    adc_data_b_ccd : in    Slv8Array(NUM_SENSORS_C-1 downto 0);
+    adc_cnv_ccd    : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    adc_sck_ccd    : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
 
     -- ASPIC signals
-    ASPIC_r_up_ccd_p   : out   std_logic_vector(2 downto 0);
-    ASPIC_r_up_ccd_n   : out   std_logic_vector(2 downto 0);
-    ASPIC_r_down_ccd_p : out   std_logic_vector(2 downto 0);
-    ASPIC_r_down_ccd_n : out   std_logic_vector(2 downto 0);
-    ASPIC_clamp_ccd_p  : out   std_logic_vector(2 downto 0);
-    ASPIC_clamp_ccd_n  : out   std_logic_vector(2 downto 0);
-    ASPIC_reset_ccd_p  : out   std_logic_vector(2 downto 0);
-    ASPIC_reset_ccd_n  : out   std_logic_vector(2 downto 0);
-    ASPIC_nap_ccd      : out   std_logic_vector(2 downto 0);
-    ASPIC_pwdn_ccd     : out   std_logic_vector(2 downto 0);
+    ASPIC_r_up_ccd_p   : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_r_up_ccd_n   : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_r_down_ccd_p : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_r_down_ccd_n : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_clamp_ccd_p  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_clamp_ccd_n  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_reset_ccd_p  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_reset_ccd_n  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_nap_ccd      : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_pwdn_ccd     : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
 
     -- ASPIC control signals
-    ASPIC_miso_ccd      : in    std_logic_vector(2 downto 0);
-    ASPIC_ss_t_ccd      : out   std_logic_vector(2 downto 0);
-    ASPIC_ss_b_ccd      : out   std_logic_vector(2 downto 0);
-    ASPIC_spi_reset_ccd : out   std_logic_vector(2 downto 0);
-    ASPIC_sclk_ccd      : out   std_logic_vector(2 downto 0);
-    ASPIC_mosi_ccd      : out   std_logic_vector(2 downto 0);
+    ASPIC_miso_ccd      : in    std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_ss_t_ccd      : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_ss_b_ccd      : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_spi_reset_ccd : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_sclk_ccd      : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    ASPIC_mosi_ccd      : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
 
     -- CCD Clocks signals
-    par_clk_ccd_p    : out   Slv4Array(2 downto 0);
-    par_clk_ccd_n    : out   Slv4Array(2 downto 0);
-    ser_clk_ccd_p    : out   Slv3Array(2 downto 0);
-    ser_clk_ccd_n    : out   Slv3Array(2 downto 0);
-    reset_gate_ccd_p : out   std_logic_vector(2 downto 0);
-    reset_gate_ccd_n : out   std_logic_vector(2 downto 0);
+    par_clk_ccd_p    : out   Slv4Array(NUM_SENSORS_C-1 downto 0);
+    par_clk_ccd_n    : out   Slv4Array(NUM_SENSORS_C-1 downto 0);
+    ser_clk_ccd_p    : out   Slv3Array(NUM_SENSORS_C-1 downto 0);
+    ser_clk_ccd_n    : out   Slv3Array(NUM_SENSORS_C-1 downto 0);
+    reset_gate_ccd_p : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    reset_gate_ccd_n : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
 
     -- CCD BIAS DAC
-    ldac_C_BIAS_ccd : out   std_logic_vector(2 downto 0);
-    din_C_BIAS_ccd  : out   std_logic_vector(2 downto 0);
-    sync_C_BIAS_ccd : out   std_logic_vector(2 downto 0);
-    sclk_C_BIAS_ccd : out   std_logic_vector(2 downto 0);
+    ldac_C_BIAS_ccd : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    din_C_BIAS_ccd  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    sync_C_BIAS_ccd : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    sclk_C_BIAS_ccd : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
 
     -- V & I sensors
     LTC2945_SCL : inout std_logic;
@@ -103,8 +99,8 @@ entity REB_v5_3_seq is
     bias_t_adc_mosi         : out   std_logic;
     bias_t_adc_sam_mux_en   : out   std_logic;
     bias_t_adc_bias_mux_en  : out   std_logic;
-    bias_t_adc_sam_mux_sel  : out   std_logic_vector(2 downto 0);
-    bias_t_adc_bias_mux_sel : out   std_logic_vector(2 downto 0);
+    bias_t_adc_sam_mux_sel  : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
+    bias_t_adc_bias_mux_sel : out   std_logic_vector(NUM_SENSORS_C-1 downto 0);
     bias_t_adc_shdn         : out   std_logic;
 
     ------ DACs ------
@@ -158,13 +154,13 @@ entity REB_v5_3_seq is
     PWR_SYNC1      : out   std_logic;
     reb_sn_onewire : inout std_logic
   );
-end entity REB_v5_3_seq;
+end entity REB_v5_6p4ns;
 
-architecture Behavioral of REB_v5_3_seq is
+architecture Behavioral of REB_v5_6p4ns is
 
   constant TARGET_CONFIG : RebConfigType := (
-    numSequencers => 3,
-    sysClkPer     => 10.0E-9,
+    numSequencers => 1,
+    sysClkPer     => 6.4E-9,
     gdAddr        => x"0",
     odAddr        => x"1",
     rdAddr        => x"4",
@@ -177,7 +173,7 @@ architecture Behavioral of REB_v5_3_seq is
   constant VERSION : RebVersionType := (
     schema        => x"00000002",
     board_type    => x"3",
-    vhdl_version  => x"5116",
+    vhdl_version  => x"5016",
     reserved_1    => x"00000000",
     reserved_2    => x"00000000",
     reserved_3    => x"00000000"

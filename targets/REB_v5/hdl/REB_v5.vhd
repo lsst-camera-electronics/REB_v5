@@ -173,7 +173,7 @@ architecture Behavioral of REB_v5 is
   constant VERSION : RebVersionType := (
     schema        => x"00000002",
     board_type    => x"3",
-    vhdl_version  => x"5015",
+    vhdl_version  => x"5016",
     reserved_1    => x"00000000",
     reserved_2    => x"00000000",
     reserved_3    => x"00000000"
