@@ -181,6 +181,7 @@ architecture Behavioral of REB_v5_base is
   signal stable_rst      : std_logic;
   signal usrClk          : std_logic;
   signal sys_clk         : std_logic;
+  signal sys_clk_local   : std_logic;
   signal multiboot_clk   : std_logic;
   signal aux_100mhz_clk  : std_logic;
 
@@ -432,6 +433,18 @@ architecture Behavioral of REB_v5_base is
   signal reb_sn            : std_logic_vector(47 downto 0);
   signal reb_sn_long       : std_logic_vector(63 downto 0);
 
+  -- Jitter Cleaner
+  signal jc_start_config  : std_logic;
+  signal jc_config_busy   : std_logic;
+  signal jc_config_done   : std_logic;
+  signal jc_clk_ready     : std_logic;
+  signal jc_clk_in_en     : std_logic;
+  signal not_jc_clk_ready : std_logic;
+  signal jc_status_bus    : std_logic_vector(5 downto 0);
+
+  signal jc_refclk_out : std_logic;
+  signal jc_refclk_in  : std_logic;
+
   -- dc_dc converter sync
   signal dcdc_clk_en_out : std_logic;
   signal dcdc_clk_en     : std_logic;
@@ -562,7 +575,7 @@ begin
       stableSlowClk => multiboot_clk,
       stableSlowRst => open,
       stableLocked  => open,
-      sysClk        => sys_clk,
+      sysClk        => sys_clk_local,
       sysRst        => sys_rst
     );
 
@@ -840,8 +853,8 @@ begin
       back_bias_sw_error => back_bias_sw_error_int,
       en_back_bias_sw    => en_back_bias_sw,
       -- Jitter Cleaner
-      jc_status_bus   => (others => '0'), --jc_status_bus,
-      jc_start_config => open, -- jc_start_config,
+      jc_status_bus   => jc_status_bus,
+      jc_start_config => jc_start_config,
       -- multiboot
       remote_update_reboot_status => ru_reboot_status,
       start_multiboot             => start_multiboot,
@@ -1367,37 +1380,129 @@ begin
     );
 
   ------------------------------------------------------------------------------
-  -- Jitter Cleaner (DISABLED)
+  -- Jitter Cleaner (ENABLED for 10ns clock)
   ------------------------------------------------------------------------------
-  jc_mosi  <= '0';
-  jc_sclk  <= '0';
-  jc_cs    <= '0';
-  jc_reset <= '1'; -- NO reset
+  U_use_jitter_cleaner : if cfg.sysClkPer = 10.0E-9 generate
 
-  U_jc_refclk_out_buf : component OBUFDS
-    generic map (
-      IOSTANDARD => "DEFAULT",
-      SLEW       => "FAST"
-    )
-    port map (
-      I  => '0',
-      O  => jc_refclk_out_p,
-      OB => jc_refclk_out_n
-    );
+    jc_ref_clk_out : ODDR
+      generic map(
+        DDR_CLK_EDGE => "OPPOSITE_EDGE",  -- "OPPOSITE_EDGE" or "SAME_EDGE"
+        INIT         => '1',              -- Initial value for Q port ('1' or '0')
+        SRTYPE       => "SYNC"            -- Reset Type ("ASYNC" or "SYNC")
+        ) port map (
+          Q  => jc_refclk_out,            -- 1-bit DDR output
+          C  => sys_clk_local,            -- 1-bit clock input
+          CE => jc_clk_in_en,             -- 1-bit clock enable input
+          D1 => '1',                      -- 1-bit data input (positive edge)
+          D2 => '0',                      -- 1-bit data input (negative edge)
+          R  => '0',                      -- 1-bit reset input
+          S  => '0'                       -- 1-bit set input
+          );
 
-  jc_clock_in_buf : component IBUFDS
-    generic map (
-      DIFF_TERM    => true,
-      IBUF_LOW_PWR => false,
-      IOSTANDARD   => "DEFAULT"
-    )
-    port map (
-      O  => open,
-      I  => jc_refclk_in_p,
-      IB => jc_refclk_in_n
-    );
+    jitter_cleaner : entity lsst_reb.si5342_jitter_cleaner_top
+      port map (
+        clk          => sys_clk,
+        reset        => sys_rst,
+        start_config => jc_start_config,
+        jc_config    => regDataWr_masked(1 downto 0),
+        config_busy  => jc_config_busy,
+        jc_clk_ready => jc_config_done,
+        jc_clk_in_en => jc_clk_in_en,
+        miso         => jc_miso,
+        mosi         => jc_mosi,
+        chip_select  => jc_cs,
+        sclk         => jc_sclk);
 
+    jc_reset <= '1';                      -- NO reset
 
+    jc_clk_ready     <= jc_config_done and jc_lol and jc_los0;
+    not_jc_clk_ready <= not jc_clk_ready;
+
+    jc_status_bus <= '0' & '0' & jc_clk_ready & jc_config_done & jc_lol & jc_los0;
+
+    BUFGCTRL_mux_100Mhz_clk : BUFGCTRL
+      generic map (
+        INIT_OUT     => 0,     -- Initial value of BUFGCTRL output ($VALUES;)
+        PRESELECT_I0 => true,  -- BUFGCTRL output uses I0 input ($VALUES;)
+        PRESELECT_I1 => false  -- BUFGCTRL output uses I1 input ($VALUES;)
+        )
+      port map (
+        O       => sys_clk,               -- 1-bit output: Clock output
+        CE0     => '1',                   -- CE not used
+        CE1     => '1',                   -- CE not used
+        I0      => sys_clk_local,         -- local clock generated form OSC
+        I1      => jc_refclk_in,          -- clock from Jitter Cleaner
+        IGNORE0 => '0',                   -- 1-bit input: Clock ignore input for I0
+        IGNORE1 => '0',                   -- set to 1 to let the mux switch also when clk is not present
+        S0      => not_jc_clk_ready,      -- 1-bit input: Clock select for I0
+        S1      => jc_clk_ready           -- 1-bit input: Clock select for I1
+        );
+
+    jc_clock_in_buf : component IBUFDS
+      generic map (
+        DIFF_TERM    => true,
+        IBUF_LOW_PWR => false,
+        IOSTANDARD   => "DEFAULT"
+      )
+      port map (
+        O  => jc_refclk_in,
+        I  => jc_refclk_in_p,
+        IB => jc_refclk_in_n
+      );
+
+    U_jc_refclk_out_buf : component OBUFDS
+      generic map (
+        IOSTANDARD => "DEFAULT",
+        SLEW       => "FAST"
+      )
+      port map (
+        I  => jc_refclk_out,
+        O  => jc_refclk_out_p,
+        OB => jc_refclk_out_n
+      );
+
+  end generate U_use_jitter_cleaner;
+
+  ------------------------------------------------------------------------------
+  -- Jitter Cleaner (DISABLED for non-10ns clock)
+  ------------------------------------------------------------------------------
+  U_no_jitter_cleaner : if cfg.sysClkPer /= 10.0E-9 generate
+
+    sys_clk <= sys_clk_local;
+
+    jc_mosi  <= '0';
+    jc_sclk  <= '0';
+    jc_cs    <= '0';
+    jc_reset <= '1'; -- NO reset
+
+    U_jc_refclk_out_buf : component OBUFDS
+      generic map (
+        IOSTANDARD => "DEFAULT",
+        SLEW       => "FAST"
+      )
+      port map (
+        I  => '0',
+        O  => jc_refclk_out_p,
+        OB => jc_refclk_out_n
+      );
+
+    jc_clock_in_buf : component IBUFDS
+      generic map (
+        DIFF_TERM    => true,
+        IBUF_LOW_PWR => false,
+        IOSTANDARD   => "DEFAULT"
+      )
+      port map (
+        O  => open,
+        I  => jc_refclk_in_p,
+        IB => jc_refclk_in_n
+      );
+
+  end generate U_no_jitter_cleaner;
+
+  ------------------------------------------------------------------------------
+  -- Aux Clk (100MHz)
+  ------------------------------------------------------------------------------
   IBUFG_inst : component IBUFG
     generic map (
       IBUF_LOW_PWR => true,
