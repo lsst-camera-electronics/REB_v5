@@ -13,6 +13,7 @@ library lsst_sci;
 use lsst_sci.LsstSciPackage.all;
 
 library lsst_reb;
+use lsst_reb.reb_config_pkg.all;
 use lsst_reb.basic_elements_pkg.all;
 use lsst_reb.SequencerPkg.all;
 
@@ -23,7 +24,6 @@ use common.REB_v5_pkg.all;
 entity REB_v5_base is
   generic (
     BUILD_INFO_G : BuildInfoType;
-    VERSION_G    : RebVersionType;
     CONFIG_G     : RebConfigType
   );
   port (
@@ -171,7 +171,10 @@ end entity REB_v5_base;
 architecture Behavioral of REB_v5_base is
 
   -- Config
-  constant cfg : RebConfigType := CONFIG_G;
+  constant NUM_SENSORS_C   : integer := 3;
+  constant HAS_MULTIBOOT_C : boolean := True;
+  constant cfg             : RebConfigType := CONFIG_G;
+  constant fwVersion       : std_logic_vector(31 downto 0) := toBuildInfo(BUILD_INFO_G).fwVersion;
 
   -- Clocks
   signal pgpRefClk       : std_logic;
@@ -455,9 +458,7 @@ architecture Behavioral of REB_v5_base is
 
 begin
 
-  assert (cfg.numSequencers = 1 or (cfg.numSequencers = NUM_SENSORS_C))
-    report "The number of sequencers must be 1 or equal to the number of sensors."
-    severity failure;
+  check_configuration(cfg, NUM_SENSORS_C, HAS_MULTIBOOT_C, fwVersion, LSST_SCI_VERSION);
 
   --------------------------------------------------------------------------
   -- Signal assignments
@@ -715,9 +716,12 @@ begin
   --------------------------------------------------------------------------
   cmd_interpreter_0 : entity common.REB_v5_cmd_interpreter
     generic map(
-      VERSION_G => VERSION_G,
-      NUM_SEQUENCERS_G => cfg.numSequencers,
-      CLK_PERIOD_G     => cfg.sysClkPer
+      --VERSION_G => VERSION_G,
+      --NUM_SEQUENCERS_G => cfg.numSequencers,
+      --CLK_PERIOD_G     => cfg.sysClkPer
+      VERSION_G    => fwVersion,
+      CONFIG_G     => CONFIG_G
+
     )
     port map (
       reset => sys_rst,
@@ -977,9 +981,9 @@ begin
   --------------------------------------------------------------------------
   AdcDataHandlers : entity lsst_reb.AdcDataHandler
     generic map (
-      CLK_PERIOD_G     => cfg.sysClkPer,
       NUM_SENSORS_G    => NUM_SENSORS_C,
-      NUM_SEQUENCERS_G => cfg.numSequencers
+      NUM_SEQUENCERS_G => cfg.numSequencers,
+      CLK_PERIOD_G     => cfg.sysClkPer
     )
     port map (
       rst               => sys_rst,

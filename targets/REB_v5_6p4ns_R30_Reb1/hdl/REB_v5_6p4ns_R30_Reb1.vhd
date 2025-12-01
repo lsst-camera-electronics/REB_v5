@@ -3,11 +3,11 @@ use IEEE.STD_LOGIC_1164.all;
 use IEEE.std_logic_misc.all;
 use IEEE.NUMERIC_STD.all;
 
-library UNISIM;
-use UNISIM.VComponents.all;
-
 library surf;
 use surf.StdRtlPkg.all;
+
+library lsst_reb;
+use lsst_reb.reb_config_pkg.all;
 
 library common;
 use common.REB_v5_pkg.all;
@@ -170,14 +170,8 @@ architecture Behavioral of REB_v5_6p4ns_R30_Reb1 is
     rdAddr        => x"4",
     gdThresh      => (1138, 1138, 1138),
     odThresh      => (  10, 2275, 2275),
-    rdThresh      => (1632, 1632, 1632)
+    rdThresh      => (1632, 1632, 1632),
     --         Sensor(   0,    1,    2)
-  );
-
-  constant VERSION : RebVersionType := (
-    schema        => x"00000002",
-    board_type    => x"3",
-    vhdl_version  => x"5016",
     reserved_1    => x"0000003D", -- This is the index of DAQ Location R30/1
     reserved_2    => x"00000000",
     reserved_3    => x"00000000"
@@ -187,7 +181,6 @@ begin
   U_REB_v5 : entity common.REB_v5_base
     generic map (
       BUILD_INFO_G => BUILD_INFO_G,
-      VERSION_G    => VERSION,
       CONFIG_G     => TARGET_CONFIG
     )
     port map (
