@@ -32,10 +32,11 @@
 # -- 313A5014 Major code refactor and bugfix for version 12 register address contention
 # -- 313A5015 Update to support 6.4ns and 10ns system clocks
 # -- 313A5016 Add 6.4ns target
+# -- 313B5016 Updated SCI with larger data encoder buffers
 # -------------------------------------------------------------------------------
 
 # Define Firmware Version Number (and don't forget to change the register values! :facepalm:)
-export PRJ_VERSION = 0x313A5016
+export PRJ_VERSION = 0x313B5016
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
