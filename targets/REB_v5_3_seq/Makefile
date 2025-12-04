@@ -36,9 +36,10 @@
 # -- 313A5016 Add 6.4ns target
 # -- 313B5116 Updated SCI with larger data encoder buffers
 # -- 313B5017 Fixed bug in slow ADC for 6.4ns
+# -- 313B5018 Tuned ADC Handler timing constants
 # -------------------------------------------------------------------------------
 
-export PRJ_VERSION = 0x313B5117
+export PRJ_VERSION = 0x313B5118
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
