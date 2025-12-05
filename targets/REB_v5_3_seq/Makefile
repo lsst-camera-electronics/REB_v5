@@ -1,4 +1,3 @@
-
 # -------------------------------------------------------------------------------
 # -- Revision History:
 # -- 00000000 First version (imported from REB v4_6)
@@ -37,9 +36,10 @@
 # -- 313B5116 Updated SCI with larger data encoder buffers
 # -- 313B5017 Fixed bug in slow ADC for 6.4ns
 # -- 313B5018 Tuned ADC Handler timing constants
+# -- 313B5019 Fixed bug in i2c for multiple clock support
 # -------------------------------------------------------------------------------
 
-export PRJ_VERSION = 0x313B5118
+export PRJ_VERSION = 0x313B5119
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0

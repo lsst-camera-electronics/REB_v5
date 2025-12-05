@@ -35,9 +35,10 @@
 # -- 313B5016 Updated SCI with larger data encoder buffers
 # -- 313B5017 Fixed bug in slow ADC for 6.4ns
 # -- 313B5018 Tuned ADC Handler timing constants
+# -- 313B5019 Fixed bug in i2c for multiple clock support
 # -------------------------------------------------------------------------------
 
-export PRJ_VERSION = 0x313B5018
+export PRJ_VERSION = 0x313B5019
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
