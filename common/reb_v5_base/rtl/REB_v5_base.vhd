@@ -171,10 +171,8 @@ end entity REB_v5_base;
 architecture Behavioral of REB_v5_base is
 
   -- Config
-  constant NUM_SENSORS_C   : integer := 3;
-  constant HAS_MULTIBOOT_C : boolean := True;
-  constant cfg             : RebConfigType := CONFIG_G;
-  constant fwVersion       : std_logic_vector(31 downto 0) := toBuildInfo(BUILD_INFO_G).fwVersion;
+  constant cfg       : RebConfigType := CONFIG_G;
+  constant fwVersion : std_logic_vector(31 downto 0) := toBuildInfo(BUILD_INFO_G).fwVersion;
 
   -- Clocks
   signal pgpRefClk       : std_logic;
@@ -716,12 +714,8 @@ begin
   --------------------------------------------------------------------------
   cmd_interpreter_0 : entity common.REB_v5_cmd_interpreter
     generic map(
-      --VERSION_G => VERSION_G,
-      --NUM_SEQUENCERS_G => cfg.numSequencers,
-      --CLK_PERIOD_G     => cfg.sysClkPer
       VERSION_G    => fwVersion,
       CONFIG_G     => CONFIG_G
-
     )
     port map (
       reset => sys_rst,
