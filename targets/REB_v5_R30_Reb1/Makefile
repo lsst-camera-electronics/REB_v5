@@ -36,9 +36,11 @@
 # -- 313B5017 Fixed bug in slow ADC for 6.4ns
 # -- 313B5018 Tuned ADC Handler timing constants
 # -- 313B5019 Fixed bug in i2c for multiple clock support
+# --       1A Added a sequencer main enable register
+# --       1B Properly disabled Jitter Cleaner in 6.4ns targets
 # -------------------------------------------------------------------------------
 
-export PRJ_VERSION = 0x313B5019
+export PRJ_VERSION = 0x313B501B
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
