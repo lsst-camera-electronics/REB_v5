@@ -277,6 +277,17 @@ architecture Behavioral of REB_v5_base is
   signal seq_override_we   : std_logic_vector(NUM_SENSORS_C-1 downto 0);
   signal seq_override_rd   : Slv32Array(NUM_SENSORS_C-1 downto 0);
 
+  -- ILA debug probes: sequencer comparison signals
+  -- sequencer_out_slv repacks sequencer_outputs(0) back to the raw 32-bit bus
+  -- (matching sequencer_masked(0) inside Sequencer.vhd) for direct simulation comparison.
+  signal sequencer_out_slv  : std_logic_vector(31 downto 0);
+
+  attribute MARK_DEBUG : string;
+  attribute MARK_DEBUG of sync_cmd_start_seq  : signal is "TRUE";
+  attribute MARK_DEBUG of sequencer_busy      : signal is "TRUE";
+  attribute MARK_DEBUG of end_sequence        : signal is "TRUE";
+  attribute MARK_DEBUG of sequencer_out_slv   : signal is "TRUE";
+
   -- Image handler signals
   signal image_pattern_read : std_logic_vector(NUM_SENSORS_C-1 downto 0);
   signal image_pattern_en  : std_logic;
@@ -532,11 +543,29 @@ begin
   ------------ assignments for test ------------
   test_led_int(0) <= pgpLocLinkReady;
   test_led_int(1) <= pgpRemLinkReady;
-  test_port(11)   <= sequencer_outputs(0).adc_trigger;
-  test_port(12)   <= sequencer_outputs(0).pattern_reset;
-  test_port(0)    <= sync_cmd_en;
-  test_port(1)    <= sync_cmd_start_seq;
-  gpio_int        <= sequencer_outputs(0).pattern_reset;
+   test_port(11)   <= sequencer_outputs(0).adc_trigger;
+   test_port(12)   <= sequencer_outputs(0).pattern_reset;
+   test_port(0)    <= sync_cmd_en;
+   test_port(1)    <= sync_cmd_start_seq;
+   gpio_int        <= sequencer_outputs(0).pattern_reset;
+
+   -- Repack sequencer_outputs(0) record to raw 32-bit bus for ILA comparison.
+   -- Bit mapping mirrors Sequencer.vhd sensors_generate (sequencer_masked assignments).
+   -- Bits 17-30 are unused in the design and held at '0'.
+   sequencer_out_slv(0)            <= sequencer_outputs(0).aspic_r_up;
+   sequencer_out_slv(1)            <= sequencer_outputs(0).aspic_r_down;
+   sequencer_out_slv(2)            <= sequencer_outputs(0).aspic_reset;
+   sequencer_out_slv(3)            <= sequencer_outputs(0).aspic_clamp;
+   sequencer_out_slv(6 downto 4)   <= sequencer_outputs(0).ser_clk;
+   sequencer_out_slv(7)            <= sequencer_outputs(0).reset_gate;
+   sequencer_out_slv(11 downto 8)  <= sequencer_outputs(0).par_clk;
+   sequencer_out_slv(12)           <= sequencer_outputs(0).adc_trigger;
+   sequencer_out_slv(13)           <= sequencer_outputs(0).soi;
+   sequencer_out_slv(14)           <= sequencer_outputs(0).eoi;
+   sequencer_out_slv(15)           <= sequencer_outputs(0).cabac_pulse;
+   sequencer_out_slv(16)           <= sequencer_outputs(0).pattern_reset;
+   sequencer_out_slv(30 downto 17) <= (others => '0');
+   sequencer_out_slv(31)           <= sequencer_outputs(0).user_bit;
 
   --------------------------------------------------------------------------
   -- System Clock and Reset
