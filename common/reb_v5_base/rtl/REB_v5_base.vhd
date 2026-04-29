@@ -205,6 +205,7 @@ architecture Behavioral of REB_v5_base is
 
   signal StatusAddr : std_logic_vector(23 downto 0);
   signal StatusReg  : std_logic_vector(31 downto 0);
+  signal StatusReg_r : std_logic_vector(31 downto 0);
   signal StatusRst  : std_logic;
 
   -- CMD interpreter signals
@@ -457,6 +458,14 @@ begin
   regDataWr_masked         <= regDataWr and regWrEn;
   StatusAddr(23 downto 10) <= (others => '0');
   StatusAddr(9 downto 0)   <= regAddr(9 downto 0);
+
+  -- Pipeline register on StatusReg to break combinational path
+  process (sys_clk) is
+  begin
+    if rising_edge(sys_clk) then
+      StatusReg_r <= StatusReg;
+    end if;
+  end process;
 
   ------------ Trigger signals assignment ------------
   seq_start       <= (trigger_val_bus(2) and trigger_ce_bus(2)) or sync_cmd_start_seq;
@@ -733,7 +742,7 @@ begin
       regReq           => regReq,
       regOp            => regOp,
       regAddr          => regAddr,
-      statusReg        => statusReg,
+      statusReg        => StatusReg_r,
       regWrEn          => RegWrEn,
       regDataWr_masked => regDataWr_masked,
       regAck           => regAck,
