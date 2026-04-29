@@ -1527,6 +1527,7 @@ begin
       ---------------------- Sequencer Parameters (handshake) --------------------------
       when seq_wait =>
         -- Wait for Sequencer block to acknowledge
+        next_state <= seq_wait;  -- hold until ack
         if seq_reg_ack = '1' then
           next_regDataRd <= seq_reg_rd_data;
           next_regAck    <= '1';
