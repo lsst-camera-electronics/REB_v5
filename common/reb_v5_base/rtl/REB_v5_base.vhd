@@ -1001,7 +1001,8 @@ begin
   Sequencers : entity lsst_reb.Sequencer
     generic map (
       NUM_SENSORS_G    => NUM_SENSORS_C,
-      NUM_SEQUENCERS_G => cfg.numSequencers
+      NUM_SEQUENCERS_G => cfg.numSequencers,
+      REG_MAP_G        => SEQ_REG_MAP_C
     )
     port map (
       clk => sys_clk,

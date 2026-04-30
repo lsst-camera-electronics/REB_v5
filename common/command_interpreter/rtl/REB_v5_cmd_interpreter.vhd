@@ -819,33 +819,8 @@ begin
               next_state <= read_ccd_oe_state;
 
             -------- Sequencer parameters read (all handled via handshake)
-            elsif (regAddr = ccd_1_seq_override_cmd) or
-                  (regAddr = ccd_2_seq_override_cmd) or
-                  (regAddr = ccd_3_seq_override_cmd) or
-                  ((regAddr >= func_time_set_base_0) and (regAddr <= func_time_set_high_0)) or
-                  ((regAddr >= func_time_set_base_1) and (regAddr <= func_time_set_high_1)) or
-                  ((regAddr >= func_time_set_base_2) and (regAddr <= func_time_set_high_2)) or
-                  ((regAddr >= func_out_set_base_0) and (regAddr <= func_out_set_high_0)) or
-                  ((regAddr >= func_out_set_base_1) and (regAddr <= func_out_set_high_1)) or
-                  ((regAddr >= func_out_set_base_2) and (regAddr <= func_out_set_high_2)) or
-                  ((regAddr >= prog_mem_base_0) and (regAddr <= prog_mem_high_0)) or
-                  ((regAddr >= prog_mem_base_1) and (regAddr <= prog_mem_high_1)) or
-                  ((regAddr >= prog_mem_base_2) and (regAddr <= prog_mem_high_2)) or
-                  (regAddr = enable_conv_shift_cmd_0) or (regAddr = enable_conv_shift_cmd_1) or (regAddr = enable_conv_shift_cmd_2) or
-                  (regAddr = start_add_cmd_0) or (regAddr = start_add_cmd_1) or (regAddr = start_add_cmd_2) or
-                  ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
-                  ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
-                  ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2)) or
-                  ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
-                  ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
-                  ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2)) or
-                  (regAddr = seq_op_code_error_rd_cmd_0) or (regAddr = seq_op_code_error_rd_cmd_1) or (regAddr = seq_op_code_error_rd_cmd_2) then
+            elsif regAddr(23 downto 16) >= SEQ_ADDR_LOW
+              and regAddr(23 downto 16) <= SEQ_ADDR_HIGH then
               next_seq_reg_req <= '1';
               next_seq_reg_op  <= '0';
               next_state       <= seq_wait;
@@ -1102,36 +1077,8 @@ begin
               next_ccd_oe_en <= '1';
 
             ---------- Sequencer Parameters Write (all handled via handshake)
-            elsif (regAddr = ccd_1_seq_override_cmd) or
-                  (regAddr = ccd_2_seq_override_cmd) or
-                  (regAddr = ccd_3_seq_override_cmd) or
-                  ((regAddr >= func_time_set_base_0) and (regAddr <= func_time_set_high_0)) or
-                  ((regAddr >= func_time_set_base_1) and (regAddr <= func_time_set_high_1)) or
-                  ((regAddr >= func_time_set_base_2) and (regAddr <= func_time_set_high_2)) or
-                  ((regAddr >= func_out_set_base_0) and (regAddr <= func_out_set_high_0)) or
-                  ((regAddr >= func_out_set_base_1) and (regAddr <= func_out_set_high_1)) or
-                  ((regAddr >= func_out_set_base_2) and (regAddr <= func_out_set_high_2)) or
-                  ((regAddr >= prog_mem_base_0) and (regAddr <= prog_mem_high_0)) or
-                  ((regAddr >= prog_mem_base_1) and (regAddr <= prog_mem_high_1)) or
-                  ((regAddr >= prog_mem_base_2) and (regAddr <= prog_mem_high_2)) or
-                  (regAddr = seq_step_cmd_0) or (regAddr = seq_step_cmd_1) or (regAddr = seq_step_cmd_2) or
-                  (regAddr = func_stop_cmd_0) or (regAddr = func_stop_cmd_1) or (regAddr = func_stop_cmd_2) or
-                  (regAddr = enable_conv_shift_cmd_0) or (regAddr = enable_conv_shift_cmd_1) or (regAddr = enable_conv_shift_cmd_2) or
-                  (regAddr = init_conv_shift_cmd_0) or (regAddr = init_conv_shift_cmd_1) or (regAddr = init_conv_shift_cmd_2) or
-                  (regAddr = start_add_cmd_0) or (regAddr = start_add_cmd_1) or (regAddr = start_add_cmd_2) or
-                  ((regAddr >= seq_ind_func_mem_base_0) and (regAddr <= seq_ind_func_mem_high_0)) or
-                  ((regAddr >= seq_ind_func_mem_base_1) and (regAddr <= seq_ind_func_mem_high_1)) or
-                  ((regAddr >= seq_ind_func_mem_base_2) and (regAddr <= seq_ind_func_mem_high_2)) or
-                  ((regAddr >= seq_ind_rep_mem_base_0) and (regAddr <= seq_ind_rep_mem_high_0)) or
-                  ((regAddr >= seq_ind_rep_mem_base_1) and (regAddr <= seq_ind_rep_mem_high_1)) or
-                  ((regAddr >= seq_ind_rep_mem_base_2) and (regAddr <= seq_ind_rep_mem_high_2)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_0) and (regAddr <= seq_ind_sub_add_mem_high_0)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_1) and (regAddr <= seq_ind_sub_add_mem_high_1)) or
-                  ((regAddr >= seq_ind_sub_add_mem_base_2) and (regAddr <= seq_ind_sub_add_mem_high_2)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_0) and (regAddr <= seq_ind_sub_rep_mem_high_0)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_1) and (regAddr <= seq_ind_sub_rep_mem_high_1)) or
-                  ((regAddr >= seq_ind_sub_rep_mem_base_2) and (regAddr <= seq_ind_sub_rep_mem_high_2)) or
-                  (regAddr = seq_op_code_error_reset_cmd_0) or (regAddr = seq_op_code_error_reset_cmd_1) or (regAddr = seq_op_code_error_reset_cmd_2) then
+            elsif regAddr(23 downto 16) >= SEQ_ADDR_LOW
+              and regAddr(23 downto 16) <= SEQ_ADDR_HIGH then
               next_seq_reg_req <= '1';
               next_seq_reg_op  <= '1';
               next_state       <= seq_wait;
