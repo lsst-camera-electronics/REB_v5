@@ -20,16 +20,24 @@ check-log:
 	fi; \
 	\
 	if [ -f "$(TIMING_RPT)" ]; then \
-		WNS=$$(awk '/^    WNS\(ns\)/{getline;getline;print $$1}' "$(TIMING_RPT)"); \
-		WHS=$$(awk '/^    WNS\(ns\)/{getline;getline;print $$5}' "$(TIMING_RPT)"); \
-		FAILING=$$(awk '/^    WNS\(ns\)/{getline;getline;print $$3}' "$(TIMING_RPT)"); \
+		WNS=$$(awk '/^[[:space:]]*WNS\(ns\)/ {getline; getline; print $$1; exit}' "$(TIMING_RPT)" || echo "N/A"); \
+		SETUP_FAILING=$$(awk '/^[[:space:]]*WNS\(ns\)/ {getline; getline; print $$3; exit}' "$(TIMING_RPT)" || echo "0"); \
+		WHS=$$(awk '/^[[:space:]]*WNS\(ns\)/ {getline; getline; print $$5; exit}' "$(TIMING_RPT)" || echo "N/A"); \
+		HOLD_FAILING=$$(awk '/^[[:space:]]*WNS\(ns\)/ {getline; getline; print $$7; exit}' "$(TIMING_RPT)" || echo "0"); \
+		WPWS=$$(awk '/^[[:space:]]*WNS\(ns\)/ {getline; getline; print $$9; exit}' "$(TIMING_RPT)" || echo "N/A"); \
+		\
 		if grep -q "All user specified timing constraints are met" "$(TIMING_RPT)"; then \
-			echo "  ✓ Timing: PASSED (WNS=$${WNS}ns WHS=$${WHS}ns)"; \
+			echo "  ✓ Timing: PASSED"; \
+			echo "    WNS: $$WNS ns, WHS: $$WHS ns, WPWS: $$WPWS ns"; \
 		elif grep -q "timing constraints are not met" "$(TIMING_RPT)"; then \
-			echo "  ❌ Timing: FAILED (WNS=$${WNS}ns WHS=$${WHS}ns, $${FAILING} failing endpoints)"; \
+			echo "  ❌ Timing: FAILED"; \
+			echo "    WNS: $$WNS ns ($$SETUP_FAILING failing endpoints)"; \
+			echo "    WHS: $$WHS ns ($$HOLD_FAILING failing endpoints)"; \
+			echo "    WPWS: $$WPWS ns"; \
 			ERROR=1; \
 		else \
 			echo "  ⚠ Timing: Status unclear"; \
+			echo "    WNS: $$WNS ns, WHS: $$WHS ns, WPWS: $$WPWS ns"; \
 		fi; \
 	else \
 		echo "  ⚠ Timing: Report not found"; \
