@@ -255,6 +255,7 @@ architecture Behavioral of REB_v5_base is
   signal seq_reg_op      : std_logic;
   signal seq_reg_rd_data : std_logic_vector(31 downto 0);
   signal seq_reg_ack     : std_logic;
+  signal seq_reg_fail    : std_logic;
 
   signal sequencer_outputs : SequencerOutputArray(NUM_SENSORS_C-1 downto 0);
 
@@ -787,6 +788,7 @@ begin
       seq_reg_op      => seq_reg_op,
       seq_reg_rd_data => seq_reg_rd_data,
       seq_reg_ack     => seq_reg_ack,
+      seq_reg_fail    => seq_reg_fail,
       -- ASPIC
       aspic_config_r_ccd_1 => aspic_config_r_ccd(0),
       aspic_config_r_ccd_2 => aspic_config_r_ccd(1),
@@ -1011,6 +1013,7 @@ begin
       reg_wr_data => regDataWr_masked,
       reg_rd_data => seq_reg_rd_data,
       reg_ack     => seq_reg_ack,
+      reg_fail    => seq_reg_fail,
       -- Synchronous command interface
       sync_cmd_start     => sync_cmd_start_seq,
       sync_cmd_stop      => sync_cmd_stop_seq,

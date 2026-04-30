@@ -81,6 +81,7 @@ entity REB_v5_cmd_interpreter is
     seq_reg_op      : out   std_logic;
     seq_reg_rd_data : in    std_logic_vector(31 downto 0);
     seq_reg_ack     : in    std_logic;
+    seq_reg_fail    : in    std_logic;
 
     -- ASPIC
     aspic_config_r_ccd_1 : in    std_logic_vector(15 downto 0);
@@ -571,7 +572,7 @@ begin
            image_size, image_pattern_read, ccd_sel_read, ccd_oe_read,
 
     -- sequencer
-           seq_reg_rd_data, seq_reg_ack,
+           seq_reg_rd_data, seq_reg_ack, seq_reg_fail,
 
     -- ASPIC
            aspic_config_r_ccd_1, aspic_config_r_ccd_2, aspic_config_r_ccd_3, aspic_op_end,
@@ -1531,6 +1532,7 @@ begin
         if seq_reg_ack = '1' then
           next_regDataRd <= seq_reg_rd_data;
           next_regAck    <= '1';
+          next_regFail   <= seq_reg_fail;
           next_state     <= wait_end_cmd;
         end if;
 
