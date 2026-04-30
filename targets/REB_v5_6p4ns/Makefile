@@ -38,9 +38,10 @@
 # -- 313B5019 Fixed bug in i2c for multiple clock support
 # --       1A Added a sequencer main enable register
 # --       1B Properly disabled Jitter Cleaner in 6.4ns targets
+# --       1C Updated sequencer and command interpreter for 6.4ns timing closure
 # -------------------------------------------------------------------------------
 
-export PRJ_VERSION = 0x313B501B
+export PRJ_VERSION = 0x313B501C
 
 export GIT_BYPASS?=0
 export OVERRIDE_SUBMODULE_LOCKS=0
@@ -60,3 +61,6 @@ export PRJ_PART = XC7K160TFFG676-1
 
 # Use top level makefile
 include ../../submodules/ruckus/system_vivado.mk
+
+# Include log checking functionality
+include ../check_logs.mk
