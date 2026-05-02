@@ -17,6 +17,38 @@ and Vivado. The REB drives three science sensors.
 
 All targets use the same RTL and produce identical register-level behaviour.
 
+## Target configuration
+
+All targets instantiate the same `REB_v5_base` entity, parameterised by a
+`RebConfigType` record (defined in
+`submodules/lsst_reb/reb_config/rtl/reb_config_pkg.vhd`).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `numSequencers` | 1 or 3 | Number of sequencer instances |
+| `sysClkPer` | real | System clock period (seconds) |
+| `gdAddr` | 4-bit | Guard drain DAC channel address |
+| `odAddr` | 4-bit | Output drain DAC channel address |
+| `rdAddr` | 4-bit | Reset drain DAC channel address |
+| `gdThresh` | integer×3 | Guard drain threshold per sensor |
+| `odThresh` | integer×3 | Output drain threshold per sensor |
+| `rdThresh` | integer×3 | Reset drain threshold per sensor |
+| `reserved_1` | 32-bit | DAQ index for location-limited targets |
+| `reserved_2` | 32-bit | Reserved |
+| `reserved_3` | 32-bit | Reserved |
+
+With `numSequencers=1`, a single sequencer drives all three sensors.
+With `numSequencers=3`, each sensor has an independent sequencer instance
+selected via `addr[13:12]` in the register interface.
+
+The DAC channel addresses (`gdAddr=0x0`, `odAddr=0x1`, `rdAddr=0x4`) are
+the same across all REB targets but differ on GREB and WREB boards.
+
+Standard threshold values (`gdThresh=(1138,1138,1138)`,
+`odThresh=(2275,2275,2275)`, `rdThresh=(1632,1632,1632)`) are used by all
+targets except `R30_Reb1`, which lowers `odThresh(0)` to 10 (disabled bias)
+and sets `reserved_1=0x0000003D` (DAQ location index).
+
 ## Repository layout
 
 | Path | Contents |
