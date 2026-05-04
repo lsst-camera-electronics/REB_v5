@@ -87,7 +87,7 @@ Binary outputs (`.bit.gz`, `.mcs.gz`) are committed to
 
 ## Register map
 
-See [`REGISTERS.md`](REGISTERS.md) for the full register address map.
+See [`REGISTER_MAP.md`](common/command_interpreter/REGISTER_MAP.md) for the full register address map.
 
 ## Documentation
 
